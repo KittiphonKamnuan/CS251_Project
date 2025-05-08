@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ชำระเงิน | SkyBooking</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="payment.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo">
+                <h1>SkyBooking</h1>
+            </div>
+            <ul class="nav-links">
+                <li><a href="index.html">หน้าหลัก</a></li>
+                <li><a href="#" class="active">เที่ยวบิน</a></li>
+                <li><a href="promotions.html">โปรโมชั่น</a></li>
+                <li><a href="contact.html">ติดต่อเรา</a></li>
+            </ul>
+            <div class="user-actions">
+                <div class="user-welcome">ยินดีต้อนรับ, user@example.com</div>
+                <a href="#" class="btn btn-outline" id="logoutBtn">ออกจากระบบ</a>
+            </div>
+            <div class="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <!-- Booking Progress -->
+        <div class="booking-progress">
+            <div class="progress-container">
+                <div class="progress-step completed">
+                    <div class="step-number">1</div>
+                    <div class="step-label">เลือกเที่ยวบิน</div>
+                </div>
+                <div class="progress-line completed"></div>
+                <div class="progress-step completed">
+                    <div class="step-number">2</div>
+                    <div class="step-label">ข้อมูลผู้โดยสาร</div>
+                </div>
+                <div class="progress-line completed"></div>
+                <div class="progress-step completed">
+                    <div class="step-number">3</div>
+                    <div class="step-label">เลือกที่นั่ง</div>
+                </div>
+                <div class="progress-line completed"></div>
+                <div class="progress-step active">
+                    <div class="step-number">4</div>
+                    <div class="step-label">ชำระเงิน</div>
+                </div>
+                <div class="progress-line"></div>
+                <div class="progress-step">
+                    <div class="step-number">5</div>
+                    <div class="step-label">ยืนยันการจอง</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Flight Summary -->
+        <section class="flight-summary">
+            <div class="container">
+                <div class="flight-route">
+                    <h2>กรุงเทพฯ (BKK) → เชียงใหม่ (CNX)</h2>
+                    <p>วันพุธที่ 19 มีนาคม 2025 | ผู้โดยสาร 1 คน | ชั้นประหยัด | Thai Airways TG123</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Payment Section -->
+        <section class="payment-section">
+            <div class="container">
+                <div class="payment-container">
+                    <!-- Booking Summary -->
+                    <div class="booking-summary">
+                        <h2>สรุปการจอง</h2>
+                        <div class="summary-item">
+                            <div class="summary-label">เที่ยวบิน</div>
+                            <div class="summary-value">Thai Airways TG123</div>
+                        </div>
+                        <div class="summary-item">
+                            <div class="summary-label">วันที่</div>
+                            <div class="summary-value">19 มีนาคม 2025</div>
+                        </div>
+                        <div class="summary-item">
+                            <div class="summary-label">เวลา</div>
+                            <div class="summary-value">08:30 - 10:00</div>
+                        </div>
+                        <div class="summary-item">
+                            <div class="summary-label">ผู้โดยสาร</div>
+                            <div class="summary-value">1 คน (สมชาย ใจดี)</div>
+                        </div>
+                        <div class="summary-item">
+                            <div class="summary-label">ที่นั่ง</div>
+                            <div class="summary-value">14D</div>
+                        </div>
+                        <div class="summary-divider"></div>
+                        <div class="summary-item">
+                            <div class="summary-label">ค่าโดยสาร</div>
+                            <div class="summary-value">฿1,200</div>
+                        </div>
+                        <div class="summary-item">
+                            <div class="summary-label">ภาษีและค่าธรรมเนียม</div>
+                            <div class="summary-value">฿390</div>
+                        </div>
+                        <div class="summary-item">
+                            <div class="summary-label">บริการเสริม</div>
+                            <div class="summary-value">฿0</div>
+                        </div>
+                        <div class="summary-divider"></div>
+                        <div class="summary-item total">
+                            <div class="summary-label">ยอดรวมทั้งสิ้น</div>
+                            <div class="summary-value">฿1,590</div>
+                        </div>
+
+                        <!-- Loyalty Points -->
+                        <div class="loyalty-points">
+                            <div class="points-info">
+                                <i class="fas fa-award"></i>
+                                <div>
+                                    <h3>คะแนนสะสม</h3>
+                                    <p>คุณจะได้รับ 159 คะแนนเมื่อการจองเสร็จสมบูรณ์</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Payment Method -->
+                    <div class="payment-methods">
+                        <h2>วิธีการชำระเงิน</h2>
+                        <div class="payment-options">
+                            <div class="payment-option-tabs">
+                                <button class="payment-tab active" data-tab="credit-card">
+                                    <i class="fas fa-credit-card"></i>
+                                    <span>บัตรเครดิต/เดบิต</span>
+                                </button>
+                                <button class="payment-tab" data-tab="bank-transfer">
+                                    <i class="fas fa-university"></i>
+                                    <span>โอนเงิน</span>
+                                </button>
+                                <button class="payment-tab" data-tab="qr-payment">
+                                    <i class="fas fa-qrcode"></i>
+                                    <span>QR Payment</span>
+                                </button>
+                                <button class="payment-tab" data-tab="e-wallet">
+                                    <i class="fas fa-wallet"></i>
+                                    <span>E-Wallet</span>
+                                </button>
+                            </div>
+
+                            <!-- Credit Card Payment Form -->
+                            <div class="payment-tab-content active" id="credit-card-content">
+                                <form id="credit-card-form">
+                                    <div class="form-row">
+                                        <div class="form-group full-width">
+                                            <label for="card-number">หมายเลขบัตร</label>
+                                            <input type="text" id="card-number" placeholder="XXXX XXXX XXXX XXXX" required>
+                                        </div>
+                                    </div>
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label for="expiry-date">วันหมดอายุ</label>
+                                            <input type="text" id="expiry-date" placeholder="MM/YY" required>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="cvv">รหัส CVV</label>
+                                            <input type="text" id="cvv" placeholder="XXX" required>
+                                            <small>รหัส 3 หลักด้านหลังบัตร</small>
+                                        </div>
+                                    </div>
+                                    <div class="form-group save-card">
+                                        <input type="checkbox" id="save-card">
+                                        <label for="save-card">บันทึกข้อมูลบัตรสำหรับการชำระครั้งต่อไป</label>
+                                    </div>
+                                    <div class="secured-payment-info">
+                                        <i class="fas fa-lock"></i>
+                                        <span>การชำระเงินของคุณปลอดภัยด้วยการเข้ารหัส SSL 256-bit</span>
+                                    </div>
+                                </form>
+                            </div>
+
+                            <!-- Bank Transfer Tab Content -->
+                            <div class="payment-tab-content" id="bank-transfer-content">
+                                <div class="bank-accounts">
+                                    <div class="bank-account-item">
+                                        <img src="https://via.placeholder.com/50" alt="ธนาคารกสิกรไทย" class="bank-logo">
+                                        <div class="bank-details">
+                                            <h3>ธนาคารกสิกรไทย</h3>
+                                            <p>เลขที่บัญชี: 123-4-56789-0</p>
+                                            <p>ชื่อบัญชี: บริษัท สกายบุ๊คกิ้ง จำกัด</p>
+                                        </div>
+                                    </div>
+                                    <div class="bank-account-item">
+                                        <img src="https://via.placeholder.com/50" alt="ธนาคารไทยพาณิชย์" class="bank-logo">
+                                        <div class="bank-details">
+                                            <h3>ธนาคารไทยพาณิชย์</h3>
+                                            <p>เลขที่บัญชี: 987-6-54321-0</p>
+                                            <p>ชื่อบัญชี: บริษัท สกายบุ๊คกิ้ง จำกัด</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="payment-note">
+                                    <p>* กรุณาโอนเงินภายใน 24 ชั่วโมง และส่งหลักฐานการโอนเงินมาที่ payment@skybooking.com</p>
+                                </div>
+                            </div>
+
+                            <!-- QR Payment Tab Content -->
+                            <div class="payment-tab-content" id="qr-payment-content">
+                                <div class="qr-container">
+                                    <img src="https://via.placeholder.com/300" alt="QR Code" class="qr-code">
+                                    <p>สแกน QR Code เพื่อชำระเงิน</p>
+                                    <div class="qr-steps">
+                                        <div class="qr-step">
+                                            <div class="step-number">1</div>
+                                            <p>เปิดแอพธนาคารของคุณ</p>
+                                        </div>
+                                        <div class="qr-step">
+                                            <div class="step-number">2</div>
+                                            <p>เลือก "สแกนจ่าย"</p>
+                                        </div>
+                                        <div class="qr-step">
+                                            <div class="step-number">3</div>
+                                            <p>สแกน QR Code</p>
+                                        </div>
+                                        <div class="qr-step">
+                                            <div class="step-number">4</div>
+                                            <p>ยืนยันการชำระเงิน</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- E-Wallet Tab Content -->
+                            <div class="payment-tab-content" id="e-wallet-content">
+                                <div class="wallet-options">
+                                    <div class="wallet-option">
+                                        <input type="radio" name="wallet" id="true-money" value="true-money">
+                                        <label for="true-money">
+                                            <img src="https://via.placeholder.com/80x40" alt="TrueMoney Wallet">
+                                            <span>TrueMoney Wallet</span>
+                                        </label>
+                                    </div>
+                                    <div class="wallet-option">
+                                        <input type="radio" name="wallet" id="prompt-pay" value="prompt-pay">
+                                        <label for="prompt-pay">
+                                            <img src="https://via.placeholder.com/80x40" alt="PromptPay">
+                                            <span>PromptPay</span>
+                                        </label>
+                                    </div>
+                                    <div class="wallet-option">
+                                        <input type="radio" name="wallet" id="shopeepay" value="shopeepay">
+                                        <label for="shopeepay">
+                                            <img src="https://via.placeholder.com/80x40" alt="ShopeePay">
+                                            <span>ShopeePay</span>
+                                        </label>
+                                    </div>
+                                    <div class="wallet-option">
+                                        <input type="radio" name="wallet" id="rabbit-line-pay" value="rabbit-line-pay">
+                                        <label for="rabbit-line-pay">
+                                            <img src="https://via.placeholder.com/80x40" alt="Rabbit LINE Pay">
+                                            <span>Rabbit LINE Pay</span>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="wallet-form">
+                                    <div class="form-group">
+                                        <label for="wallet-phone">เบอร์โทรศัพท์</label>
+                                        <input type="tel" id="wallet-phone" placeholder="0xx-xxx-xxxx" required>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Discount Code -->
+                        <div class="discount-code">
+                            <h3>รหัสส่วนลด</h3>
+                            <div class="discount-input">
+                                <input type="text" placeholder="กรอกรหัสส่วนลด">
+                                <button class="btn btn-outline">ใช้รหัส</button>
+                            </div>
+                        </div>
+
+                        <!-- Terms and Conditions -->
+                        <div class="terms-conditions">
+                            <div class="form-group">
+                                <input type="checkbox" id="accept-terms" required>
+                                <label for="accept-terms">ฉันได้อ่านและยอมรับ <a href="#">เงื่อนไขและข้อตกลง</a> ในการจองตั๋วเครื่องบิน</label>
+                            </div>
+                            <div class="form-group">
+                                <input type="checkbox" id="accept-policy" required>
+                                <label for="accept-policy">ฉันได้อ่านและยอมรับ <a href="#">นโยบายความเป็นส่วนตัว</a> ของ SkyBooking</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Action Buttons -->
+        <section class="action-buttons">
+            <div class="container">
+                <button class="btn btn-outline" onclick="window.location.href='seat-selection.html'">ย้อนกลับ</button>
+                <button class="btn btn-primary" onclick="window.location.href='confirmation.html'" id="pay-now-btn">ชำระเงินทันที</button>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>SkyBooking</h3>
+                <p>ระบบจองตั๋วเครื่องบินออนไลน์ที่ให้คุณจองตั๋วได้ง่าย สะดวก รวดเร็ว และปลอดภัย</p>
+                <div class="social-icons">
+                    <a href="#"><i class="fab fa-facebook"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                    <a href="#"><i class="fab fa-youtube"></i></a>
+                </div>
+            </div>
+            <div class="footer-section">
+                <h3>ลิงก์ด่วน</h3>
+                <ul class="footer-links">
+                    <li><a href="index.html">หน้าหลัก</a></li>
+                    <li><a href="#">ค้นหาเที่ยวบิน</a></li>
+                    <li><a href="promotions.html">โปรโมชั่นพิเศษ</a></li>
+                    <li><a href="booking-status.html">สถานะการจอง</a></li>
+                    <li><a href="contact.html">ติดต่อเรา</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>ติดต่อเรา</h3>
+                <p><i class="fas fa-map-marker-alt"></i> 99 มหาวิทยาลัยธรรมศาสตร์ ศูนย์รังสิต คลองหลวง ปทุมธานี 12120</p>
+                <p><i class="fas fa-phone"></i> 02-564-4440</p>
+                <p><i class="fas fa-envelope"></i> contact@skybooking.com</p>
+            </div>
+            <div class="footer-section">
+                <h3>รับข่าวสาร</h3>
+                <p>ลงทะเบียนเพื่อรับข้อเสนอพิเศษและอัพเดทล่าสุด</p>
+                <form class="newsletter-form">
+                    <input type="email" placeholder="อีเมลของคุณ" required>
+                    <button type="submit" class="btn btn-primary">ลงทะเบียน</button>
+                </form>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2025 SkyBooking. ขับเคลื่อนโดยนักศึกษา CS251.</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+    <script src="payment.js"></script>
+</body>
+</html>
