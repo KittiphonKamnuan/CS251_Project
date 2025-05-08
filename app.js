@@ -1,734 +1,448 @@
-// app.js - Main application file for Airline Booking System
+// app.js - Main application file for Airline Booking System Frontend
 
-// Import required modules
 const express = require('express');
 const path = require('path');
-const mysql = require('mysql2');
 const bodyParser = require('body-parser');
+const cors = require('cors');
+const axios = require('axios');
+const morgan = require('morgan');
 const session = require('express-session');
-const bcrypt = require('bcrypt');
+const cookieParser = require('cookie-parser');
 
-// Initialize express app
+// Initialize Express app
 const app = express();
 const PORT = process.env.PORT || 3000;
+const API_BASE_URL = process.env.API_BASE_URL || 'http://localhost:8080/api';
 
-// Set up middleware
-app.use(bodyParser.urlencoded({ extended: true }));
+// Middleware
+app.use(cors());
+app.use(morgan('dev')); // Logging
 app.use(bodyParser.json());
-app.use(express.static(path.join(__dirname, 'public')));
-
-// Set up session
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(cookieParser());
 app.use(session({
-    secret: 'flight-booking-secret-key',
-    resave: false,
-    saveUninitialized: false,
-    cookie: { maxAge: 3600000 } // 1 hour
+  secret: 'airline-booking-secret',
+  resave: false,
+  saveUninitialized: false,
+  cookie: { 
+    secure: process.env.NODE_ENV === 'production',
+    maxAge: 3600000 // 1 hour
+  }
 }));
 
-// Configure database connection
-const db = mysql.createConnection({
-    host: 'localhost',
-    user: 'root',
-    password: 'yourpassword',
-    database: 'airline_booking'
-});
+// Serve static files
+app.use(express.static(path.join(__dirname, 'public')));
+app.use('/css', express.static(path.join(__dirname, 'src/main/resources/static/css')));
+app.use('/js', express.static(path.join(__dirname, 'src/main/resources/static/js')));
+app.use('/images', express.static(path.join(__dirname, 'src/main/resources/static/images')));
 
-// Connect to database
-db.connect(err => {
-    if (err) {
-        console.error('Error connecting to database:', err);
-        return;
+// View engine setup (if using templates)
+app.set('views', path.join(__dirname, 'views'));
+app.set('view engine', 'ejs');
+
+// Authentication middleware
+const isAuthenticated = (req, res, next) => {
+  if (req.session.user) {
+    return next();
+  }
+  res.redirect('/login');
+};
+
+// API proxy middleware
+const apiProxy = async (req, res, next) => {
+  try {
+    const { method, url, params, body } = req;
+    const apiUrl = `${API_BASE_URL}${url}`;
+    
+    const headers = {};
+    if (req.session.token) {
+      headers['Authorization'] = `Bearer ${req.session.token}`;
     }
-    console.log('Connected to MySQL database');
-});
+    
+    const response = await axios({
+      method,
+      url: apiUrl,
+      params,
+      data: body,
+      headers
+    });
+    
+    req.apiResponse = response.data;
+    next();
+  } catch (error) {
+    console.error('API Error:', error.message);
+    if (error.response) {
+      return res.status(error.response.status).json(error.response.data);
+    }
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
 
-// Set up template engine
-app.set('view engine', 'html');
-app.engine('html', require('ejs').renderFile);
-
-// Define routes
+// Routes
 
 // Home page
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'index.html'));
+  res.render('index', { 
+    user: req.session.user || null,
+    title: 'Airline Booking System - Home'
+  });
 });
 
-// User authentication routes
-app.post('/register', async (req, res) => {
-    try {
-        const { username, password, email, firstName, lastName, phone, address } = req.body;
-        
-        // Check if username already exists
-        db.query('SELECT * FROM User WHERE Username = ?', [username], async (err, results) => {
-            if (err) throw err;
-            
-            if (results.length > 0) {
-                return res.status(400).json({ message: 'Username already exists' });
-            }
-            
-            // Hash password
-            const hashedPassword = await bcrypt.hash(password, 10);
-            
-            // Generate UserID (you may want to improve this logic)
-            const userId = Date.now().toString();
-            
-            // Insert new user
-            const query = `INSERT INTO User (UserID, Username, Password, Email, FirstName, LastName, Address, Phone, Role) 
-                          VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'Customer')`;
-            
-            db.query(query, [userId, username, hashedPassword, email, firstName, lastName, address, phone], (err, result) => {
-                if (err) throw err;
-                res.status(201).json({ message: 'User registered successfully' });
-            });
-        });
-    } catch (error) {
-        res.status(500).json({ message: 'Server error', error: error.message });
-    }
+// Login Page
+app.get('/login', (req, res) => {
+  if (req.session.user) {
+    return res.redirect('/');
+  }
+  res.render('login', { 
+    title: 'Login',
+    error: req.query.error || null
+  });
 });
 
-app.post('/login', (req, res) => {
-    try {
-        const { username, password } = req.body;
-        
-        db.query('SELECT * FROM User WHERE Username = ?', [username], async (err, results) => {
-            if (err) throw err;
-            
-            if (results.length === 0) {
-                return res.status(401).json({ message: 'Invalid username or password' });
-            }
-            
-            const user = results[0];
-            
-            // Compare password
-            const isMatch = await bcrypt.compare(password, user.Password);
-            
-            if (!isMatch) {
-                return res.status(401).json({ message: 'Invalid username or password' });
-            }
-            
-            // Set session
-            req.session.user = {
-                id: user.UserID,
-                username: user.Username,
-                firstName: user.FirstName,
-                lastName: user.LastName,
-                role: user.Role
-            };
-            
-            res.status(200).json({ 
-                message: 'Login successful',
-                user: {
-                    id: user.UserID,
-                    username: user.Username,
-                    firstName: user.FirstName,
-                    lastName: user.LastName,
-                    role: user.Role
-                } 
-            });
-        });
-    } catch (error) {
-        res.status(500).json({ message: 'Server error', error: error.message });
-    }
+// Login API
+app.post('/login', async (req, res) => {
+  try {
+    const { username, password } = req.body;
+    
+    const response = await axios.post(`${API_BASE_URL}/auth/login`, {
+      username,
+      password
+    });
+    
+    req.session.user = response.data.user;
+    req.session.token = response.data.token;
+    
+    res.redirect('/');
+  } catch (error) {
+    console.error('Login error:', error.message);
+    res.redirect('/login?error=Invalid username or password');
+  }
 });
 
+// Logout
 app.get('/logout', (req, res) => {
-    req.session.destroy(err => {
-        if (err) {
-            return res.status(500).json({ message: 'Error logging out' });
-        }
-        res.redirect('/');
-    });
+  req.session.destroy();
+  res.redirect('/');
 });
 
-// Flight routes
-app.get('/flights/search', (req, res) => {
-    const { departureCity, arrivalCity, departureDate } = req.query;
-    
-    let query = `SELECT * FROM Flight WHERE 1=1`;
-    const params = [];
-    
-    if (departureCity) {
-        query += ` AND DepartureCity = ?`;
-        params.push(departureCity);
-    }
-    
-    if (arrivalCity) {
-        query += ` AND ArrivalCity = ?`;
-        params.push(arrivalCity);
-    }
-    
-    if (departureDate) {
-        query += ` AND DATE(DepartureTime) = ?`;
-        params.push(departureDate);
-    }
-    
-    db.query(query, params, (err, results) => {
-        if (err) {
-            return res.status(500).json({ message: 'Error searching flights', error: err.message });
-        }
-        
-        res.status(200).json({ flights: results });
-    });
+// Registration page
+app.get('/register', (req, res) => {
+  if (req.session.user) {
+    return res.redirect('/');
+  }
+  res.render('register', { 
+    title: 'Register',
+    error: req.query.error || null
+  });
 });
 
+// Registration API
+app.post('/register', async (req, res) => {
+  try {
+    const { username, password, email, firstName, lastName, phone, address } = req.body;
+    
+    await axios.post(`${API_BASE_URL}/auth/register`, {
+      username,
+      password,
+      email,
+      firstName,
+      lastName,
+      phone,
+      address
+    });
+    
+    res.redirect('/login?success=Registration successful. Please login.');
+  } catch (error) {
+    console.error('Registration error:', error.message);
+    res.redirect('/register?error=Registration failed. Please try again.');
+  }
+});
+
+// Flight search page
+app.get('/flights', (req, res) => {
+  res.render('flights', { 
+    user: req.session.user || null,
+    title: 'Search Flights',
+    query: req.query
+  });
+});
+
+// Flight search API
+app.get('/api/flights/search', async (req, res) => {
+  try {
+    const { departureCity, arrivalCity, departureDate, returnDate, passengers } = req.query;
+    
+    const response = await axios.get(`${API_BASE_URL}/flights/search`, {
+      params: {
+        departureCity,
+        arrivalCity,
+        departureDate,
+        returnDate,
+        passengers
+      }
+    });
+    
+    res.json(response.data);
+  } catch (error) {
+    console.error('Flight search error:', error.message);
+    res.status(500).json({ message: 'Error searching flights' });
+  }
+});
+
+// Flight details page
 app.get('/flight-details/:id', (req, res) => {
-    const flightId = req.params.id;
+  res.render('flight-details', { 
+    user: req.session.user || null,
+    title: 'Flight Details',
+    flightId: req.params.id
+  });
+});
+
+// Flight details API
+app.get('/api/flights/:id', async (req, res) => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/flights/${req.params.id}`);
+    res.json(response.data);
+  } catch (error) {
+    console.error('Flight details error:', error.message);
+    res.status(500).json({ message: 'Error fetching flight details' });
+  }
+});
+
+// Seat selection page
+app.get('/seat-selection/:flightId', isAuthenticated, (req, res) => {
+  res.render('seat-selection', { 
+    user: req.session.user,
+    title: 'Select Your Seat',
+    flightId: req.params.flightId
+  });
+});
+
+// Seats API
+app.get('/api/flights/:flightId/seats', async (req, res) => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/flights/${req.params.flightId}/seats`);
+    res.json(response.data);
+  } catch (error) {
+    console.error('Seat fetch error:', error.message);
+    res.status(500).json({ message: 'Error fetching seats' });
+  }
+});
+
+// Booking page (after seat selection)
+app.post('/booking', isAuthenticated, (req, res) => {
+  const { flightId, seatIds, passengers, totalPrice } = req.body;
+  
+  // Store in session for next steps
+  req.session.bookingData = {
+    flightId,
+    seatIds,
+    passengers,
+    totalPrice
+  };
+  
+  res.render('passenger-details', {
+    user: req.session.user,
+    title: 'Passenger Details',
+    bookingData: req.session.bookingData
+  });
+});
+
+// Create booking API
+app.post('/api/bookings', isAuthenticated, async (req, res) => {
+  try {
+    const { flightId, seatIds, passengers, totalPrice } = req.body;
     
-    db.query('SELECT * FROM Flight WHERE FlightID = ?', [flightId], (err, results) => {
-        if (err) {
-            return res.status(500).json({ message: 'Error fetching flight details', error: err.message });
-        }
-        
-        if (results.length === 0) {
-            return res.status(404).json({ message: 'Flight not found' });
-        }
-        
-        res.sendFile(path.join(__dirname, 'flight-details.html'));
+    const response = await axios.post(`${API_BASE_URL}/bookings`, {
+      flightId,
+      seatIds,
+      passengers,
+      totalPrice
+    }, {
+      headers: {
+        'Authorization': `Bearer ${req.session.token}`
+      }
     });
+    
+    // Store booking ID in session for payment
+    req.session.bookingId = response.data.bookingId;
+    
+    res.json(response.data);
+  } catch (error) {
+    console.error('Booking creation error:', error.message);
+    res.status(500).json({ message: 'Error creating booking' });
+  }
 });
 
-// Seat routes
-app.get('/seats/:flightId', (req, res) => {
-    const flightId = req.params.flightId;
-    
-    db.query('SELECT * FROM Seat WHERE FlightID = ?', [flightId], (err, results) => {
-        if (err) {
-            return res.status(500).json({ message: 'Error fetching seats', error: err.message });
-        }
-        
-        res.status(200).json({ seats: results });
-    });
+// Payment page
+app.get('/payment/:bookingId', isAuthenticated, (req, res) => {
+  res.render('payment', { 
+    user: req.session.user,
+    title: 'Payment',
+    bookingId: req.params.bookingId
+  });
 });
 
-app.get('/seat-selection/:flightId', (req, res) => {
-    const flightId = req.params.flightId;
-    
-    // Check if flight exists
-    db.query('SELECT * FROM Flight WHERE FlightID = ?', [flightId], (err, results) => {
-        if (err) {
-            return res.status(500).json({ message: 'Error fetching flight', error: err.message });
-        }
-        
-        if (results.length === 0) {
-            return res.status(404).json({ message: 'Flight not found' });
-        }
-        
-        res.sendFile(path.join(__dirname, 'seat-selection.html'));
-    });
-});
-
-app.put('/seats/:seatId', (req, res) => {
-    if (!req.session.user) {
-        return res.status(401).json({ message: 'Unauthorized' });
-    }
-    
-    const seatId = req.params.seatId;
-    const { status } = req.body;
-    
-    db.query('UPDATE Seat SET SeatStatus = ? WHERE SeatID = ?', [status, seatId], (err, result) => {
-        if (err) {
-            return res.status(500).json({ message: 'Error updating seat status', error: err.message });
-        }
-        
-        res.status(200).json({ message: 'Seat status updated successfully' });
-    });
-});
-
-// Booking routes
-app.post('/booking', (req, res) => {
-    if (!req.session.user) {
-        return res.status(401).json({ message: 'Unauthorized' });
-    }
-    
-    const { flightId, seatIds, passengerDetails, totalPrice } = req.body;
-    const userId = req.session.user.id;
-    
-    // Generate booking ID
-    const bookingId = 'BK' + Date.now();
-    const bookingDate = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
-    
-    // Begin transaction
-    db.beginTransaction(err => {
-        if (err) {
-            return res.status(500).json({ message: 'Error starting transaction', error: err.message });
-        }
-        
-        // Insert booking
-        db.query(
-            'INSERT INTO Booking (BookingID, UserID, FlightID, BookingDate, TotalPrice, BookingStatus) VALUES (?, ?, ?, ?, ?, ?)',
-            [bookingId, userId, flightId, bookingDate, totalPrice, 'Pending'],
-            (err, result) => {
-                if (err) {
-                    return db.rollback(() => {
-                        res.status(500).json({ message: 'Error creating booking', error: err.message });
-                    });
-                }
-                
-                // Add passengers
-                const passengerPromises = passengerDetails.map((passenger, index) => {
-                    return new Promise((resolve, reject) => {
-                        const passengerId = 'P' + Date.now() + index;
-                        
-                        db.query(
-                            'INSERT INTO Passenger (PassengerID, BookingID, FirstName, LastName, PassportNumber, DateOfBirth) VALUES (?, ?, ?, ?, ?, ?)',
-                            [passengerId, bookingId, passenger.firstName, passenger.lastName, passenger.passportNumber, passenger.dateOfBirth],
-                            (err, result) => {
-                                if (err) reject(err);
-                                else resolve(result);
-                            }
-                        );
-                    });
-                });
-                
-                // Update seat status
-                const seatPromises = seatIds.map(seatId => {
-                    return new Promise((resolve, reject) => {
-                        db.query(
-                            'UPDATE Seat SET SeatStatus = ? WHERE SeatID = ?',
-                            ['Reserved', seatId],
-                            (err, result) => {
-                                if (err) reject(err);
-                                else resolve(result);
-                            }
-                        );
-                    });
-                });
-                
-                Promise.all([...passengerPromises, ...seatPromises])
-                    .then(() => {
-                        db.commit(err => {
-                            if (err) {
-                                return db.rollback(() => {
-                                    res.status(500).json({ message: 'Error committing transaction', error: err.message });
-                                });
-                            }
-                            
-                            res.status(201).json({ 
-                                message: 'Booking created successfully',
-                                bookingId: bookingId
-                            });
-                        });
-                    })
-                    .catch(err => {
-                        db.rollback(() => {
-                            res.status(500).json({ message: 'Error processing booking', error: err.message });
-                        });
-                    });
-            }
-        );
-    });
-});
-
-app.get('/booking-status/:id', (req, res) => {
-    const bookingId = req.params.id;
-    
-    if (!req.session.user) {
-        return res.status(401).json({ message: 'Unauthorized' });
-    }
-    
-    db.query(
-        `SELECT b.*, f.*, s.SeatNumber, s.Class, p.FirstName as PassengerFirstName, p.LastName as PassengerLastName
-         FROM Booking b
-         JOIN Flight f ON b.FlightID = f.FlightID
-         JOIN Passenger p ON p.BookingID = b.BookingID
-         LEFT JOIN Seat s ON s.FlightID = f.FlightID AND s.SeatStatus = 'Reserved'
-         WHERE b.BookingID = ? AND b.UserID = ?`,
-        [bookingId, req.session.user.id],
-        (err, results) => {
-            if (err) {
-                return res.status(500).json({ message: 'Error fetching booking', error: err.message });
-            }
-            
-            if (results.length === 0) {
-                return res.status(404).json({ message: 'Booking not found' });
-            }
-            
-            res.sendFile(path.join(__dirname, 'booking-status.html'));
-        }
-    );
-});
-
-app.get('/api/booking/:id', (req, res) => {
-    const bookingId = req.params.id;
-    
-    if (!req.session.user) {
-        return res.status(401).json({ message: 'Unauthorized' });
-    }
-    
-    db.query(
-        `SELECT b.*, f.*, s.SeatNumber, s.Class, p.FirstName as PassengerFirstName, p.LastName as PassengerLastName
-         FROM Booking b
-         JOIN Flight f ON b.FlightID = f.FlightID
-         JOIN Passenger p ON p.BookingID = b.BookingID
-         LEFT JOIN Seat s ON s.FlightID = f.FlightID AND s.SeatStatus = 'Reserved'
-         WHERE b.BookingID = ? AND b.UserID = ?`,
-        [bookingId, req.session.user.id],
-        (err, results) => {
-            if (err) {
-                return res.status(500).json({ message: 'Error fetching booking', error: err.message });
-            }
-            
-            if (results.length === 0) {
-                return res.status(404).json({ message: 'Booking not found' });
-            }
-            
-            // Process results to create a structured booking object
-            const booking = {
-                bookingId: results[0].BookingID,
-                bookingDate: results[0].BookingDate,
-                totalPrice: results[0].TotalPrice,
-                status: results[0].BookingStatus,
-                flight: {
-                    flightId: results[0].FlightID,
-                    flightNumber: results[0].FlightNumber,
-                    departureCity: results[0].DepartureCity,
-                    arrivalCity: results[0].ArrivalCity,
-                    departureTime: results[0].DepartureTime,
-                    arrivalTime: results[0].ArrivalTime,
-                    aircraft: results[0].Aircraft,
-                    status: results[0].FlightStatus
-                },
-                passengers: [],
-                seats: []
-            };
-            
-            // Extract unique passengers and seats
-            const passengerMap = new Map();
-            const seatMap = new Map();
-            
-            results.forEach(row => {
-                if (row.PassengerFirstName && !passengerMap.has(row.PassengerFirstName + row.PassengerLastName)) {
-                    passengerMap.set(row.PassengerFirstName + row.PassengerLastName, {
-                        firstName: row.PassengerFirstName,
-                        lastName: row.PassengerLastName
-                    });
-                }
-                
-                if (row.SeatNumber && !seatMap.has(row.SeatNumber)) {
-                    seatMap.set(row.SeatNumber, {
-                        seatNumber: row.SeatNumber,
-                        class: row.Class
-                    });
-                }
-            });
-            
-            booking.passengers = Array.from(passengerMap.values());
-            booking.seats = Array.from(seatMap.values());
-            
-            res.status(200).json({ booking });
-        }
-    );
-});
-
-// Payment routes
-app.get('/payment/:bookingId', (req, res) => {
-    const bookingId = req.params.bookingId;
-    
-    if (!req.session.user) {
-        return res.status(401).json({ message: 'Unauthorized' });
-    }
-    
-    db.query(
-        'SELECT * FROM Booking WHERE BookingID = ? AND UserID = ?',
-        [bookingId, req.session.user.id],
-        (err, results) => {
-            if (err) {
-                return res.status(500).json({ message: 'Error fetching booking', error: err.message });
-            }
-            
-            if (results.length === 0) {
-                return res.status(404).json({ message: 'Booking not found' });
-            }
-            
-            res.sendFile(path.join(__dirname, 'payment.html'));
-        }
-    );
-});
-
-app.post('/payment', (req, res) => {
-    if (!req.session.user) {
-        return res.status(401).json({ message: 'Unauthorized' });
-    }
-    
+// Process payment API
+app.post('/api/payments', isAuthenticated, async (req, res) => {
+  try {
     const { bookingId, amount, paymentMethod, cardDetails } = req.body;
     
-    // Generate payment ID
-    const paymentId = 'PAY' + Date.now();
-    const paymentDate = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
-    
-    // Save payment details based on method
-    let query;
-    let params;
-    
-    if (paymentMethod === 'credit_card') {
-        query = 'INSERT INTO Payment (PaymentID, BookingID, Amount, PaymentMethod, PaymentDate, PaymentStatus, credit_card) VALUES (?, ?, ?, ?, ?, ?, ?)';
-        params = [paymentId, bookingId, amount, 'credit_card', paymentDate, 'Completed', cardDetails.cardNumber];
-    } else if (paymentMethod === 'debit_card') {
-        query = 'INSERT INTO Payment (PaymentID, BookingID, Amount, PaymentMethod, PaymentDate, PaymentStatus, debit_card) VALUES (?, ?, ?, ?, ?, ?, ?)';
-        params = [paymentId, bookingId, amount, 'debit_card', paymentDate, 'Completed', cardDetails.cardNumber];
-    } else if (paymentMethod === 'bank_transfer') {
-        query = 'INSERT INTO Payment (PaymentID, BookingID, Amount, PaymentMethod, PaymentDate, PaymentStatus, bank_transfer) VALUES (?, ?, ?, ?, ?, ?, ?)';
-        params = [paymentId, bookingId, amount, 'bank_transfer', paymentDate, 'Completed', cardDetails.accountNumber];
-    } else if (paymentMethod === 'cash') {
-        query = 'INSERT INTO Payment (PaymentID, BookingID, Amount, PaymentMethod, PaymentDate, PaymentStatus, cash) VALUES (?, ?, ?, ?, ?, ?, ?)';
-        params = [paymentId, bookingId, amount, 'cash', paymentDate, 'Completed', true];
-    } else {
-        return res.status(400).json({ message: 'Invalid payment method' });
-    }
-    
-    // Begin transaction
-    db.beginTransaction(err => {
-        if (err) {
-            return res.status(500).json({ message: 'Error starting transaction', error: err.message });
-        }
-        
-        // Save payment
-        db.query(query, params, (err, result) => {
-            if (err) {
-                return db.rollback(() => {
-                    res.status(500).json({ message: 'Error processing payment', error: err.message });
-                });
-            }
-            
-            // Update booking status
-            db.query(
-                'UPDATE Booking SET BookingStatus = ? WHERE BookingID = ?',
-                ['Confirmed', bookingId],
-                (err, result) => {
-                    if (err) {
-                        return db.rollback(() => {
-                            res.status(500).json({ message: 'Error updating booking status', error: err.message });
-                        });
-                    }
-                    
-                    // Add loyalty points
-                    db.query(
-                        'SELECT TotalPrice FROM Booking WHERE BookingID = ?',
-                        [bookingId],
-                        (err, results) => {
-                            if (err) {
-                                return db.rollback(() => {
-                                    res.status(500).json({ message: 'Error fetching booking details', error: err.message });
-                                });
-                            }
-                            
-                            const totalPrice = results[0].TotalPrice;
-                            const pointsEarned = Math.floor(totalPrice / 100); // 1 point per 100 currency units
-                            const expiryDate = new Date();
-                            expiryDate.setFullYear(expiryDate.getFullYear() + 1); // Points expire after 1 year
-                            
-                            db.query(
-                                'INSERT INTO LoyaltyPoints (BookingID, PointsBalance, PointsExpiryDate) VALUES (?, ?, ?)',
-                                [bookingId, pointsEarned, expiryDate.toISOString().slice(0, 10)],
-                                (err, result) => {
-                                    if (err) {
-                                        return db.rollback(() => {
-                                            res.status(500).json({ message: 'Error adding loyalty points', error: err.message });
-                                        });
-                                    }
-                                    
-                                    db.commit(err => {
-                                        if (err) {
-                                            return db.rollback(() => {
-                                                res.status(500).json({ message: 'Error committing transaction', error: err.message });
-                                            });
-                                        }
-                                        
-                                        res.status(200).json({ 
-                                            message: 'Payment successful',
-                                            paymentId: paymentId,
-                                            pointsEarned: pointsEarned
-                                        });
-                                    });
-                                }
-                            );
-                        }
-                    );
-                }
-            );
-        });
+    const response = await axios.post(`${API_BASE_URL}/payments`, {
+      bookingId,
+      amount,
+      paymentMethod,
+      cardDetails
+    }, {
+      headers: {
+        'Authorization': `Bearer ${req.session.token}`
+      }
     });
+    
+    res.json(response.data);
+  } catch (error) {
+    console.error('Payment error:', error.message);
+    res.status(500).json({ message: 'Error processing payment' });
+  }
 });
 
-// Confirmation route
-app.get('/confirmation/:bookingId', (req, res) => {
-    const bookingId = req.params.bookingId;
-    
-    if (!req.session.user) {
-        return res.status(401).json({ message: 'Unauthorized' });
-    }
-    
-    res.sendFile(path.join(__dirname, 'confirmation.html'));
+// Booking confirmation page
+app.get('/confirmation/:bookingId', isAuthenticated, (req, res) => {
+  res.render('confirmation', { 
+    user: req.session.user,
+    title: 'Booking Confirmation',
+    bookingId: req.params.bookingId
+  });
 });
 
-// Promotions route
+// Booking details API
+app.get('/api/bookings/:id', isAuthenticated, async (req, res) => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/bookings/${req.params.id}`, {
+      headers: {
+        'Authorization': `Bearer ${req.session.token}`
+      }
+    });
+    
+    res.json(response.data);
+  } catch (error) {
+    console.error('Booking details error:', error.message);
+    res.status(500).json({ message: 'Error fetching booking details' });
+  }
+});
+
+// Booking status page
+app.get('/booking-status/:id', isAuthenticated, (req, res) => {
+  res.render('booking-status', { 
+    user: req.session.user,
+    title: 'Booking Status',
+    bookingId: req.params.id
+  });
+});
+
+// Promotions page
 app.get('/promotions', (req, res) => {
-    db.query('SELECT * FROM Discount WHERE ExpiryDate >= CURDATE()', (err, results) => {
-        if (err) {
-            return res.status(500).json({ message: 'Error fetching promotions', error: err.message });
-        }
-        
-        res.sendFile(path.join(__dirname, 'promotions.html'));
-    });
+  res.render('promotions', { 
+    user: req.session.user || null,
+    title: 'Promotions & Offers'
+  });
 });
 
-app.get('/api/promotions', (req, res) => {
-    db.query('SELECT * FROM Discount WHERE ExpiryDate >= CURDATE()', (err, results) => {
-        if (err) {
-            return res.status(500).json({ message: 'Error fetching promotions', error: err.message });
-        }
-        
-        res.status(200).json({ promotions: results });
-    });
+// Promotions API
+app.get('/api/promotions', async (req, res) => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/promotions`);
+    res.json(response.data);
+  } catch (error) {
+    console.error('Promotions error:', error.message);
+    res.status(500).json({ message: 'Error fetching promotions' });
+  }
 });
 
-// Contact route
+// Contact page
 app.get('/contact', (req, res) => {
-    res.sendFile(path.join(__dirname, 'contact.html'));
+  res.render('contact', { 
+    user: req.session.user || null,
+    title: 'Contact Us'
+  });
 });
 
-app.post('/contact', (req, res) => {
+// Send contact form API
+app.post('/api/contact', async (req, res) => {
+  try {
     const { name, email, message } = req.body;
     
-    // Here you would typically send an email or save to a database
-    // For this example, we'll just respond with success
-    
-    res.status(200).json({ message: 'Message sent successfully' });
-});
-
-// User profile and bookings
-app.get('/profile', (req, res) => {
-    if (!req.session.user) {
-        return res.redirect('/');
-    }
-    
-    db.query(
-        'SELECT * FROM User WHERE UserID = ?',
-        [req.session.user.id],
-        (err, results) => {
-            if (err) {
-                return res.status(500).json({ message: 'Error fetching user data', error: err.message });
-            }
-            
-            if (results.length === 0) {
-                req.session.destroy();
-                return res.redirect('/');
-            }
-            
-            // Fetch user's bookings
-            db.query(
-                `SELECT b.*, f.DepartureCity, f.ArrivalCity, f.DepartureTime, f.ArrivalTime
-                 FROM Booking b
-                 JOIN Flight f ON b.FlightID = f.FlightID
-                 WHERE b.UserID = ?
-                 ORDER BY b.BookingDate DESC`,
-                [req.session.user.id],
-                (err, bookings) => {
-                    if (err) {
-                        return res.status(500).json({ message: 'Error fetching bookings', error: err.message });
-                    }
-                    
-                    // Fetch loyalty points
-                    db.query(
-                        `SELECT SUM(lp.PointsBalance) as TotalPoints
-                         FROM LoyaltyPoints lp
-                         JOIN Booking b ON lp.BookingID = b.BookingID
-                         WHERE b.UserID = ? AND lp.PointsExpiryDate >= CURDATE()`,
-                        [req.session.user.id],
-                        (err, pointsResults) => {
-                            if (err) {
-                                return res.status(500).json({ message: 'Error fetching loyalty points', error: err.message });
-                            }
-                            
-                            const userData = {
-                                user: {
-                                    id: results[0].UserID,
-                                    username: results[0].Username,
-                                    firstName: results[0].FirstName,
-                                    lastName: results[0].LastName,
-                                    email: results[0].Email,
-                                    phone: results[0].Phone,
-                                    address: results[0].Address
-                                },
-                                bookings: bookings,
-                                loyaltyPoints: pointsResults[0].TotalPoints || 0
-                            };
-                            
-                            res.render('profile', userData);
-                        }
-                    );
-                }
-            );
-        }
-    );
-});
-
-// Admin routes (protected by role check)
-app.use('/admin', (req, res, next) => {
-    if (!req.session.user || req.session.user.role !== 'Admin') {
-        return res.status(403).json({ message: 'Forbidden - Admin access required' });
-    }
-    next();
-});
-
-app.get('/admin/flights', (req, res) => {
-    db.query('SELECT * FROM Flight ORDER BY DepartureTime', (err, results) => {
-        if (err) {
-            return res.status(500).json({ message: 'Error fetching flights', error: err.message });
-        }
-        
-        res.render('admin/flights', { flights: results });
+    const response = await axios.post(`${API_BASE_URL}/contact`, {
+      name,
+      email,
+      message
     });
+    
+    res.json(response.data);
+  } catch (error) {
+    console.error('Contact form error:', error.message);
+    res.status(500).json({ message: 'Error sending contact form' });
+  }
 });
 
-app.post('/admin/flights', (req, res) => {
-    const { flightNumber, departureCity, arrivalCity, departureTime, arrivalTime, aircraft } = req.body;
-    
-    // Generate flight ID
-    const flightId = 'FL' + Date.now();
-    
-    db.query(
-        'INSERT INTO Flight (FlightID, FlightNumber, DepartureCity, ArrivalCity, DepartureTime, ArrivalTime, Aircraft, FlightStatus) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-        [flightId, flightNumber, departureCity, arrivalCity, departureTime, arrivalTime, aircraft, 'Scheduled'],
-        (err, result) => {
-            if (err) {
-                return res.status(500).json({ message: 'Error creating flight', error: err.message });
-            }
-            
-            res.status(201).json({ 
-                message: 'Flight created successfully',
-                flightId: flightId
-            });
-        }
-    );
+// User profile page
+app.get('/profile', isAuthenticated, (req, res) => {
+  res.render('profile', { 
+    user: req.session.user,
+    title: 'My Profile'
+  });
 });
 
-app.put('/admin/flights/:id', (req, res) => {
-    const flightId = req.params.id;
-    const { flightNumber, departureCity, arrivalCity, departureTime, arrivalTime, aircraft, status } = req.body;
+// Get user bookings API
+app.get('/api/users/bookings', isAuthenticated, async (req, res) => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/users/bookings`, {
+      headers: {
+        'Authorization': `Bearer ${req.session.token}`
+      }
+    });
     
-    db.query(
-        'UPDATE Flight SET FlightNumber = ?, DepartureCity = ?, ArrivalCity = ?, DepartureTime = ?, ArrivalTime = ?, Aircraft = ?, FlightStatus = ? WHERE FlightID = ?',
-        [flightNumber, departureCity, arrivalCity, departureTime, arrivalTime, aircraft, status, flightId],
-        (err, result) => {
-            if (err) {
-                return res.status(500).json({ message: 'Error updating flight', error: err.message });
-            }
-            
-            res.status(200).json({ message: 'Flight updated successfully' });
-        }
-    );
+    res.json(response.data);
+  } catch (error) {
+    console.error('User bookings error:', error.message);
+    res.status(500).json({ message: 'Error fetching user bookings' });
+  }
+});
+
+// Admin routes
+app.get('/admin', isAuthenticated, (req, res) => {
+  if (req.session.user.role !== 'ADMIN') {
+    return res.status(403).render('error', {
+      message: 'Forbidden',
+      error: { status: 403, stack: '' }
+    });
+  }
+  
+  res.render('admin/dashboard', { 
+    user: req.session.user,
+    title: 'Admin Dashboard'
+  });
 });
 
 // Error handling middleware
+app.use((req, res, next) => {
+  res.status(404).render('error', {
+    message: 'Page Not Found',
+    error: { status: 404, stack: process.env.NODE_ENV === 'development' ? '' : '' }
+  });
+});
+
 app.use((err, req, res, next) => {
-    console.error(err.stack);
-    res.status(500).send('Something broke!');
+  console.error(err.stack);
+  res.status(err.status || 500).render('error', {
+    message: err.message,
+    error: process.env.NODE_ENV === 'development' ? err : {}
+  });
 });
 
 // Start the server
 app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
+  console.log(`Server running on http://localhost:${PORT}`);
 });
 
 module.exports = app;
