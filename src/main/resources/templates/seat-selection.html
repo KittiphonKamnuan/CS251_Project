@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>เลือกที่นั่ง | SkyBooking</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/seat-selection.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo">
+                <h1>SkyBooking</h1>
+            </div>
+            <ul class="nav-links">
+                <li><a href="index.html">หน้าหลัก</a></li>
+                <li><a href="#" class="active">เที่ยวบิน</a></li>
+                <li><a href="promotions.html">โปรโมชั่น</a></li>
+                <li><a href="contact.html">ติดต่อเรา</a></li>
+            </ul>
+            <div class="user-actions">
+                <div class="user-welcome">ยินดีต้อนรับ, user@example.com</div>
+                <a href="#" class="btn btn-outline" id="logoutBtn">ออกจากระบบ</a>
+            </div>
+            <div class="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <!-- Booking Progress -->
+        <div class="booking-progress">
+            <div class="progress-container">
+                <div class="progress-step completed">
+                    <div class="step-number">1</div>
+                    <div class="step-label">เลือกเที่ยวบิน</div>
+                </div>
+                <div class="progress-line completed"></div>
+                <div class="progress-step completed">
+                    <div class="step-number">2</div>
+                    <div class="step-label">ข้อมูลผู้โดยสาร</div>
+                </div>
+                <div class="progress-line completed"></div>
+                <div class="progress-step active">
+                    <div class="step-number">3</div>
+                    <div class="step-label">เลือกที่นั่ง</div>
+                </div>
+                <div class="progress-line"></div>
+                <div class="progress-step">
+                    <div class="step-number">4</div>
+                    <div class="step-label">ชำระเงิน</div>
+                </div>
+                <div class="progress-line"></div>
+                <div class="progress-step">
+                    <div class="step-number">5</div>
+                    <div class="step-label">ยืนยันการจอง</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Flight Summary -->
+        <section class="flight-summary">
+            <div class="container">
+                <div class="flight-route">
+                    <h2>กรุงเทพฯ (BKK) → เชียงใหม่ (CNX)</h2>
+                    <p>วันพุธที่ 19 มีนาคม 2025 | ผู้โดยสาร 1 คน | ชั้นประหยัด | Thai Airways TG123</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Seat Selection -->
+        <section class="seat-selection">
+            <div class="container">
+                <div class="seat-selection-container">
+                    <div class="seat-instructions">
+                        <h2>เลือกที่นั่ง</h2>
+                        <p>กรุณาเลือกที่นั่งสำหรับผู้โดยสาร: สมชาย ใจดี</p>
+                        
+                        <div class="seat-legend">
+                            <div class="legend-item">
+                                <div class="seat-icon available"></div>
+                                <span>ที่นั่งว่าง</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="seat-icon selected"></div>
+                                <span>ที่นั่งที่เลือก</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="seat-icon occupied"></div>
+                                <span>ที่นั่งไม่ว่าง</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="seat-icon premium"></div>
+                                <span>ที่นั่งพรีเมียม (+฿350)</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="seat-icon exit-row"></div>
+                                <span>ที่นั่งแถวทางออกฉุกเฉิน (+฿250)</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="airplane-container">
+                        <div class="airplane-header">
+                            <div class="airplane-front">
+                                <span>หัวเครื่อง</span>
+                            </div>
+                        </div>
+                        
+                        <div class="airplane-body">
+                            <!-- Business Class -->
+                            <div class="seat-class-label">ชั้นธุรกิจ</div>
+                            <div class="seat-row">
+                                <div class="row-number">1</div>
+                                <div class="seat occupied" data-seat="1A">A</div>
+                                <div class="seat occupied" data-seat="1B">B</div>
+                                <div class="aisle"></div>
+                                <div class="seat occupied" data-seat="1C">C</div>
+                                <div class="seat occupied" data-seat="1D">D</div>
+                                <div class="row-number">1</div>
+                            </div>
+                            <div class="seat-row">
+                                <div class="row-number">2</div>
+                                <div class="seat premium" data-seat="2A">A</div>
+                                <div class="seat premium" data-seat="2B">B</div>
+                                <div class="aisle"></div>
+                                <div class="seat premium" data-seat="2C">C</div>
+                                <div class="seat premium" data-seat="2D">D</div>
+                                <div class="row-number">2</div>
+                            </div>
+                            
+                            <!-- Divider between classes -->
+                            <div class="class-divider"></div>
+                            
+                            <!-- Economy Class -->
+                            <div class="seat-class-label">ชั้นประหยัด</div>
+                            <div class="seat-row">
+                                <div class="row-number">10</div>
+                                <div class="seat premium" data-seat="10A">A</div>
+                                <div class="seat premium" data-seat="10B">B</div>
+                                <div class="seat premium" data-seat="10C">C</div>
+                                <div class="aisle"></div>
+                                <div class="seat premium" data-seat="10D">D</div>
+                                <div class="seat premium" data-seat="10E">E</div>
+                                <div class="seat premium" data-seat="10F">F</div>
+                                <div class="row-number">10</div>
+                            </div>
+                            
+                            <!-- Exit Row -->
+                            <div class="seat-row">
+                                <div class="row-number">11</div>
+                                <div class="seat exit-row" data-seat="11A">A</div>
+                                <div class="seat exit-row" data-seat="11B">B</div>
+                                <div class="seat exit-row" data-seat="11C">C</div>
+                                <div class="aisle exit-row-marker">แถวทางออกฉุกเฉิน</div>
+                                <div class="seat exit-row" data-seat="11D">D</div>
+                                <div class="seat exit-row" data-seat="11E">E</div>
+                                <div class="seat exit-row" data-seat="11F">F</div>
+                                <div class="row-number">11</div>
+                            </div>
+                            
+                            <!-- Regular Economy Rows -->
+                            <div class="seat-row">
+                                <div class="row-number">12</div>
+                                <div class="seat occupied" data-seat="12A">A</div>
+                                <div class="seat" data-seat="12B">B</div>
+                                <div class="seat" data-seat="12C">C</div>
+                                <div class="aisle"></div>
+                                <div class="seat" data-seat="12D">D</div>
+                                <div class="seat" data-seat="12E">E</div>
+                                <div class="seat occupied" data-seat="12F">F</div>
+                                <div class="row-number">12</div>
+                            </div>
+                            <div class="seat-row">
+                                <div class="row-number">13</div>
+                                <div class="seat" data-seat="13A">A</div>
+                                <div class="seat" data-seat="13B">B</div>
+                                <div class="seat" data-seat="13C">C</div>
+                                <div class="aisle"></div>
+                                <div class="seat" data-seat="13D">D</div>
+                                <div class="seat occupied" data-seat="13E">E</div>
+                                <div class="seat occupied" data-seat="13F">F</div>
+                                <div class="row-number">13</div>
+                            </div>
+                            <div class="seat-row">
+                                <div class="row-number">14</div>
+                                <div class="seat" data-seat="14A">A</div>
+                                <div class="seat" data-seat="14B">B</div>
+                                <div class="seat" data-seat="14C">C</div>
+                                <div class="aisle"></div>
+                                <div class="seat" data-seat="14D">D</div>
+                                <div class="seat" data-seat="14E">E</div>
+                                <div class="seat" data-seat="14F">F</div>
+                                <div class="row-number">14</div>
+                            </div>
+                            <div class="seat-row">
+                                <div class="row-number">15</div>
+                                <div class="seat occupied" data-seat="15A">A</div>
+                                <div class="seat occupied" data-seat="15B">B</div>
+                                <div class="seat" data-seat="15C">C</div>
+                                <div class="aisle"></div>
+                                <div class="seat" data-seat="15D">D</div>
+                                <div class="seat occupied" data-seat="15E">E</div>
+                                <div class="seat" data-seat="15F">F</div>
+                                <div class="row-number">15</div>
+                            </div>
+                            
+                            <!-- More rows would be added here -->
+                            <div class="more-rows">...</div>
+                            
+                            <!-- Last rows -->
+                            <div class="seat-row">
+                                <div class="row-number">30</div>
+                                <div class="seat" data-seat="30A">A</div>
+                                <div class="seat" data-seat="30B">B</div>
+                                <div class="seat" data-seat="30C">C</div>
+                                <div class="aisle"></div>
+                                <div class="seat" data-seat="30D">D</div>
+                                <div class="seat" data-seat="30E">E</div>
+                                <div class="seat" data-seat="30F">F</div>
+                                <div class="row-number">30</div>
+                            </div>
+                        </div>
+                        
+                        <div class="airplane-tail">
+                            <span>ท้ายเครื่อง</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="selected-seats-summary">
+                    <h3>ที่นั่งที่เลือก</h3>
+                    <div class="selected-seat-info">
+                        <div id="selected-seat-display">ยังไม่ได้เลือกที่นั่ง</div>
+                        <div class="seat-price">
+                            <span>ราคาเพิ่มเติม: </span>
+                            <span id="seat-price-display">฿0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Action Buttons -->
+        <section class="action-buttons">
+            <div class="container">
+                <button class="btn btn-outline" onclick="window.location.href='flight-details.html'">ย้อนกลับ</button>
+                <button class="btn btn-primary" onclick="window.location.href='payment.html'" id="continue-btn">ดำเนินการต่อ</button>
+            </div>
+        </section>
+    </main>
+</body>        
+</html>

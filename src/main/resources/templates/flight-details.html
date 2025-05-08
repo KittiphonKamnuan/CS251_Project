@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>รายละเอียดเที่ยวบิน | SkyBooking</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/flight-details.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo">
+                <h1>SkyBooking</h1>
+            </div>
+            <ul class="nav-links">
+                <li><a href="index.html">หน้าหลัก</a></li>
+                <li><a href="#" class="active">เที่ยวบิน</a></li>
+                <li><a href="promotions.html">โปรโมชั่น</a></li>
+                <li><a href="contact.html">ติดต่อเรา</a></li>
+            </ul>
+            <div class="user-actions">
+                <a href="#" class="btn btn-outline" id="loginBtn">เข้าสู่ระบบ</a>
+                <a href="#" class="btn btn-primary" id="registerBtn">สมัครสมาชิก</a>
+            </div>
+            <div class="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <!-- Booking Progress -->
+        <div class="booking-progress">
+            <div class="progress-container">
+                <div class="progress-step active">
+                    <div class="step-number">1</div>
+                    <div class="step-label">เลือกเที่ยวบิน</div>
+                </div>
+                <div class="progress-line"></div>
+                <div class="progress-step">
+                    <div class="step-number">2</div>
+                    <div class="step-label">ข้อมูลผู้โดยสาร</div>
+                </div>
+                <div class="progress-line"></div>
+                <div class="progress-step">
+                    <div class="step-number">3</div>
+                    <div class="step-label">เลือกที่นั่ง</div>
+                </div>
+                <div class="progress-line"></div>
+                <div class="progress-step">
+                    <div class="step-number">4</div>
+                    <div class="step-label">ชำระเงิน</div>
+                </div>
+                <div class="progress-line"></div>
+                <div class="progress-step">
+                    <div class="step-number">5</div>
+                    <div class="step-label">ยืนยันการจอง</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Flight Summary -->
+        <section class="flight-summary">
+            <div class="container">
+                <div class="flight-route">
+                    <h2>กรุงเทพฯ (BKK) → เชียงใหม่ (CNX)</h2>
+                    <p>วันพุธที่ 19 มีนาคม 2025 | ผู้โดยสาร 1 คน | ชั้นประหยัด</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Flight Details -->
+        <section class="flight-details">
+            <div class="container">
+                <div class="flight-card selected">
+                    <div class="selected-badge">เที่ยวบินที่เลือก</div>
+                    <div class="flight-info">
+                        <div class="flight-header">
+                            <img src="https://companieslogo.com/img/orig/THAI.BK-9c0c5078.png?t=1720244494" alt="Thai Airways" class="airline-logo">
+                            <div>
+                                <div class="airline-name">Thai Airways</div>
+                                <div class="flight-number">TG123</div>
+                            </div>
+                        </div>
+                        <div class="flight-times">
+                            <div class="departure">
+                                <div class="time">08:30</div>
+                                <div class="date">19 มี.ค. 2025</div>
+                                <div class="airport">กรุงเทพฯ (BKK)</div>
+                                <div class="terminal">เทอร์มินัล D</div>
+                            </div>
+                            <div class="flight-duration">
+                                <div class="flight-path"></div>
+                                <div class="duration">1h 30m</div>
+                                <div class="plane-icon">
+                                    <i class="fas fa-plane"></i>
+                                </div>
+                            </div>
+                            <div class="arrival">
+                                <div class="time">10:00</div>
+                                <div class="date">19 มี.ค. 2025</div>
+                                <div class="airport">เชียงใหม่ (CNX)</div>
+                                <div class="terminal">เทอร์มินัล 1</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flight-details-extra">
+                        <div class="detail-item">
+                            <i class="fas fa-suitcase"></i>
+                            <div class="detail-info">
+                                <div class="detail-title">สัมภาระ</div>
+                                <div class="detail-text">กระเป๋าถือ 7 กก. + กระเป๋าโหลด 20 กก.</div>
+                            </div>
+                        </div>
+                        <div class="detail-item">
+                            <i class="fas fa-utensils"></i>
+                            <div class="detail-info">
+                                <div class="detail-title">อาหาร</div>
+                                <div class="detail-text">อาหารและเครื่องดื่มบนเที่ยวบิน</div>
+                            </div>
+                        </div>
+                        <div class="detail-item">
+                            <i class="fas fa-wifi"></i>
+                            <div class="detail-info">
+                                <div class="detail-title">Wi-Fi</div>
+                                <div class="detail-text">มีบริการ Wi-Fi บนเครื่อง (มีค่าใช้จ่าย)</div>
+                            </div>
+                        </div>
+                        <div class="detail-item">
+                            <i class="fas fa-plane-departure"></i>
+                            <div class="detail-info">
+                                <div class="detail-title">เครื่องบิน</div>
+                                <div class="detail-text">Airbus A320</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Fare Information -->
+        <section class="fare-info">
+            <div class="container">
+                <h2>รายละเอียดราคา</h2>
+                <div class="fare-details">
+                    <div class="fare-row">
+                        <div class="fare-label">ค่าโดยสารผู้ใหญ่ (1)</div>
+                        <div class="fare-value">฿1,200</div>
+                    </div>
+                    <div class="fare-row">
+                        <div class="fare-label">ภาษีและค่าธรรมเนียม</div>
+                        <div class="fare-value">฿390</div>
+                    </div>
+                    <div class="fare-row total">
+                        <div class="fare-label">ราคารวม</div>
+                        <div class="fare-value">฿1,590</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Next Steps -->
+        <section class="next-steps">
+            <div class="container">
+                <h2>ข้อมูลผู้โดยสาร</h2>
+                <form id="passenger-form">
+                    <div class="form-section">
+                        <h3>ข้อมูลผู้ติดต่อ</h3>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="contact-email">อีเมล</label>
+                                <input type="email" id="contact-email" required>
+                                <small>ใช้สำหรับส่งบัตรโดยสารและการแจ้งเตือน</small>
+                            </div>
+                            <div class="form-group">
+                                <label for="contact-phone">เบอร์โทรศัพท์</label>
+                                <input type="tel" id="contact-phone" required>
+                                <small>ใช้สำหรับติดต่อกรณีฉุกเฉิน</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h3>ผู้โดยสารคนที่ 1 (ผู้ใหญ่)</h3>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="title">คำนำหน้า</label>
+                                <select id="title" required>
+                                    <option value="">เลือก</option>
+                                    <option value="mr">นาย</option>
+                                    <option value="mrs">นาง</option>
+                                    <option value="ms">นางสาว</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="first-name">ชื่อ (ภาษาอังกฤษ)</label>
+                                <input type="text" id="first-name" required>
+                                <small>ต้องตรงกับหนังสือเดินทาง/บัตรประชาชน</small>
+                            </div>
+                            <div class="form-group">
+                                <label for="last-name">นามสกุล (ภาษาอังกฤษ)</label>
+                                <input type="text" id="last-name" required>
+                                <small>ต้องตรงกับหนังสือเดินทาง/บัตรประชาชน</small>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="dob">วันเกิด</label>
+                                <input type="date" id="dob" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="nationality">สัญชาติ</label>
+                                <select id="nationality" required>
+                                    <option value="">เลือก</option>
+                                    <option value="th">ไทย</option>
+                                    <option value="us">อเมริกัน</option>
+                                    <option value="cn">จีน</option>
+                                    <option value="jp">ญี่ปุ่น</option>
+                                    <option value="gb">อังกฤษ</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="passport">เลขที่หนังสือเดินทาง/บัตรประชาชน</label>
+                                <input type="text" id="passport" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h3>บริการเสริม</h3>
+                        <div class="addon-list">
+                            <div class="addon-item">
+                                <div class="addon-check">
+                                    <input type="checkbox" id="addon-meal">
+                                </div>
+                                <div class="addon-info">
+                                    <label for="addon-meal">อาหารพิเศษ</label>
+                                    <p>มังสวิรัติ, ฮาลาล, ไม่มีแลคโตส และอื่นๆ</p>
+                                </div>
+                                <div class="addon-price">+ ฿150</div>
+                            </div>
+                            <div class="addon-item">
+                                <div class="addon-check">
+                                    <input type="checkbox" id="addon-baggage">
+                                </div>
+                                <div class="addon-info">
+                                    <label for="addon-baggage">น้ำหนักกระเป๋าเพิ่ม</label>
+                                    <p>เพิ่มน้ำหนักกระเป๋าโหลดอีก 10 กก.</p>
+                                </div>
+                                <div class="addon-price">+ ฿350</div>
+                            </div>
+                            <div class="addon-item">
+                                <div class="addon-check">
+                                    <input type="checkbox" id="addon-insurance">
+                                </div>
+                                <div class="addon-info">
+                                    <label for="addon-insurance">ประกันการเดินทาง</label>
+                                    <p>คุ้มครองค่ารักษาพยาบาลและอุบัติเหตุระหว่างการเดินทาง</p>
+                                </div>
+                                <div class="addon-price">+ ฿200</div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <!-- Action Buttons -->
+        <section class="action-buttons">
+            <div class="container">
+                <button class="btn btn-outline" onclick="window.history.back()">ย้อนกลับ</button>
+                <button class="btn btn-primary" onclick="location.href='seat-selection.html'">ดำเนินการต่อ</button>
+            </div>
+        </section>
+    </main>
+
+    <!-- Login/Register Modals (same as index.html) -->
+    <!-- ... -->
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>SkyBooking</h3>
+                <p>ระบบจองตั๋วเครื่องบินออนไลน์ที่ให้คุณจองตั๋วได้ง่าย สะดวก รวดเร็ว และปลอดภัย</p>
+                <div class="social-icons">
+                    <a href="#"><i class="fab fa-facebook"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                    <a href="#"><i class="fab fa-youtube"></i></a>
+                </div>
+            </div>
+            <div class="footer-section">
+                <h3>ลิงก์ด่วน</h3>
+                <ul class="footer-links">
+                    <li><a href="index.html">หน้าหลัก</a></li>
+                    <li><a href="#">ค้นหาเที่ยวบิน</a></li>
+                    <li><a href="promotions.html">โปรโมชั่นพิเศษ</a></li>
+                    <li><a href="booking-status.html">สถานะการจอง</a></li>
+                    <li><a href="contact.html">ติดต่อเรา</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>ติดต่อเรา</h3>
+                <p><i class="fas fa-map-marker-alt"></i> 99 มหาวิทยาลัยธรรมศาสตร์ ศูนย์รังสิต คลองหลวง ปทุมธานี 12120</p>
+                <p><i class="fas fa-phone"></i> 02-564-4440</p>
+                <p><i class="fas fa-envelope"></i> contact@skybooking.com</p>
+            </div>
+            <div class="footer-section">
+                <h3>รับข่าวสาร</h3>
+                <p>ลงทะเบียนเพื่อรับข้อเสนอพิเศษและอัพเดทล่าสุด</p>
+                <form class="newsletter-form">
+                    <input type="email" placeholder="อีเมลของคุณ" required>
+                    <button type="submit" class="btn btn-primary">ลงทะเบียน</button>
+                </form>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2025 SkyBooking. ขับเคลื่อนโดยนักศึกษา CS251.</p>
+        </div>
+    </footer>
+
+    <script src="js/script.js"></script>
+</body>
+</html>

@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ยืนยันการจอง | SkyBooking</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/confirmation.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo">
+                <h1>SkyBooking</h1>
+            </div>
+            <ul class="nav-links">
+                <li><a href="index.html">หน้าหลัก</a></li>
+                <li><a href="#" class="active">เที่ยวบิน</a></li>
+                <li><a href="promotions.html">โปรโมชั่น</a></li>
+                <li><a href="contact.html">ติดต่อเรา</a></li>
+            </ul>
+            <div class="user-actions">
+                <div class="user-welcome">ยินดีต้อนรับ, user@example.com</div>
+                <a href="#" class="btn btn-outline" id="logoutBtn">ออกจากระบบ</a>
+            </div>
+            <div class="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <!-- Booking Progress -->
+        <div class="booking-progress">
+            <div class="progress-container">
+                <div class="progress-step completed">
+                    <div class="step-number">1</div>
+                    <div class="step-label">เลือกเที่ยวบิน</div>
+                </div>
+                <div class="progress-line completed"></div>
+                <div class="progress-step completed">
+                    <div class="step-number">2</div>
+                    <div class="step-label">ข้อมูลผู้โดยสาร</div>
+                </div>
+                <div class="progress-line completed"></div>
+                <div class="progress-step completed">
+                    <div class="step-number">3</div>
+                    <div class="step-label">เลือกที่นั่ง</div>
+                </div>
+                <div class="progress-line completed"></div>
+                <div class="progress-step completed">
+                    <div class="step-number">4</div>
+                    <div class="step-label">ชำระเงิน</div>
+                </div>
+                <div class="progress-line completed"></div>
+                <div class="progress-step active">
+                    <div class="step-number">5</div>
+                    <div class="step-label">ยืนยันการจอง</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Confirmation Message -->
+        <section class="confirmation-message">
+            <div class="container">
+                <div class="success-animation">
+                    <div class="checkmark-circle">
+                        <div class="checkmark-stem"></div>
+                        <div class="checkmark-kick"></div>
+                    </div>
+                </div>
+                <h1>การจองสำเร็จ!</h1>
+                <p>ขอบคุณที่ใช้บริการ SkyBooking</p>
+                <div class="booking-reference">
+                    <span>รหัสการจอง:</span>
+                    <strong>SKY123456</strong>
+                </div>
+            </div>
+        </section>
+
+        <!-- Booking Details -->
+        <section class="booking-details">
+            <div class="container">
+                <div class="booking-card">
+                    <div class="card-header">
+                        <h2>รายละเอียดการจอง</h2>
+                        <div class="booking-actions">
+                            <button class="btn btn-outline" onclick="window.print()">
+                                <i class="fas fa-print"></i> พิมพ์
+                            </button>
+                            <button class="btn btn-primary" id="email-btn">
+                                <i class="fas fa-envelope"></i> ส่งอีเมล
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Flight Information -->
+                    <div class="flight-info-section">
+                        <div class="section-header">
+                            <i class="fas fa-plane"></i>
+                            <h3>ข้อมูลเที่ยวบิน</h3>
+                        </div>
+                        
+                        <div class="flight-details-card">
+                            <div class="airline-info">
+                                <img src="ThaiAirways.png" alt="Thai Airways" class="airline-logo">
+                                <div>
+                                    <div class="airline-name">Thai Airways</div>
+                                    <div class="flight-number">TG123</div>
+                                </div>
+                            </div>
+                            
+                            <div class="flight-route">
+                                <div class="route-point departure">
+                                    <div class="city">กรุงเทพฯ (BKK)</div>
+                                    <div class="time">08:30</div>
+                                    <div class="date">19 มีนาคม 2025</div>
+                                    <div class="terminal">เทอร์มินัล D</div>
+                                </div>
+                                
+                                <div class="route-line">
+                                    <div class="duration">1h 30m</div>
+                                    <div class="line"></div>
+                                    <div class="airplane-icon">
+                                        <i class="fas fa-plane"></i>
+                                    </div>
+                                </div>
+                                
+                                <div class="route-point arrival">
+                                    <div class="city">เชียงใหม่ (CNX)</div>
+                                    <div class="time">10:00</div>
+                                    <div class="date">19 มีนาคม 2025</div>
+                                    <div class="terminal">เทอร์มินัล 1</div>
+                                </div>
+                            </div>
+                            
+                            <div class="flight-services">
+                                <div class="service-item">
+                                    <i class="fas fa-suitcase"></i>
+                                    <span>กระเป๋าถือ 7 กก. + กระเป๋าโหลด 20 กก.</span>
+                                </div>
+                                <div class="service-item">
+                                    <i class="fas fa-utensils"></i>
+                                    <span>อาหารและเครื่องดื่มบนเที่ยวบิน</span>
+                                </div>
+                                <div class="service-item">
+                                    <i class="fas fa-plane-departure"></i>
+                                    <span>Airbus A320</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Passenger Information -->
+                    <div class="passenger-info-section">
+                        <div class="section-header">
+                            <i class="fas fa-user"></i>
+                            <h3>ข้อมูลผู้โดยสาร</h3>
+                        </div>
+                        
+                        <div class="passenger-card">
+                            <div class="passenger-name">นาย สมชาย ใจดี</div>
+                            <div class="passenger-details">
+                                <div class="detail-item">
+                                    <span class="detail-label">ที่นั่ง:</span>
+                                    <span class="detail-value">14D</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">ประเภทผู้โดยสาร:</span>
+                                    <span class="detail-value">ผู้ใหญ่</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">บริการพิเศษ:</span>
+                                    <span class="detail-value">ไม่มี</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Contact Information -->
+                    <div class="contact-info-section">
+                        <div class="section-header">
+                            <i class="fas fa-address-card"></i>
+                            <h3>ข้อมูลติดต่อ</h3>
+                        </div>
+                        
+                        <div class="contact-details">
+                            <div class="detail-item">
+                                <span class="detail-label">อีเมล:</span>
+                                <span class="detail-value">user@example.com</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">เบอร์โทรศัพท์:</span>
+                                <span class="detail-value">089-123-4567</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Payment Information -->
+                    <div class="payment-info-section">
+                        <div class="section-header">
+                            <i class="fas fa-receipt"></i>
+                            <h3>ข้อมูลการชำระเงิน</h3>
+                        </div>
+                        
+                        <div class="payment-details">
+                            <div class="detail-item">
+                                <span class="detail-label">วิธีการชำระเงิน:</span>
+                                <span class="detail-value">บัตรเครดิต (XXXX-XXXX-XXXX-1234)</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">วันที่ชำระเงิน:</span>
+                                <span class="detail-value">17 มีนาคม 2025 15:30</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">สถานะการชำระเงิน:</span>
+                                <span class="detail-value success">ชำระเงินแล้ว</span>
+                            </div>
+                            
+                            <div class="price-breakdown">
+                                <div class="price-item">
+                                    <span class="price-label">ค่าโดยสาร:</span>
+                                    <span class="price-value">฿1,200</span>
+                                </div>
+                                <div class="price-item">
+                                    <span class="price-label">ภาษีและค่าธรรมเนียม:</span>
+                                    <span class="price-value">฿390</span>
+                                </div>
+                                <div class="price-item">
+                                    <span class="price-label">บริการเสริม:</span>
+                                    <span class="price-value">฿0</span>
+                                </div>
+                                <div class="price-divider"></div>
+                                <div class="price-item total">
+                                    <span class="price-label">ยอดรวมทั้งสิ้น:</span>
+                                    <span class="price-value">฿1,590</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Important Notes -->
+                    <div class="important-notes">
+                        <h3><i class="fas fa-exclamation-circle"></i> ข้อควรทราบ</h3>
+                        <ul>
+                            <li>กรุณามาถึงสนามบินอย่างน้อย 2 ชั่วโมงก่อนเวลาเครื่องออกสำหรับเที่ยวบินในประเทศ</li>
+                            <li>ผู้โดยสารต้องแสดงบัตรประชาชนหรือหนังสือเดินทางที่มีอายุการใช้งานเพื่อขึ้นเครื่อง</li>
+                            <li>หากต้องการเปลี่ยนแปลงการจอง กรุณาติดต่อเราล่วงหน้าอย่างน้อย 24 ชั่วโมงก่อนเที่ยวบิน</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <!-- Loyalty Points Summary -->
+                <div class="loyalty-points-summary">
+                    <div class="points-icon">
+                        <i class="fas fa-award"></i>
+                    </div>
+                    <div class="points-info">
+                        <h3>คะแนนสะสม</h3>
+                        <p>คุณได้รับ <strong>159 คะแนน</strong> จากการจองครั้งนี้</p>
+                        <p>คะแนนสะสมทั้งหมดของคุณ: <strong>2,459 คะแนน</strong></p>
+                    </div>
+                </div>
+                
+                <!-- Next Steps -->
+                <div class="next-steps-section">
+                    <h2>ขั้นตอนต่อไป</h2>
+                    <div class="next-steps-grid">
+                        <div class="next-step-card">
+                            <div class="next-step-icon">
+                                <i class="fas fa-hotel"></i>
+                            </div>
+                            <h3>จองที่พัก</h3>
+                            <p>เลือกจากโรงแรมกว่า 1,000 แห่งทั่วประเทศไทย</p>
+                            <a href="#" class="btn btn-outline">จองที่พัก</a>
+                        </div>
+                        <div class="next-step-card">
+                            <div class="next-step-icon">
+                                <i class="fas fa-car"></i>
+                            </div>
+                            <h3>จองรถเช่า</h3>
+                            <p>เลือกรถได้หลากหลายรุ่นในราคาพิเศษ</p>
+                            <a href="#" class="btn btn-outline">จองรถเช่า</a>
+                        </div>
+                        <div class="next-step-card">
+                            <div class="next-step-icon">
+                                <i class="fas fa-umbrella-beach"></i>
+                            </div>
+                            <h3>กิจกรรมท่องเที่ยว</h3>
+                            <p>ค้นพบกิจกรรมท่องเที่ยวที่น่าสนใจในจุดหมายปลายทางของคุณ</p>
+                            <a href="#" class="btn btn-outline">ดูกิจกรรม</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Return to Home -->
+        <section class="return-home">
+            <div class="container">
+                <a href="index.html" class="btn btn-primary btn-large">
+                    <i class="fas fa-home"></i> กลับหน้าหลัก
+                </a>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>SkyBooking</h3>
+                <p>ระบบจองตั๋วเครื่องบินออนไลน์ที่ให้คุณจองตั๋วได้ง่าย สะดวก รวดเร็ว และปลอดภัย</p>
+                <div class="social-icons">
+                    <a href="#"><i class="fab fa-facebook"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                    <a href="#"><i class="fab fa-youtube"></i></a>
+                </div>
+            </div>
+            <div class="footer-section">
+                <h3>ลิงก์ด่วน</h3>
+                <ul class="footer-links">
+                    <li><a href="index.html">หน้าหลัก</a></li>
+                    <li><a href="#">ค้นหาเที่ยวบิน</a></li>
+                    <li><a href="promotions.html">โปรโมชั่นพิเศษ</a></li>
+                    <li><a href="booking-status.html">สถานะการจอง</a></li>
+                    <li><a href="contact.html">ติดต่อเรา</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>ติดต่อเรา</h3>
+                <p><i class="fas fa-map-marker-alt"></i> 99 มหาวิทยาลัยธรรมศาสตร์ ศูนย์รังสิต คลองหลวง ปทุมธานี 12120</p>
+                <p><i class="fas fa-phone"></i> 02-564-4440</p>
+                <p><i class="fas fa-envelope"></i> contact@skybooking.com</p>
+            </div>
+            <div class="footer-section">
+                <h3>รับข่าวสาร</h3>
+                <p>ลงทะเบียนเพื่อรับข้อเสนอพิเศษและอัพเดทล่าสุด</p>
+                <form class="newsletter-form">
+                    <input type="email" placeholder="อีเมลของคุณ" required>
+                    <button type="submit" class="btn btn-primary">ลงทะเบียน</button>
+                </form>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2025 SkyBooking. ขับเคลื่อนโดยนักศึกษา CS251.</p>
+        </div>
+    </footer>
+
+    <script src="js/script.js"></script>
+    <script src="js/confirmation.js"></script>
+</body>
+</html>
