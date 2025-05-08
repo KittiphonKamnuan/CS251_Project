@@ -1,0 +1,601 @@
+/* Confirmation Page Specific Styles */
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* Booking Progress - Same as previous pages with additions */
+.booking-progress {
+    background-color: var(--white);
+    padding: 1.5rem 0;
+    border-bottom: 1px solid var(--medium-gray);
+}
+
+.progress-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.progress-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+}
+
+.step-number {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: var(--medium-gray);
+    color: var(--dark-gray);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.progress-step.active .step-number {
+    background-color: var(--primary-color);
+    color: var(--white);
+}
+
+.progress-step.completed .step-number {
+    background-color: var(--success);
+    color: var(--white);
+}
+
+.step-label {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--dark-gray);
+    text-align: center;
+}
+
+.progress-step.active .step-label {
+    color: var(--primary-color);
+    font-weight: 600;
+}
+
+.progress-step.completed .step-label {
+    color: var(--success);
+    font-weight: 600;
+}
+
+.progress-line {
+    height: 3px;
+    background-color: var(--medium-gray);
+    flex-grow: 1;
+    margin: 0 0.5rem;
+    margin-bottom: 2rem;
+}
+
+.progress-line.completed {
+    background-color: var(--success);
+}
+
+/* Confirmation Message */
+.confirmation-message {
+    background-color: var(--success);
+    color: var(--white);
+    padding: 3rem 0;
+    text-align: center;
+}
+
+.confirmation-message h1 {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+}
+
+.confirmation-message p {
+    font-size: 1.2rem;
+    margin-bottom: 2rem;
+}
+
+.booking-reference {
+    background-color: rgba(255, 255, 255, 0.2);
+    display: inline-block;
+    padding: 1rem 2rem;
+    border-radius: 8px;
+    font-size: 1.2rem;
+}
+
+.booking-reference strong {
+    font-size: 1.5rem;
+    margin-left: 0.5rem;
+}
+
+/* Success Animation */
+.success-animation {
+    margin: 0 auto 2rem;
+    width: 100px;
+    height: 100px;
+    position: relative;
+}
+
+.checkmark-circle {
+    width: 100px;
+    height: 100px;
+    position: relative;
+    background-color: var(--white);
+    border-radius: 50%;
+    box-shadow: 0 0 0 10px rgba(255, 255, 255, 0.2);
+}
+
+.checkmark-stem {
+    position: absolute;
+    width: 6px;
+    height: 40px;
+    background-color: var(--success);
+    left: 57px;
+    top: 31px;
+    transform: rotate(45deg);
+    animation: stem-appear 0.3s ease-in-out 0.3s forwards;
+    opacity: 0;
+}
+
+.checkmark-kick {
+    position: absolute;
+    width: 20px;
+    height: 6px;
+    background-color: var(--success);
+    left: 32px;
+    top: 55px;
+    transform: rotate(45deg);
+    animation: kick-appear 0.3s ease-in-out 0.5s forwards;
+    opacity: 0;
+}
+
+@keyframes stem-appear {
+    0% {
+        opacity: 0;
+        height: 0;
+    }
+    100% {
+        opacity: 1;
+        height: 40px;
+    }
+}
+
+@keyframes kick-appear {
+    0% {
+        opacity: 0;
+        width: 0;
+    }
+    100% {
+        opacity: 1;
+        width: 20px;
+    }
+}
+
+/* Booking Details */
+.booking-details {
+    padding: 3rem 0;
+}
+
+.booking-card {
+    background-color: var(--white);
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    padding: 2rem;
+    margin-bottom: 2rem;
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--medium-gray);
+}
+
+.booking-actions {
+    display: flex;
+    gap: 1rem;
+}
+
+/* Section Styling */
+.section-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    color: var(--primary-color);
+}
+
+.section-header i {
+    font-size: 1.5rem;
+}
+
+/* Flight Details Card */
+.flight-details-card {
+    background-color: var(--light-gray);
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.airline-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.airline-logo {
+    width: 60px;
+    height: 60px;
+    object-fit: contain;
+}
+
+.airline-name {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 0.2rem;
+}
+
+.flight-number {
+    color: var(--dark-gray);
+    font-size: 0.9rem;
+}
+
+.flight-route {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+}
+
+.route-point {
+    text-align: center;
+}
+
+.city {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 0.3rem;
+}
+
+.time {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 0.3rem;
+}
+
+.date, .terminal {
+    color: var(--dark-gray);
+    font-size: 0.9rem;
+}
+
+.route-line {
+    flex-grow: 1;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 0 2rem;
+}
+
+.line {
+    height: 2px;
+    background-color: var(--medium-gray);
+    width: 100%;
+    position: relative;
+}
+
+.duration {
+    background-color: var(--light-gray);
+    padding: 0 0.5rem;
+    font-size: 0.9rem;
+    color: var(--dark-gray);
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.airplane-icon {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(90deg);
+    color: var(--primary-color);
+    font-size: 1.2rem;
+}
+
+.flight-services {
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.service-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.service-item i {
+    color: var(--primary-color);
+}
+
+/* Passenger Information */
+.passenger-card {
+    background-color: var(--light-gray);
+    border-radius: 8px;
+    padding: 1.5rem;
+}
+
+.passenger-name {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+.passenger-details {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1rem;
+}
+
+/* Detail Items (Used in multiple sections) */
+.detail-item {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+}
+
+.detail-label {
+    color: var(--dark-gray);
+}
+
+.detail-value {
+    font-weight: 500;
+}
+
+.detail-value.success {
+    color: var(--success);
+}
+
+/* Contact Details */
+.contact-details, .payment-details {
+    background-color: var(--light-gray);
+    border-radius: 8px;
+    padding: 1.5rem;
+}
+
+/* Price Breakdown */
+.price-breakdown {
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--medium-gray);
+}
+
+.price-item {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.8rem;
+}
+
+.price-divider {
+    height: 1px;
+    background-color: var(--medium-gray);
+    margin: 1rem 0;
+}
+
+.price-item.total {
+    font-weight: 600;
+    font-size: 1.2rem;
+    color: var(--primary-color);
+}
+
+/* Important Notes */
+.important-notes {
+    background-color: #fff3e0;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-top: 2rem;
+}
+
+.important-notes h3 {
+    color: #e65100;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.important-notes ul {
+    list-style-type: none;
+    padding-left: 2rem;
+}
+
+.important-notes li {
+    margin-bottom: 0.8rem;
+    position: relative;
+}
+
+.important-notes li::before {
+    content: '•';
+    position: absolute;
+    left: -1rem;
+    color: #e65100;
+}
+
+/* Loyalty Points Summary */
+.loyalty-points-summary {
+    background-color: #e8f5e9;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.points-icon {
+    font-size: 3rem;
+    color: #2e7d32;
+}
+
+.points-info h3 {
+    color: #2e7d32;
+    margin-bottom: 0.5rem;
+}
+
+.points-info p {
+    color: #1b5e20;
+    margin-bottom: 0.3rem;
+}
+
+/* Next Steps Section */
+.next-steps-section {
+    margin-bottom: 3rem;
+}
+
+.next-steps-section h2 {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.next-steps-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 2rem;
+}
+
+.next-step-card {
+    background-color: var(--white);
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    padding: 2rem;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.next-step-card:hover {
+    transform: translateY(-5px);
+}
+
+.next-step-icon {
+    font-size: 2.5rem;
+    color: var(--primary-color);
+    margin-bottom: 1rem;
+}
+
+.next-step-card h3 {
+    margin-bottom: 1rem;
+}
+
+.next-step-card p {
+    margin-bottom: 1.5rem;
+    color: var(--dark-gray);
+}
+
+/* Return to Home */
+.return-home {
+    text-align: center;
+    padding: 2rem 0;
+}
+
+.btn-large {
+    padding: 1rem 2.5rem;
+    font-size: 1.2rem;
+}
+
+/* Print Styles */
+@media print {
+    header, footer, .booking-progress, .confirmation-message, .booking-actions, 
+    .next-steps-section, .return-home, .loyalty-points-summary {
+        display: none !important;
+    }
+    
+    .booking-card {
+        box-shadow: none;
+        padding: 0;
+    }
+    
+    .container {
+        max-width: 100%;
+        padding: 0;
+    }
+    
+    @page {
+        size: A4;
+        margin: 1cm;
+    }
+}
+
+/* Responsive Adjustments */
+@media screen and (max-width: 992px) {
+    .flight-route {
+        flex-direction: column;
+        gap: 2rem;
+    }
+    
+    .route-line {
+        transform: rotate(90deg);
+        width: 150px;
+        margin: 1rem auto;
+    }
+    
+    .route-point {
+        margin: 0 auto;
+    }
+    
+    .card-header {
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+    }
+}
+
+@media screen and (max-width: 768px) {
+    .progress-container {
+        display: none; /* Hide on mobile to save space */
+    }
+    
+    .passenger-details, .contact-details, .payment-details {
+        grid-template-columns: 1fr;
+    }
+    
+    .next-steps-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .confirmation-message h1 {
+        font-size: 2rem;
+    }
+    
+    .booking-reference {
+        padding: 0.8rem 1.5rem;
+    }
+    
+    .booking-reference strong {
+        font-size: 1.3rem;
+    }
+}
+
+@media screen and (max-width: 480px) {
+    .flight-services {
+        flex-direction: column;
+    }
+    
+    .booking-actions {
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    .booking-actions button {
+        width: 100%;
+    }
+}
