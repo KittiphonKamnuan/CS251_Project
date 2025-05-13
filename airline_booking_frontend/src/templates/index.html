@@ -3,123 +3,238 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ระบบจองตั๋วเครื่องบิน | SkyBooking</title>
-    <link rel="stylesheet" href="../static/css/styles.css">
+    <title>Skyways Airlines - ระบบจองตั๋วเครื่องบินออนไลน์</title>
+    <!-- Standardized CSS links -->
+    <link rel="stylesheet" href="../assets/css/common.css">
+    <link rel="stylesheet" href="../assets/css/home.css">
+    <link rel="icon" type="image/x-icon" href="../public/favicon.ico">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="../static/js/script.js" defer></script>
-    <script src="../static/js/flight-search.js" defer></script>
+    <!-- Added 'defer' to scripts to avoid blocking page load -->
+    <script src="../assets/js/script.js" defer></script>
+    <script src="../assets/js/flight-search.js" defer></script>
 </head>
 <body>
-    <header>
-        <nav>
+    <!-- Standardized header with consistent navigation -->
+    <header class="site-header">
+        <div class="container">
             <div class="logo">
-                <h1>SkyBooking</h1>
+                <a href="index.html">
+                    <img src="../assets/images/ui/logo.svg" alt="Skyways Airlines Logo">
+                </a>
             </div>
-            <ul class="nav-links">
-                <li><a href="#" class="active">หน้าหลัก</a></li>
-                <li><a href="#">เที่ยวบิน</a></li>
-                <li><a href="promotions.html">โปรโมชั่น</a></li>
-                <li><a href="contact.html">ติดต่อเรา</a></li>
-            </ul>
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="index.html" class="active">หน้าหลัก</a></li>
+                    <li><a href="promotions.html">โปรโมชั่น</a></li>
+                    <li><a href="booking-status.html">ตรวจสอบการจอง</a></li>
+                    <li><a href="contact.html">ติดต่อเรา</a></li>
+                </ul>
+            </nav>
             <div class="user-actions">
-                <a href="#" class="btn btn-outline" id="loginBtn">เข้าสู่ระบบ</a>
-                <a href="#" class="btn btn-primary" id="registerBtn">สมัครสมาชิก</a>
+                <a href="login.html" class="btn btn-outline" id="loginBtn">เข้าสู่ระบบ</a>
+                <a href="register.html" class="btn btn-primary" id="registerBtn">สมัครสมาชิก</a>
             </div>
-            <div class="hamburger">
+            <button class="mobile-menu-toggle" aria-label="Toggle mobile menu">
                 <span></span>
                 <span></span>
                 <span></span>
-            </div>
-        </nav>
+            </button>
+        </div>
     </header>
+
+    <!-- Mobile navigation menu -->
+    <div class="mobile-menu" style="display: none;">
+        <ul>
+            <li><a href="index.html" class="active">หน้าหลัก</a></li>
+            <li><a href="promotions.html">โปรโมชั่น</a></li>
+            <li><a href="booking-status.html">ตรวจสอบการจอง</a></li>
+            <li><a href="contact.html">ติดต่อเรา</a></li>
+        </ul>
+        <div class="mobile-menu-user-actions">
+            <a href="login.html" class="btn btn-outline">เข้าสู่ระบบ</a>
+            <a href="register.html" class="btn btn-primary">สมัครสมาชิก</a>
+        </div>
+    </div>
 
     <main>
         <!-- Hero Section -->
-        <section class="hero">
+        <section class="hero-section">
             <div class="hero-content">
-                <h1>ค้นหาเที่ยวบินที่ใช่สำหรับคุณ</h1>
-                <p>ค้นหาและจองตั๋วเครื่องบินราคาพิเศษได้ง่าย ๆ กับเรา</p>
+                <h1 class="hero-title">ค้นหาเที่ยวบินที่ใช่สำหรับคุณ</h1>
+                <p class="hero-subtitle">จองตั๋วเครื่องบินในราคาพิเศษได้ง่ายๆ กับ Skyways Airlines</p>
             </div>
         </section>
 
         <!-- Search Form Section -->
-        <section class="search-container">
-            <div class="search-tabs">
-                <button class="tab-btn active" data-tab="one-way">เที่ยวเดียว</button>
-                <button class="tab-btn" data-tab="round-trip">ไป-กลับ</button>
-                <button class="tab-btn" data-tab="multi-city">หลายเมือง</button>
-            </div>
+        <section class="search-form-section">
+            <div class="container">
+                <div class="search-form-container">
+                    <div class="search-tabs">
+                        <button class="tab-btn active" data-tab="one-way">เที่ยวเดียว</button>
+                        <button class="tab-btn" data-tab="round-trip">ไป-กลับ</button>
+                        <button class="tab-btn" data-tab="multi-city">หลายเมือง</button>
+                    </div>
 
-            <form id="flight-search-form" class="search-form">
-                <div class="form-group">
-                    <label for="departure"><i class="fas fa-plane-departure"></i> ต้นทาง</label>
-                    <input type="text" id="departure" placeholder="กรุงเทพฯ (BKK)" required>
+                    <form id="flight-search-form" class="search-form">
+                        <div class="form-group">
+                            <label for="departure"><i class="fas fa-plane-departure"></i> ต้นทาง</label>
+                            <input type="text" id="departure" placeholder="กรุงเทพฯ (BKK)" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="arrival"><i class="fas fa-plane-arrival"></i> ปลายทาง</label>
+                            <input type="text" id="arrival" placeholder="เชียงใหม่ (CNX)" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="departure-date"><i class="far fa-calendar-alt"></i> วันที่เดินทาง</label>
+                            <input type="date" id="departure-date" required>
+                        </div>
+                        <div class="form-group return-date">
+                            <label for="return-date"><i class="far fa-calendar-alt"></i> วันที่กลับ</label>
+                            <input type="date" id="return-date">
+                        </div>
+                        <div class="form-group">
+                            <label for="passengers"><i class="fas fa-users"></i> ผู้โดยสาร</label>
+                            <select id="passengers">
+                                <option value="1">1 คน</option>
+                                <option value="2">2 คน</option>
+                                <option value="3">3 คน</option>
+                                <option value="4">4 คน</option>
+                                <option value="5">5 คน</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="seat-class"><i class="fas fa-chair"></i> ชั้นโดยสาร</label>
+                            <select id="seat-class">
+                                <option value="economy">ชั้นประหยัด</option>
+                                <option value="premium-economy">ชั้นประหยัดพิเศษ</option>
+                                <option value="business">ชั้นธุรกิจ</option>
+                                <option value="first">ชั้นหนึ่ง</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary search-btn">
+                            <i class="fas fa-search"></i> ค้นหาเที่ยวบิน
+                        </button>
+                    </form>
                 </div>
-                <div class="form-group">
-                    <label for="arrival"><i class="fas fa-plane-arrival"></i> ปลายทาง</label>
-                    <input type="text" id="arrival" placeholder="เชียงใหม่ (CNX)" required>
-                </div>
-                <div class="form-group">
-                    <label for="departure-date"><i class="far fa-calendar-alt"></i> วันที่เดินทาง</label>
-                    <input type="date" id="departure-date" required>
-                </div>
-                <div class="form-group return-date">
-                    <label for="return-date"><i class="far fa-calendar-alt"></i> วันที่กลับ</label>
-                    <input type="date" id="return-date">
-                </div>
-                <div class="form-group">
-                    <label for="passengers"><i class="fas fa-users"></i> ผู้โดยสาร</label>
-                    <select id="passengers">
-                        <option value="1">1 คน</option>
-                        <option value="2">2 คน</option>
-                        <option value="3">3 คน</option>
-                        <option value="4">4 คน</option>
-                        <option value="5">5 คน</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="seat-class"><i class="fas fa-chair"></i> ชั้นโดยสาร</label>
-                    <select id="seat-class">
-                        <option value="economy">ชั้นประหยัด</option>
-                        <option value="premium-economy">ชั้นประหยัดพิเศษ</option>
-                        <option value="business">ชั้นธุรกิจ</option>
-                        <option value="first">ชั้นหนึ่ง</option>
-                    </select>
-                </div>
-                <button type="submit" class="btn btn-primary search-btn">
-                    <i class="fas fa-search"></i> ค้นหาเที่ยวบิน
-                </button>
-            </form>
+            </div>
         </section>
 
         <!-- Flight Results Section (initially hidden) -->
         <section id="flight-results" class="flight-results" style="display: none;">
-            <h2>ผลการค้นหา</h2>
-            <div class="result-filters">
-                <button class="filter-btn active">ทั้งหมด</button>
-                <button class="filter-btn">ราคาต่ำสุด</button>
-                <button class="filter-btn">เวลาออกเร็วสุด</button>
-                <button class="filter-btn">เวลาเดินทางสั้นสุด</button>
-            </div>
-            <div class="results-container">
-                <!-- Flight results will be populated by JavaScript -->
+            <div class="container">
+                <div class="results-filters">
+                    <button class="filter-btn active">ทั้งหมด</button>
+                    <button class="filter-btn">ราคาต่ำสุด</button>
+                    <button class="filter-btn">เวลาออกเร็วสุด</button>
+                    <button class="filter-btn">เวลาเดินทางสั้นสุด</button>
+                </div>
+                <div class="results-container">
+                    <!-- Flight results will be populated by JavaScript -->
+                </div>
             </div>
         </section>
 
         <!-- Popular Destinations -->
         <section class="popular-destinations">
-            <h2>จุดหมายปลายทางยอดนิยม</h2>
-            <div class="destinations-grid">
-                <!-- Popular destinations would be populated dynamically -->
+            <div class="container">
+                <h2 class="section-title">จุดหมายปลายทางยอดนิยม</h2>
+                <div class="destinations-grid">
+                    <div class="destination-card" data-destination="เชียงใหม่ (CNX)">
+                        <div class="destination-img">
+                            <img src="https://img.toursmidea.com/toursmidea/upload/trip_overview_album/6.jpg" alt="เชียงใหม่">
+                        </div>
+                        <div class="destination-info">
+                            <h3 class="destination-name">เชียงใหม่</h3>
+                            <p class="destination-price">เริ่มต้นที่ ฿1,290</p>
+                        </div>
+                    </div>
+                    <div class="destination-card" data-destination="ภูเก็ต (HKT)">
+                        <div class="destination-img">
+                            <img src="https://res.klook.com/image/upload/fl_lossy.progressive,q_85/c_fill,w_1000/v1601900476/blog/fdhbeum4iydf3uuvrql8.webp" alt="ภูเก็ต">
+                        </div>
+                        <div class="destination-info">
+                            <h3 class="destination-name">ภูเก็ต</h3>
+                            <p class="destination-price">เริ่มต้นที่ ฿1,590</p>
+                        </div>
+                    </div>
+                    <div class="destination-card" data-destination="กระบี่ (KBV)">
+                        <div class="destination-img">
+                            <img src="https://www.inspirationtourism.com/wp-content/uploads/2023/05/krabi-beach-1.jpg" alt="กระบี่">
+                        </div>
+                        <div class="destination-info">
+                            <h3 class="destination-name">กระบี่</h3>
+                            <p class="destination-price">เริ่มต้นที่ ฿1,490</p>
+                        </div>
+                    </div>
+                    <div class="destination-card" data-destination="เชียงราย (CEI)">
+                        <div class="destination-img">
+                            <img src="https://media-cdn.tripadvisor.com/media/photo-s/01/0a/55/74/the-white-temple.jpg" alt="เชียงราย">
+                        </div>
+                        <div class="destination-info">
+                            <h3 class="destination-name">เชียงราย</h3>
+                            <p class="destination-price">เริ่มต้นที่ ฿1,390</p>
+                        </div>
+                    </div>
+                    <div class="destination-card" data-destination="หาดใหญ่ (HDY)">
+                        <div class="destination-img">
+                            <img src="https://blog.airpaz.com/wp-content/uploads/hat-yai-city-view.jpeg" alt="หาดใหญ่">
+                        </div>
+                        <div class="destination-info">
+                            <h3 class="destination-name">หาดใหญ่</h3>
+                            <p class="destination-price">เริ่มต้นที่ ฿1,290</p>
+                        </div>
+                    </div>
+                    <div class="destination-card" data-destination="ขอนแก่น (KKC)">
+                        <div class="destination-img">
+                            <img src="https://a.cdn-hotels.com/gdcs/production151/d1733/3f4e93c8-aa7d-490e-b41a-11231cc049c4.jpg" alt="ขอนแก่น">
+                        </div>
+                        <div class="destination-info">
+                            <h3 class="destination-name">ขอนแก่น</h3>
+                            <p class="destination-price">เริ่มต้นที่ ฿1,190</p>
+                        </div>
+                    </div>
+                </div>
             </div>
         </section>
 
-        <!-- Special Offers Section -->
+        <!-- Special Offers -->
         <section class="special-offers">
             <div class="container">
-                <h2>โปรโมชั่นพิเศษ</h2>
+                <h2 class="section-title">โปรโมชั่นพิเศษ</h2>
                 <div class="offers-grid">
-                    <!-- Promotions would be populated dynamically -->
+                    <div class="offer-card">
+                        <div class="offer-img">
+                            <img src="https://images.squarespace-cdn.com/content/v1/5a5dbe4632601eb31977f947/f3dd0618-e187-40e5-920b-9bc264f940bc/0-cover_square.png" alt="โปรโมชั่นซัมเมอร์">
+                        </div>
+                        <div class="offer-content">
+                            <h3 class="offer-title">โปรโมชั่นซัมเมอร์ 2025</h3>
+                            <p class="offer-details">ลดสูงสุด 30% สำหรับเส้นทางภายในประเทศและต่างประเทศ</p>
+                            <div class="offer-price">เริ่มต้น ฿1,090</div>
+                            <a href="promotions.html" class="btn btn-outline">ดูรายละเอียด</a>
+                        </div>
+                    </div>
+                    <div class="offer-card">
+                        <div class="offer-img">
+                            <img src="https://img.salehere.co.th/p/1200x0/2021/12/03/elrcpuzt4a87.jpg" alt="โปรโมชั่นเที่ยวบินไป-กลับ">
+                        </div>
+                        <div class="offer-content">
+                            <h3 class="offer-title">โปรโมชั่นเที่ยวบินไป-กลับ</h3>
+                            <p class="offer-details">รับส่วนลด 20% สำหรับเที่ยวบินไป-กลับทุกเส้นทางในประเทศ</p>
+                            <div class="offer-price">เริ่มต้น ฿2,190</div>
+                            <a href="promotions.html" class="btn btn-outline">ดูรายละเอียด</a>
+                        </div>
+                    </div>
+                    <div class="offer-card">
+                        <div class="offer-img">
+                            <img src="https://img.salehere.co.th/p/1200x0/2021/06/02/sstae8ruqvew.jpg" alt="แพ็คเกจเที่ยวบิน + โรงแรม">
+                        </div>
+                        <div class="offer-content">
+                            <h3 class="offer-title">แพ็คเกจเที่ยวบิน + โรงแรม</h3>
+                            <p class="offer-details">ประหยัดสูงสุด 30% เมื่อจองเที่ยวบินพร้อมที่พัก 3 คืนขึ้นไป</p>
+                            <div class="offer-price">เริ่มต้น ฿3,990</div>
+                            <a href="promotions.html" class="btn btn-outline">ดูรายละเอียด</a>
+                        </div>
+                    </div>
                 </div>
                 <div class="view-all-link">
                     <a href="promotions.html">ดูโปรโมชั่นทั้งหมด <i class="fas fa-chevron-right"></i></a>
@@ -127,186 +242,100 @@
             </div>
         </section>
 
-        <!-- Latest Flight Updates Section -->
-        <section class="flight-updates">
+        <!-- Features Section -->
+        <section class="features-section">
             <div class="container">
-                <h2>อัพเดทเที่ยวบินล่าสุด</h2>
-                <div class="updates-table-container">
-                    <table class="updates-table">
-                        <thead>
-                            <tr>
-                                <th>เที่ยวบิน</th>
-                                <th>เส้นทาง</th>
-                                <th>กำหนดเวลา</th>
-                                <th>สถานะ</th>
-                                <th>หมายเหตุ</th>
-                            </tr>
-                        </thead>
-                        <tbody id="flight-updates-body">
-                            <!-- Flight updates would be populated dynamically -->
-                        </tbody>
-                    </table>
-                </div>
-                <div class="view-all-link">
-                    <a href="flight-status.html">ตรวจสอบสถานะเที่ยวบิน <i class="fas fa-chevron-right"></i></a>
+                <h2 class="section-title">ทำไมต้องเลือกเรา</h2>
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <i class="fas fa-tag feature-icon"></i>
+                        <h3 class="feature-title">ราคาดีที่สุด</h3>
+                        <p class="feature-desc">เราเสนอราคาที่ดีที่สุดสำหรับทุกเที่ยวบิน พร้อมข้อเสนอพิเศษเฉพาะสมาชิก</p>
+                    </div>
+                    <div class="feature-card">
+                        <i class="fas fa-shield-alt feature-icon"></i>
+                        <h3 class="feature-title">การชำระเงินที่ปลอดภัย</h3>
+                        <p class="feature-desc">ระบบชำระเงินที่ปลอดภัยด้วยเทคโนโลยีการเข้ารหัสล่าสุด</p>
+                    </div>
+                    <div class="feature-card">
+                        <i class="fas fa-headset feature-icon"></i>
+                        <h3 class="feature-title">บริการลูกค้า 24/7</h3>
+                        <p class="feature-desc">ทีมบริการลูกค้าของเราพร้อมให้ความช่วยเหลือคุณตลอด 24 ชั่วโมง 7 วัน</p>
+                    </div>
+                    <div class="feature-card">
+                        <i class="fas fa-user-check feature-icon"></i>
+                        <h3 class="feature-title">สะสมแต้มและแลกรับสิทธิพิเศษ</h3>
+                        <p class="feature-desc">รับแต้มสะสมทุกครั้งที่จองเพื่อแลกรับส่วนลดและสิทธิพิเศษมากมาย</p>
+                    </div>
                 </div>
             </div>
         </section>
 
-        <!-- Why Choose Us Section -->
-        <section class="features">
-            <h2>ทำไมต้องเลือกเรา</h2>
-            <div class="features-grid">
-                <div class="feature-card">
-                    <i class="fas fa-tag feature-icon"></i>
-                    <h3>ราคาดีที่สุด</h3>
-                    <p>เราเสนอราคาที่ดีที่สุดสำหรับทุกเที่ยวบิน พร้อมข้อเสนอพิเศษเฉพาะสมาชิก</p>
-                </div>
-                <div class="feature-card">
-                    <i class="fas fa-shield-alt feature-icon"></i>
-                    <h3>การชำระเงินที่ปลอดภัย</h3>
-                    <p>ระบบชำระเงินที่ปลอดภัยด้วยเทคโนโลยีการเข้ารหัสล่าสุด</p>
-                </div>
-                <div class="feature-card">
-                    <i class="fas fa-headset feature-icon"></i>
-                    <h3>บริการลูกค้า 24/7</h3>
-                    <p>ทีมบริการลูกค้าของเราพร้อมให้ความช่วยเหลือคุณตลอด 24 ชั่วโมง 7 วัน</p>
-                </div>
-                <div class="feature-card">
-                    <i class="fas fa-user-check feature-icon"></i>
-                    <h3>สะสมแต้มและแลกรับสิทธิพิเศษ</h3>
-                    <p>รับแต้มสะสมทุกครั้งที่จองเพื่อแลกรับส่วนลดและสิทธิพิเศษมากมาย</p>
-                </div>
-            </div>
-        </section>
-
-        <!-- Loyalty Program Section -->
-        <section class="loyalty-program">
+        <!-- Newsletter Section -->
+        <section class="newsletter-section">
             <div class="container">
-                <div class="loyalty-content">
-                    <div class="loyalty-info">
-                        <h2>โปรแกรมสะสมแต้ม SkyPoints</h2>
-                        <p>รับแต้มสะสมทุกครั้งที่จองเที่ยวบินกับเรา และแลกรับสิทธิประโยชน์มากมาย</p>
-                        <ul class="loyalty-benefits">
-                            <li><i class="fas fa-check-circle"></i> รับแต้ม 1 แต้มต่อทุกๆ 10 บาท</li>
-                            <li><i class="fas fa-check-circle"></i> แลกแต้มเป็นส่วนลดในการจองครั้งต่อไป</li>
-                            <li><i class="fas fa-check-circle"></i> สิทธิพิเศษในการเลือกที่นั่ง</li>
-                            <li><i class="fas fa-check-circle"></i> น้ำหนักกระเป๋าเพิ่มเติมสำหรับสมาชิก</li>
-                        </ul>
-                        <button class="btn btn-primary">สมัครเลย</button>
-                    </div>
-                    <div class="loyalty-image">
-                        <img src="https://www.flightaura.com/wp-content/uploads/2023/03/6-Best-Benefits-of-the-Delta-SkyMiles-Program-.png" alt="SkyPoints Program">
-                    </div>
+                <div class="newsletter-container">
+                    <h2 class="newsletter-title">รับข่าวสารและโปรโมชั่นพิเศษ</h2>
+                    <p>ลงทะเบียนรับข่าวสารจากเราเพื่อรับโปรโมชั่นพิเศษก่อนใคร</p>
+                    <form class="newsletter-form">
+                        <input type="email" placeholder="อีเมลของคุณ" required>
+                        <button type="submit" class="btn btn-primary">ลงทะเบียน</button>
+                    </form>
                 </div>
             </div>
         </section>
     </main>
 
-    <!-- Login Modal -->
-    <div id="login-modal" class="modal">
-        <div class="modal-content">
-            <span class="close">&times;</span>
-            <h2>เข้าสู่ระบบ</h2>
-            <form id="login-form">
-                <div class="form-group">
-                    <label for="login-email">อีเมล</label>
-                    <input type="email" id="login-email" required>
+    <!-- Footer -->
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <img src="../assets/images/ui/logo.svg" alt="Skyways Airlines Logo">
+                    <p>เราให้บริการการเดินทางที่ปลอดภัยและสะดวกสบาย</p>
                 </div>
-                <div class="form-group">
-                    <label for="login-password">รหัสผ่าน</label>
-                    <input type="password" id="login-password" required>
-                </div>
-                <div class="form-group remember-me">
-                    <input type="checkbox" id="remember-me">
-                    <label for="remember-me">จดจำฉัน</label>
-                </div>
-                <button type="submit" class="btn btn-primary">เข้าสู่ระบบ</button>
-                <p class="form-footer">ยังไม่มีบัญชี? <a href="#" id="switch-to-register">สมัครสมาชิก</a></p>
-            </form>
-        </div>
-    </div>
-
-    <!-- Register Modal -->
-    <div id="register-modal" class="modal">
-        <div class="modal-content">
-            <span class="close">&times;</span>
-            <h2>สมัครสมาชิก</h2>
-            <form id="register-form">
-                <div class="form-group">
-                    <label for="first-name">ชื่อ</label>
-                    <input type="text" id="first-name" required>
-                </div>
-                <div class="form-group">
-                    <label for="last-name">นามสกุล</label>
-                    <input type="text" id="last-name" required>
-                </div>
-                <div class="form-group">
-                    <label for="register-email">อีเมล</label>
-                    <input type="email" id="register-email" required>
-                </div>
-                <div class="form-group">
-                    <label for="phone">เบอร์โทรศัพท์</label>
-                    <input type="tel" id="phone" required>
-                </div>
-                <div class="form-group">
-                    <label for="register-password">รหัสผ่าน</label>
-                    <input type="password" id="register-password" required>
-                </div>
-                <div class="form-group">
-                    <label for="confirm-password">ยืนยันรหัสผ่าน</label>
-                    <input type="password" id="confirm-password" required>
-                </div>
-                <div class="form-group terms">
-                    <input type="checkbox" id="terms" required>
-                    <label for="terms">ฉันยอมรับ<a href="#">ข้อกำหนดและเงื่อนไข</a></label>
-                </div>
-                <button type="submit" class="btn btn-primary">สมัครสมาชิก</button>
-                <p class="form-footer">มีบัญชีแล้ว? <a href="#" id="switch-to-login">เข้าสู่ระบบ</a></p>
-            </form>
-        </div>
-    </div>
-
-    <footer>
-        <div class="footer-content">
-            <div class="footer-section">
-                <h3>SkyBooking</h3>
-                <p>ระบบจองตั๋วเครื่องบินออนไลน์ที่ให้คุณจองตั๋วได้ง่าย สะดวก รวดเร็ว และปลอดภัย</p>
-                <div class="social-icons">
-                    <a href="#"><i class="fab fa-facebook"></i></a>
-                    <a href="#"><i class="fab fa-twitter"></i></a>
-                    <a href="#"><i class="fab fa-instagram"></i></a>
-                    <a href="#"><i class="fab fa-youtube"></i></a>
+                <div class="footer-links">
+                    <div class="footer-column">
+                        <h3>หน้า</h3>
+                        <ul>
+                            <li><a href="index.html">หน้าหลัก</a></li>
+                            <li><a href="promotions.html">โปรโมชั่น</a></li>
+                            <li><a href="booking-status.html">ตรวจสอบการจอง</a></li>
+                            <li><a href="contact.html">ติดต่อเรา</a></li>
+                        </ul>
+                    </div>
+                    <div class="footer-column">
+                        <h3>บริการ</h3>
+                        <ul>
+                            <li><a href="#">จองตั๋ว</a></li>
+                            <li><a href="#">เช็คอิน</a></li>
+                            <li><a href="#">บริการพิเศษ</a></li>
+                            <li><a href="#">สถานะเที่ยวบิน</a></li>
+                        </ul>
+                    </div>
+                    <div class="footer-column">
+                        <h3>ติดต่อเรา</h3>
+                        <ul>
+                            <li>โทร: 02-123-4567</li>
+                            <li>อีเมล: support@skyways.com</li>
+                            <li>ที่อยู่: 123 ถนนสุขุมวิท กรุงเทพฯ</li>
+                        </ul>
+                    </div>
                 </div>
             </div>
-            <div class="footer-section">
-                <h3>ลิงก์ด่วน</h3>
-                <ul class="footer-links">
-                    <li><a href="#">หน้าหลัก</a></li>
-                    <li><a href="#">ค้นหาเที่ยวบิน</a></li>
-                    <li><a href="promotions.html">โปรโมชั่นพิเศษ</a></li>
-                    <li><a href="booking-status.html">สถานะการจอง</a></li>
-                    <li><a href="contact.html">ติดต่อเรา</a></li>
-                </ul>
+            <div class="footer-bottom">
+                <p>&copy; 2025 Skyways Airlines. สงวนลิขสิทธิ์</p>
+                <div class="footer-social">
+                    <a href="#" aria-label="Facebook">FB</a>
+                    <a href="#" aria-label="Twitter">TW</a>
+                    <a href="#" aria-label="Instagram">IG</a>
+                    <a href="#" aria-label="YouTube">YT</a>
+                </div>
             </div>
-            <div class="footer-section">
-                <h3>ติดต่อเรา</h3>
-                <p><i class="fas fa-map-marker-alt"></i> 99 มหาวิทยาลัยธรรมศาสตร์ ศูนย์รังสิต คลองหลวง ปทุมธานี 12120</p>
-                <p><i class="fas fa-phone"></i> 02-564-4440</p>
-                <p><i class="fas fa-envelope"></i> contact@skybooking.com</p>
-            </div>
-            <div class="footer-section">
-                <h3>รับข่าวสาร</h3>
-                <p>ลงทะเบียนเพื่อรับข้อเสนอพิเศษและอัพเดทล่าสุด</p>
-                <form class="newsletter-form">
-                    <input type="email" placeholder="อีเมลของคุณ" required>
-                    <button type="submit" class="btn btn-primary">ลงทะเบียน</button>
-                </form>
-            </div>
-        </div>
-        <div class="footer-bottom">
-            <p>&copy; 2025 SkyBooking. ขับเคลื่อนโดยนักศึกษา CS251.</p>
         </div>
     </footer>
+
+    <script src="../assets/js/script.js"></script>
+    <script src="../assets/js/flight-search.js"></script>
 </body>
 </html>

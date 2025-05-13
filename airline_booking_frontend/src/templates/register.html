@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="../assets/css/common.css">
     <link rel="stylesheet" href="../assets/css/register.css">
     <link rel="icon" type="image/x-icon" href="../../public/favicon.ico">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
     <header class="site-header">
@@ -28,8 +29,26 @@
                 <a href="login.html" class="btn btn-outline">เข้าสู่ระบบ</a>
                 <a href="register.html" class="btn btn-primary active">สมัครสมาชิก</a>
             </div>
+            <button class="mobile-menu-toggle" aria-label="Toggle mobile menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
         </div>
     </header>
+
+    <div class="mobile-menu" style="display: none;">
+        <ul>
+            <li><a href="index.html">หน้าหลัก</a></li>
+            <li><a href="promotions.html">โปรโมชั่น</a></li>
+            <li><a href="booking-status.html">ตรวจสอบการจอง</a></li>
+            <li><a href="contact.html">ติดต่อเรา</a></li>
+        </ul>
+        <div class="mobile-menu-user-actions">
+            <a href="login.html" class="btn btn-outline">เข้าสู่ระบบ</a>
+            <a href="register.html" class="btn btn-primary">สมัครสมาชิก</a>
+        </div>
+    </div>
 
     <main>
         <section class="register-section">
@@ -47,7 +66,7 @@
                                 <div class="form-group">
                                     <label for="firstName">ชื่อ</label>
                                     <div class="input-with-icon">
-                                        <img src="../assets/images/icons/user.svg" alt="First Name Icon" class="input-icon">
+                                        <i class="fas fa-user input-icon"></i>
                                         <input type="text" id="firstName" name="firstName" placeholder="ชื่อ" required>
                                     </div>
                                     <div class="error-message" id="firstName-error"></div>
@@ -56,7 +75,7 @@
                                 <div class="form-group">
                                     <label for="lastName">นามสกุล</label>
                                     <div class="input-with-icon">
-                                        <img src="../assets/images/icons/user.svg" alt="Last Name Icon" class="input-icon">
+                                        <i class="fas fa-user input-icon"></i>
                                         <input type="text" id="lastName" name="lastName" placeholder="นามสกุล" required>
                                     </div>
                                     <div class="error-message" id="lastName-error"></div>
@@ -66,7 +85,7 @@
                             <div class="form-group">
                                 <label for="email">อีเมล</label>
                                 <div class="input-with-icon">
-                                    <img src="../assets/images/icons/user.svg" alt="Email Icon" class="input-icon">
+                                    <i class="fas fa-envelope input-icon"></i>
                                     <input type="email" id="email" name="email" placeholder="example@mail.com" required>
                                 </div>
                                 <div class="error-message" id="email-error"></div>
@@ -75,7 +94,7 @@
                             <div class="form-group">
                                 <label for="phone">เบอร์โทรศัพท์</label>
                                 <div class="input-with-icon">
-                                    <img src="../assets/images/icons/user.svg" alt="Phone Icon" class="input-icon">
+                                    <i class="fas fa-phone input-icon"></i>
                                     <input type="tel" id="phone" name="phone" placeholder="0xx-xxx-xxxx" required>
                                 </div>
                                 <div class="error-message" id="phone-error"></div>
@@ -84,7 +103,7 @@
                             <div class="form-group">
                                 <label for="password">รหัสผ่าน</label>
                                 <div class="input-with-icon">
-                                    <img src="../assets/images/icons/payment.svg" alt="Password Icon" class="input-icon">
+                                    <i class="fas fa-lock input-icon"></i>
                                     <input type="password" id="password" name="password" placeholder="••••••••" required>
                                     <button type="button" class="toggle-password" aria-label="Toggle password visibility">
                                         <span class="show-password">แสดง</span>
@@ -97,7 +116,7 @@
                             <div class="form-group">
                                 <label for="confirmPassword">ยืนยันรหัสผ่าน</label>
                                 <div class="input-with-icon">
-                                    <img src="../assets/images/icons/payment.svg" alt="Confirm Password Icon" class="input-icon">
+                                    <i class="fas fa-lock input-icon"></i>
                                     <input type="password" id="confirmPassword" name="confirmPassword" placeholder="••••••••" required>
                                     <button type="button" class="toggle-password" aria-label="Toggle password visibility">
                                         <span class="show-password">แสดง</span>
@@ -121,10 +140,10 @@
                                 <p>หรือเข้าสู่ระบบด้วย</p>
                                 <div class="social-buttons">
                                     <button type="button" class="btn btn-social btn-google">
-                                        Google
+                                        <i class="fab fa-google"></i> Google
                                     </button>
                                     <button type="button" class="btn btn-social btn-facebook">
-                                        Facebook
+                                        <i class="fab fa-facebook-f"></i> Facebook
                                     </button>
                                 </div>
                             </div>
@@ -168,9 +187,9 @@
                     <div class="footer-column">
                         <h3>ติดต่อเรา</h3>
                         <ul>
-                            <li>โทร: 02-123-4567</li>
-                            <li>อีเมล: support@skyways.com</li>
-                            <li>ที่อยู่: 123 ถนนสุขุมวิท กรุงเทพฯ</li>
+                            <li><i class="fas fa-phone"></i> 02-123-4567</li>
+                            <li><i class="fas fa-envelope"></i> support@skyways.com</li>
+                            <li><i class="fas fa-map-marker-alt"></i> 123 ถนนสุขุมวิท กรุงเทพฯ</li>
                         </ul>
                     </div>
                 </div>
@@ -178,15 +197,16 @@
             <div class="footer-bottom">
                 <p>&copy; 2025 Skyways Airlines. สงวนลิขสิทธิ์</p>
                 <div class="footer-social">
-                    <a href="#" aria-label="Facebook">FB</a>
-                    <a href="#" aria-label="Twitter">TW</a>
-                    <a href="#" aria-label="Instagram">IG</a>
-                    <a href="#" aria-label="YouTube">YT</a>
+                    <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                    <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                    <a href="#" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
                 </div>
             </div>
         </div>
     </footer>
 
+    <script src="../assets/js/script.js"></script>
     <script src="../assets/js/register.js"></script>
 </body>
 </html>

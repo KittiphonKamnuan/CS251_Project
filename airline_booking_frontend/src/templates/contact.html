@@ -4,32 +4,37 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ติดต่อเรา | SkyBooking</title>
-    <link rel="stylesheet" href="../static/css/styles.css">
-    <link rel="stylesheet" href="../static/css/contact.css">
+    <link rel="stylesheet" href="../assets/css/common.css">
+    <link rel="stylesheet" href="../assets/css/styles.css">
+    <link rel="stylesheet" href="../assets/css/contact.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-    <header>
-        <nav>
+    <header class="site-header">
+        <div class="container">
             <div class="logo">
-                <h1>SkyBooking</h1>
+                <a href="index.html">
+                    <img src="../assets/images/ui/logo.svg" alt="Skyways Airlines Logo">
+                </a>
             </div>
-            <ul class="nav-links">
-                <li><a href="index.html">หน้าหลัก</a></li>
-                <li><a href="#">เที่ยวบิน</a></li>
-                <li><a href="promotions.html">โปรโมชั่น</a></li>
-                <li><a href="contact.html" class="active">ติดต่อเรา</a></li>
-            </ul>
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="index.html">หน้าหลัก</a></li>
+                    <li><a href="promotions.html">โปรโมชั่น</a></li>
+                    <li><a href="booking-status.html">ตรวจสอบการจอง</a></li>
+                    <li><a href="contact.html" class="active">ติดต่อเรา</a></li>
+                </ul>
+            </nav>
             <div class="user-actions">
-                <a href="#" class="btn btn-outline" id="loginBtn">เข้าสู่ระบบ</a>
-                <a href="#" class="btn btn-primary" id="registerBtn">สมัครสมาชิก</a>
+                <a href="login.html" class="btn btn-outline" id="loginBtn">เข้าสู่ระบบ</a>
+                <a href="register.html" class="btn btn-primary" id="registerBtn">สมัครสมาชิก</a>
             </div>
-            <div class="hamburger">
+            <button class="mobile-menu-toggle" aria-label="Toggle mobile menu">
                 <span></span>
                 <span></span>
                 <span></span>
-            </div>
-        </nav>
+            </button>
+        </div>
     </header>
 
     <main>
