@@ -1,6 +1,4 @@
-/**
- * Register Page JavaScript
- */
+import { apiService } from './api-service.js';
 
 document.addEventListener('DOMContentLoaded', function() {
     const registerForm = document.getElementById('registerForm');
@@ -121,8 +119,21 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Submit form if valid
         if (isValid) {
-            // For demo purposes, we'll simulate a registration
-            simulateRegistration(emailField.value);
+            // สร้าง username ที่ไม่ซ้ำกันจากอีเมล
+            // เพิ่มบรรทัดนี้เพื่อแก้ปัญหา Column 'Username' cannot be null
+            const username = emailField.value.trim().split('@')[0] + Math.floor(Math.random() * 1000);
+            
+            // แสดงข้อมูลที่จะส่งในคอนโซล
+            console.log('User data being sent:', {
+                firstName: firstNameField.value,
+                lastName: lastNameField.value,
+                username: username, // ส่ง username ไปด้วย
+                email: emailField.value,
+                phone: phoneField.value,
+                password: passwordField.value
+            });
+            
+            registerUser(emailField.value, username);
         }
     });
 
@@ -139,22 +150,52 @@ document.addEventListener('DOMContentLoaded', function() {
         return phoneRegex.test(phone.replace(/[- ]/g, ''));
     }
 
-    // Simulate registration for demo purposes
-    function simulateRegistration(email) {
+    // Register user function
+    async function registerUser(email, username) {
         // Show loading state
         const submitBtn = registerForm.querySelector('button[type="submit"]');
         const originalBtnText = submitBtn.textContent;
         submitBtn.innerHTML = '<span class="loading-spinner"></span> กำลังสมัครสมาชิก...';
         submitBtn.disabled = true;
         
-        // Simulate API call delay
-        setTimeout(() => {
-            // In a real app, this would be an API call
-            localStorage.setItem('isLoggedIn', 'true');
-            localStorage.setItem('userEmail', email);
+        try {
+            // สร้าง object สำหรับข้อมูลผู้ใช้
+            const userData = {
+                firstName: firstNameField.value.trim(),
+                lastName: lastNameField.value.trim(),
+                username: username, // ใช้ username ที่สร้าง
+                email: emailField.value.trim(),
+                phone: phoneField.value.trim(),
+                password: passwordField.value
+            };
             
-            // Redirect to index page
-            window.location.href = 'index.html';
-        }, 1500);
+            // เรียกใช้ API เพื่อลงทะเบียน
+            const response = await apiService.register(userData);
+            console.log('Registration response:', response);
+            
+            // แสดงข้อความสำเร็จ
+            alert('สมัครสมาชิกสำเร็จ! กรุณาเข้าสู่ระบบ');
+            
+            // ล้างฟอร์ม
+            registerForm.reset();
+            
+            // นำผู้ใช้ไปยังหน้าเข้าสู่ระบบ
+            window.location.href = 'login.html';
+        } catch (error) {
+            console.error('Registration error:', error);
+            
+            // แสดงข้อความผิดพลาดที่เฉพาะเจาะจง
+            if (error.message && error.message.includes('constraint')) {
+                emailError.textContent = 'อีเมลหรือชื่อผู้ใช้นี้มีอยู่ในระบบแล้ว กรุณาใช้อีเมลอื่น';
+                emailError.style.display = 'block';
+            } else {
+                // แสดงข้อความผิดพลาดทั่วไป
+                alert('ไม่สามารถสมัครสมาชิกได้: ' + error.message);
+            }
+        } finally {
+            // Reset button state
+            submitBtn.innerHTML = originalBtnText;
+            submitBtn.disabled = false;
+        }
     }
 });
