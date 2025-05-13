@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบจองตั๋วเครื่องบิน | SkyBooking</title>
+    <!-- Update path to CSS files -->
+    <link rel="stylesheet" href="/src/assets/css/styles.css">
+    <link rel="stylesheet" href="/src/assets/css/flight-search.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="/src/assets/js/script.js" defer></script>
+    <script src="/src/assets/js/flight-search.js" defer></script>
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo">
+                <h1>SkyBooking</h1>
+            </div>
+            <ul class="nav-links">
+                <li><a href="#" class="active">หน้าหลัก</a></li>
+                <li><a href="#">เที่ยวบิน</a></li>
+                <li><a href="promotions.html">โปรโมชั่น</a></li>
+                <li><a href="contact.html">ติดต่อเรา</a></li>
+            </ul>
+            <div class="user-actions">
+                <a href="#" class="btn btn-outline" id="loginBtn">เข้าสู่ระบบ</a>
+                <a href="#" class="btn btn-primary" id="registerBtn">สมัครสมาชิก</a>
+            </div>
+            <div class="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <!-- Hero Section -->
+        <section class="hero">
+            <div class="hero-content">
+                <h1>ค้นหาเที่ยวบินที่ใช่สำหรับคุณ</h1>
+                <p>ค้นหาและจองตั๋วเครื่องบินราคาพิเศษได้ง่าย ๆ กับเรา</p>
+            </div>
+        </section>
+
+        <!-- Search Form Section -->
+        <section class="search-container">
+            <div class="search-tabs">
+                <button class="tab-btn active" data-tab="one-way">เที่ยวเดียว</button>
+                <button class="tab-btn" data-tab="round-trip">ไป-กลับ</button>
+                <button class="tab-btn" data-tab="multi-city">หลายเมือง</button>
+            </div>
+
+            <form id="flight-search-form" class="search-form">
+                <div class="form-group">
+                    <label for="departure"><i class="fas fa-plane-departure"></i> ต้นทาง</label>
+                    <input type="text" id="departure" placeholder="กรุงเทพฯ (BKK)" required>
+                </div>
+                <div class="form-group">
+                    <label for="arrival"><i class="fas fa-plane-arrival"></i> ปลายทาง</label>
+                    <input type="text" id="arrival" placeholder="เชียงใหม่ (CNX)" required>
+                </div>
+                <div class="form-group">
+                    <label for="departure-date"><i class="far fa-calendar-alt"></i> วันที่เดินทาง</label>
+                    <input type="date" id="departure-date" required>
+                </div>
+                <div class="form-group return-date">
+                    <label for="return-date"><i class="far fa-calendar-alt"></i> วันที่กลับ</label>
+                    <input type="date" id="return-date">
+                </div>
+                <div class="form-group">
+                    <label for="passengers"><i class="fas fa-users"></i> ผู้โดยสาร</label>
+                    <select id="passengers">
+                        <option value="1">1 คน</option>
+                        <option value="2">2 คน</option>
+                        <option value="3">3 คน</option>
+                        <option value="4">4 คน</option>
+                        <option value="5">5 คน</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="seat-class"><i class="fas fa-chair"></i> ชั้นโดยสาร</label>
+                    <select id="seat-class">
+                        <option value="economy">ชั้นประหยัด</option>
+                        <option value="premium-economy">ชั้นประหยัดพิเศษ</option>
+                        <option value="business">ชั้นธุรกิจ</option>
+                        <option value="first">ชั้นหนึ่ง</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary search-btn">
+                    <i class="fas fa-search"></i> ค้นหาเที่ยวบิน
+                </button>
+            </form>
+        </section>
+
+        <!-- Flight Results Section (initially hidden) -->
+        <section id="flight-results" class="flight-results" style="display: none;">
+            <h2>ผลการค้นหา</h2>
+            <div class="result-filters">
+                <button class="filter-btn active">ทั้งหมด</button>
+                <button class="filter-btn">ราคาต่ำสุด</button>
+                <button class="filter-btn">เวลาออกเร็วสุด</button>
+                <button class="filter-btn">เวลาเดินทางสั้นสุด</button>
+            </div>
+            <div class="results-container">
+                <!-- Flight results will be populated by JavaScript -->
+            </div>
+        </section>
+
+        <!-- Popular Destinations -->
+        <section class="popular-destinations">
+            <h2>จุดหมายปลายทางยอดนิยม</h2>
+            <div class="destinations-grid">
+                <!-- Popular destinations would be populated dynamically -->
+            </div>
+        </section>
+
+        <!-- Special Offers Section -->
+        <section class="special-offers">
+            <div class="container">
+                <h2>โปรโมชั่นพิเศษ</h2>
+                <div class="offers-grid">
+                    <!-- Promotions would be populated dynamically -->
+                </div>
+                <div class="view-all-link">
+                    <a href="promotions.html">ดูโปรโมชั่นทั้งหมด <i class="fas fa-chevron-right"></i></a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Latest Flight Updates Section -->
+        <section class="flight-updates">
+            <div class="container">
+                <h2>อัพเดทเที่ยวบินล่าสุด</h2>
+                <div class="updates-table-container">
+                    <table class="updates-table">
+                        <thead>
+                            <tr>
+                                <th>เที่ยวบิน</th>
+                                <th>เส้นทาง</th>
+                                <th>กำหนดเวลา</th>
+                                <th>สถานะ</th>
+                                <th>หมายเหตุ</th>
+                            </tr>
+                        </thead>
+                        <tbody id="flight-updates-body">
+                            <!-- Flight updates would be populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+                <div class="view-all-link">
+                    <a href="flight-status.html">ตรวจสอบสถานะเที่ยวบิน <i class="fas fa-chevron-right"></i></a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Why Choose Us Section -->
+        <section class="features">
+            <h2>ทำไมต้องเลือกเรา</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <i class="fas fa-tag feature-icon"></i>
+                    <h3>ราคาดีที่สุด</h3>
+                    <p>เราเสนอราคาที่ดีที่สุดสำหรับทุกเที่ยวบิน พร้อมข้อเสนอพิเศษเฉพาะสมาชิก</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-shield-alt feature-icon"></i>
+                    <h3>การชำระเงินที่ปลอดภัย</h3>
+                    <p>ระบบชำระเงินที่ปลอดภัยด้วยเทคโนโลยีการเข้ารหัสล่าสุด</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-headset feature-icon"></i>
+                    <h3>บริการลูกค้า 24/7</h3>
+                    <p>ทีมบริการลูกค้าของเราพร้อมให้ความช่วยเหลือคุณตลอด 24 ชั่วโมง 7 วัน</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-user-check feature-icon"></i>
+                    <h3>สะสมแต้มและแลกรับสิทธิพิเศษ</h3>
+                    <p>รับแต้มสะสมทุกครั้งที่จองเพื่อแลกรับส่วนลดและสิทธิพิเศษมากมาย</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Loyalty Program Section -->
+        <section class="loyalty-program">
+            <div class="container">
+                <div class="loyalty-content">
+                    <div class="loyalty-info">
+                        <h2>โปรแกรมสะสมแต้ม SkyPoints</h2>
+                        <p>รับแต้มสะสมทุกครั้งที่จองเที่ยวบินกับเรา และแลกรับสิทธิประโยชน์มากมาย</p>
+                        <ul class="loyalty-benefits">
+                            <li><i class="fas fa-check-circle"></i> รับแต้ม 1 แต้มต่อทุกๆ 10 บาท</li>
+                            <li><i class="fas fa-check-circle"></i> แลกแต้มเป็นส่วนลดในการจองครั้งต่อไป</li>
+                            <li><i class="fas fa-check-circle"></i> สิทธิพิเศษในการเลือกที่นั่ง</li>
+                            <li><i class="fas fa-check-circle"></i> น้ำหนักกระเป๋าเพิ่มเติมสำหรับสมาชิก</li>
+                        </ul>
+                        <button class="btn btn-primary">สมัครเลย</button>
+                    </div>
+                    <div class="loyalty-image">
+                        <img src="https://www.flightaura.com/wp-content/uploads/2023/03/6-Best-Benefits-of-the-Delta-SkyMiles-Program-.png" alt="SkyPoints Program">
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Login Modal -->
+    <div id="login-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>เข้าสู่ระบบ</h2>
+            <form id="login-form">
+                <div class="form-group">
+                    <label for="login-email">อีเมล</label>
+                    <input type="email" id="login-email" required>
+                </div>
+                <div class="form-group">
+                    <label for="login-password">รหัสผ่าน</label>
+                    <input type="password" id="login-password" required>
+                </div>
+                <div class="form-group remember-me">
+                    <input type="checkbox" id="remember-me">
+                    <label for="remember-me">จดจำฉัน</label>
+                </div>
+                <button type="submit" class="btn btn-primary">เข้าสู่ระบบ</button>
+                <p class="form-footer">ยังไม่มีบัญชี? <a href="#" id="switch-to-register">สมัครสมาชิก</a></p>
+            </form>
+        </div>
+    </div>
+
+    <!-- Register Modal -->
+    <div id="register-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>สมัครสมาชิก</h2>
+            <form id="register-form">
+                <div class="form-group">
+                    <label for="first-name">ชื่อ</label>
+                    <input type="text" id="first-name" required>
+                </div>
+                <div class="form-group">
+                    <label for="last-name">นามสกุล</label>
+                    <input type="text" id="last-name" required>
+                </div>
+                <div class="form-group">
+                    <label for="register-email">อีเมล</label>
+                    <input type="email" id="register-email" required>
+                </div>
+                <div class="form-group">
+                    <label for="phone">เบอร์โทรศัพท์</label>
+                    <input type="tel" id="phone" required>
+                </div>
+                <div class="form-group">
+                    <label for="register-password">รหัสผ่าน</label>
+                    <input type="password" id="register-password" required>
+                </div>
+                <div class="form-group">
+                    <label for="confirm-password">ยืนยันรหัสผ่าน</label>
+                    <input type="password" id="confirm-password" required>
+                </div>
+                <div class="form-group terms">
+                    <input type="checkbox" id="terms" required>
+                    <label for="terms">ฉันยอมรับ<a href="#">ข้อกำหนดและเงื่อนไข</a></label>
+                </div>
+                <button type="submit" class="btn btn-primary">สมัครสมาชิก</button>
+                <p class="form-footer">มีบัญชีแล้ว? <a href="#" id="switch-to-login">เข้าสู่ระบบ</a></p>
+            </form>
+        </div>
+    </div>
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>SkyBooking</h3>
+                <p>ระบบจองตั๋วเครื่องบินออนไลน์ที่ให้คุณจองตั๋วได้ง่าย สะดวก รวดเร็ว และปลอดภัย</p>
+                <div class="social-icons">
+                    <a href="#"><i class="fab fa-facebook"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                    <a href="#"><i class="fab fa-youtube"></i></a>
+                </div>
+            </div>
+            <div class="footer-section">
+                <h3>ลิงก์ด่วน</h3>
+                <ul class="footer-links">
+                    <li><a href="index.html">หน้าหลัก</a></li>
+                    <li><a href="#">ค้นหาเที่ยวบิน</a></li>
+                    <li><a href="promotions.html">โปรโมชั่นพิเศษ</a></li>
+                    <li><a href="booking-status.html">สถานะการจอง</a></li>
+                    <li><a href="contact.html">ติดต่อเรา</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>ติดต่อเรา</h3>
+                <p><i class="fas fa-map-marker-alt"></i> 99 มหาวิทยาลัยธรรมศาสตร์ ศูนย์รังสิต คลองหลวง ปทุมธานี 12120</p>
+                <p><i class="fas fa-phone"></i> 02-564-4440</p>
+                <p><i class="fas fa-envelope"></i> contact@skybooking.com</p>
+            </div>
+            <div class="footer-section">
+                <h3>รับข่าวสาร</h3>
+                <p>ลงทะเบียนเพื่อรับข้อเสนอพิเศษและอัพเดทล่าสุด</p>
+                <form class="newsletter-form">
+                    <input type="email" placeholder="อีเมลของคุณ" required>
+                    <button type="submit" class="btn btn-primary">ลงทะเบียน</button>
+                </form>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2025 SkyBooking. ขับเคลื่อนโดยนักศึกษา CS251.</p>
+        </div>
+    </footer>
+</body>
+</html>
