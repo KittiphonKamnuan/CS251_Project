@@ -3,34 +3,54 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>เลือกที่นั่ง | SkyBooking</title>
-    <link rel="stylesheet" href="../assets/css/styles.css">
+    <title>เลือกที่นั่ง - Skyways Airlines</title>
+    <link rel="stylesheet" href="../assets/css/common.css">
     <link rel="stylesheet" href="../assets/css/seat-selection.css">
+    <link rel="icon" type="image/x-icon" href="../../public/favicon.ico">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-    <header>
-        <nav>
+    <header class="site-header">
+        <div class="container">
             <div class="logo">
-                <h1>SkyBooking</h1>
+                <a href="index.html">
+                    <img src="../../public/images/backgrounds/logo_skyways_airline.png" alt="Skyways Airlines Logo">
+                </a>
             </div>
-            <ul class="nav-links">
-                <li><a href="index.html">หน้าหลัก</a></li>
-                <li><a href="#" class="active">เที่ยวบิน</a></li>
-                <li><a href="promotions.html">โปรโมชั่น</a></li>
-                <li><a href="contact.html">ติดต่อเรา</a></li>
-            </ul>
-            <div class="user-actions">
-                <div class="user-welcome">ยินดีต้อนรับ, user@example.com</div>
-                <a href="#" class="btn btn-outline" id="logoutBtn">ออกจากระบบ</a>
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="index.html">หน้าหลัก</a></li>
+                    <li><a href="promotions.html">โปรโมชั่น</a></li>
+                    <li><a href="booking-status.html">ตรวจสอบการจอง</a></li>
+                    <li><a href="contact.html">ติดต่อเรา</a></li>
+                </ul>
+            </nav>
+            <div class="user-actions" id="userActionsContainer">
+                <!-- จะถูกแทนที่ด้วย JavaScript -->
+                <a href="login.html" class="btn btn-outline" id="loginBtn">เข้าสู่ระบบ</a>
+                <a href="register.html" class="btn btn-primary" id="registerBtn">สมัครสมาชิก</a>
             </div>
-            <div class="hamburger">
+            <button class="mobile-menu-toggle" aria-label="Toggle mobile menu">
                 <span></span>
                 <span></span>
                 <span></span>
-            </div>
-        </nav>
+            </button>
+        </div>
     </header>
+
+    <div class="mobile-menu" style="display: none;" id="mobileMenuContainer">
+        <ul>
+            <li><a href="index.html">หน้าหลัก</a></li>
+            <li><a href="promotions.html">โปรโมชั่น</a></li>
+            <li><a href="booking-status.html">ตรวจสอบการจอง</a></li>
+            <li><a href="contact.html">ติดต่อเรา</a></li>
+        </ul>
+        <div class="mobile-menu-user-actions" id="mobileUserActions">
+            <!-- จะถูกแทนที่ด้วย JavaScript -->
+            <a href="login.html" class="btn btn-outline">เข้าสู่ระบบ</a>
+            <a href="register.html" class="btn btn-primary">สมัครสมาชิก</a>
+        </div>
+    </div>
 
     <main>
         <!-- Booking Progress -->
@@ -67,8 +87,8 @@
         <section class="flight-summary">
             <div class="container">
                 <div class="flight-route">
-                    <h2>กรุงเทพฯ (BKK) → เชียงใหม่ (CNX)</h2>
-                    <p>วันพุธที่ 19 มีนาคม 2025 | ผู้โดยสาร 1 คน | ชั้นประหยัด | Thai Airways TG123</p>
+                    <h2 id="routeTitle">กำลังโหลดข้อมูลเส้นทาง...</h2>
+                    <p id="routeInfo">กำลังโหลดข้อมูลเที่ยวบิน...</p>
                 </div>
             </div>
         </section>
@@ -79,7 +99,7 @@
                 <div class="seat-selection-container">
                     <div class="seat-instructions">
                         <h2>เลือกที่นั่ง</h2>
-                        <p>กรุณาเลือกที่นั่งสำหรับผู้โดยสาร: สมชาย ใจดี</p>
+                        <p id="passengerInfo">กรุณาเลือกที่นั่งสำหรับผู้โดยสาร</p>
                         
                         <div class="seat-legend">
                             <div class="legend-item">
@@ -113,117 +133,10 @@
                         </div>
                         
                         <div class="airplane-body">
-                            <!-- Business Class -->
-                            <div class="seat-class-label">ชั้นธุรกิจ</div>
-                            <div class="seat-row">
-                                <div class="row-number">1</div>
-                                <div class="seat occupied" data-seat="1A">A</div>
-                                <div class="seat occupied" data-seat="1B">B</div>
-                                <div class="aisle"></div>
-                                <div class="seat occupied" data-seat="1C">C</div>
-                                <div class="seat occupied" data-seat="1D">D</div>
-                                <div class="row-number">1</div>
-                            </div>
-                            <div class="seat-row">
-                                <div class="row-number">2</div>
-                                <div class="seat premium" data-seat="2A">A</div>
-                                <div class="seat premium" data-seat="2B">B</div>
-                                <div class="aisle"></div>
-                                <div class="seat premium" data-seat="2C">C</div>
-                                <div class="seat premium" data-seat="2D">D</div>
-                                <div class="row-number">2</div>
-                            </div>
-                            
-                            <!-- Divider between classes -->
-                            <div class="class-divider"></div>
-                            
-                            <!-- Economy Class -->
-                            <div class="seat-class-label">ชั้นประหยัด</div>
-                            <div class="seat-row">
-                                <div class="row-number">10</div>
-                                <div class="seat premium" data-seat="10A">A</div>
-                                <div class="seat premium" data-seat="10B">B</div>
-                                <div class="seat premium" data-seat="10C">C</div>
-                                <div class="aisle"></div>
-                                <div class="seat premium" data-seat="10D">D</div>
-                                <div class="seat premium" data-seat="10E">E</div>
-                                <div class="seat premium" data-seat="10F">F</div>
-                                <div class="row-number">10</div>
-                            </div>
-                            
-                            <!-- Exit Row -->
-                            <div class="seat-row">
-                                <div class="row-number">11</div>
-                                <div class="seat exit-row" data-seat="11A">A</div>
-                                <div class="seat exit-row" data-seat="11B">B</div>
-                                <div class="seat exit-row" data-seat="11C">C</div>
-                                <div class="aisle exit-row-marker">แถวทางออกฉุกเฉิน</div>
-                                <div class="seat exit-row" data-seat="11D">D</div>
-                                <div class="seat exit-row" data-seat="11E">E</div>
-                                <div class="seat exit-row" data-seat="11F">F</div>
-                                <div class="row-number">11</div>
-                            </div>
-                            
-                            <!-- Regular Economy Rows -->
-                            <div class="seat-row">
-                                <div class="row-number">12</div>
-                                <div class="seat occupied" data-seat="12A">A</div>
-                                <div class="seat" data-seat="12B">B</div>
-                                <div class="seat" data-seat="12C">C</div>
-                                <div class="aisle"></div>
-                                <div class="seat" data-seat="12D">D</div>
-                                <div class="seat" data-seat="12E">E</div>
-                                <div class="seat occupied" data-seat="12F">F</div>
-                                <div class="row-number">12</div>
-                            </div>
-                            <div class="seat-row">
-                                <div class="row-number">13</div>
-                                <div class="seat" data-seat="13A">A</div>
-                                <div class="seat" data-seat="13B">B</div>
-                                <div class="seat" data-seat="13C">C</div>
-                                <div class="aisle"></div>
-                                <div class="seat" data-seat="13D">D</div>
-                                <div class="seat occupied" data-seat="13E">E</div>
-                                <div class="seat occupied" data-seat="13F">F</div>
-                                <div class="row-number">13</div>
-                            </div>
-                            <div class="seat-row">
-                                <div class="row-number">14</div>
-                                <div class="seat" data-seat="14A">A</div>
-                                <div class="seat" data-seat="14B">B</div>
-                                <div class="seat" data-seat="14C">C</div>
-                                <div class="aisle"></div>
-                                <div class="seat" data-seat="14D">D</div>
-                                <div class="seat" data-seat="14E">E</div>
-                                <div class="seat" data-seat="14F">F</div>
-                                <div class="row-number">14</div>
-                            </div>
-                            <div class="seat-row">
-                                <div class="row-number">15</div>
-                                <div class="seat occupied" data-seat="15A">A</div>
-                                <div class="seat occupied" data-seat="15B">B</div>
-                                <div class="seat" data-seat="15C">C</div>
-                                <div class="aisle"></div>
-                                <div class="seat" data-seat="15D">D</div>
-                                <div class="seat occupied" data-seat="15E">E</div>
-                                <div class="seat" data-seat="15F">F</div>
-                                <div class="row-number">15</div>
-                            </div>
-                            
-                            <!-- More rows would be added here -->
-                            <div class="more-rows">...</div>
-                            
-                            <!-- Last rows -->
-                            <div class="seat-row">
-                                <div class="row-number">30</div>
-                                <div class="seat" data-seat="30A">A</div>
-                                <div class="seat" data-seat="30B">B</div>
-                                <div class="seat" data-seat="30C">C</div>
-                                <div class="aisle"></div>
-                                <div class="seat" data-seat="30D">D</div>
-                                <div class="seat" data-seat="30E">E</div>
-                                <div class="seat" data-seat="30F">F</div>
-                                <div class="row-number">30</div>
+                            <!-- ข้อมูลที่นั่งจะถูกโหลดด้วย JavaScript -->
+                            <div class="loading-indicator">
+                                <i class="fas fa-spinner fa-spin"></i>
+                                <p>กำลังโหลดข้อมูลที่นั่ง...</p>
                             </div>
                         </div>
                         
@@ -249,14 +162,61 @@
         <!-- Action Buttons -->
         <section class="action-buttons">
             <div class="container">
-                <button class="btn btn-outline" onclick="window.location.href='flight-details.html'">ย้อนกลับ</button>
-                <button class="btn btn-primary" onclick="window.location.href='payment.html'" id="continue-btn">ดำเนินการต่อ</button>
+                <button class="btn btn-outline" id="backButton">ย้อนกลับ</button>
+                <button class="btn btn-primary" id="continue-btn" disabled>ดำเนินการต่อ</button>
             </div>
         </section>
     </main>
     
-    <!-- แก้ไขเส้นทาง script และเพิ่ม type="module" -->
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <img src="../../public/images/backgrounds/logo_skyways_airline.png" alt="Skyways Airlines Logo">
+                    <p>เราให้บริการการเดินทางที่ปลอดภัยและสะดวกสบาย</p>
+                </div>
+                <div class="footer-links">
+                    <div class="footer-column">
+                        <h3>หน้า</h3>
+                        <ul>
+                            <li><a href="index.html">หน้าหลัก</a></li>
+                            <li><a href="promotions.html">โปรโมชั่น</a></li>
+                            <li><a href="booking-status.html">ตรวจสอบการจอง</a></li>
+                            <li><a href="contact.html">ติดต่อเรา</a></li>
+                        </ul>
+                    </div>
+                    <div class="footer-column">
+                        <h3>บริการ</h3>
+                        <ul>
+                            <li><a href="#">จองตั๋ว</a></li>
+                            <li><a href="#">เช็คอิน</a></li>
+                            <li><a href="#">บริการพิเศษ</a></li>
+                            <li><a href="#">สถานะเที่ยวบิน</a></li>
+                        </ul>
+                    </div>
+                    <div class="footer-column">
+                        <h3>ติดต่อเรา</h3>
+                        <ul>
+                            <li><i class="fas fa-phone"></i> 02-123-4567</li>
+                            <li><i class="fas fa-envelope"></i> support@skyways.com</li>
+                            <li><i class="fas fa-map-marker-alt"></i> 123 ถนนสุขุมวิท กรุงเทพฯ</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 Skyways Airlines. สงวนลิขสิทธิ์</p>
+                <div class="footer-social">
+                    <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                    <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                    <a href="#" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
     <script type="module" src="../assets/js/script.js"></script>
     <script type="module" src="../assets/js/seat-selection.js"></script>
-</body>        
+</body>
 </html>

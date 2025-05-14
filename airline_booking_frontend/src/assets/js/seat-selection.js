@@ -12,8 +12,8 @@ document.addEventListener('DOMContentLoaded', async function() {
         JSON.parse(sessionStorage.getItem('selectedFlight')) : null;
     
     // ดึงข้อมูลผู้โดยสารที่บันทึกไว้ใน sessionStorage
-    const passengerData = sessionStorage.getItem('passengerData') ? 
-        JSON.parse(sessionStorage.getItem('passengerData')) : null;
+    const passengerInfo = sessionStorage.getItem('passengerInfo') ? 
+        JSON.parse(sessionStorage.getItem('passengerInfo')) : null;
         
     // ตรวจสอบว่ามีการเลือกเที่ยวบินหรือไม่
     if (!flightId && !selectedFlightData) {
@@ -25,11 +25,18 @@ document.addEventListener('DOMContentLoaded', async function() {
     // ใช้ flightId จาก selectedFlightData ถ้าไม่มีใน URL
     const effectiveFlightId = flightId || selectedFlightData.flightId;
     
+    // อัปเดตข้อมูลเที่ยวบินบนหน้าเว็บ
+    updateFlightSummary(selectedFlightData);
+    
+    // อัปเดตข้อมูลผู้โดยสาร
+    updatePassengerInfo(passengerInfo);
+    
     // elements
     const seatContainer = document.querySelector('.airplane-body');
     const selectedSeatDisplay = document.getElementById('selected-seat-display');
     const seatPriceDisplay = document.getElementById('seat-price-display');
     const continueBtn = document.getElementById('continue-btn');
+    const backButton = document.getElementById('backButton');
     
     // สำหรับเก็บข้อมูลที่นั่งที่เลือก
     const selectedSeats = [];
@@ -58,7 +65,73 @@ document.addEventListener('DOMContentLoaded', async function() {
             
             // บันทึกราคาที่นั่งเพิ่มเติมใน sessionStorage
             sessionStorage.setItem('additionalSeatPrice', totalSeatPrice.toString());
+            
+            // ไปที่หน้าชำระเงิน
+            window.location.href = 'payment.html';
         });
+    }
+    
+    // ตั้งค่า event listener สำหรับปุ่มย้อนกลับ
+    if (backButton) {
+        backButton.addEventListener('click', function() {
+            // กลับไปยังหน้ารายละเอียดเที่ยวบิน
+            window.location.href = 'flight-details.html';
+        });
+    }
+    
+    /**
+     * อัปเดตข้อมูลเที่ยวบินในส่วน summary
+     */
+    function updateFlightSummary(flightData) {
+        if (!flightData) return;
+        
+        const routeTitle = document.getElementById('routeTitle');
+        const routeInfo = document.getElementById('routeInfo');
+        
+        if (routeTitle && routeInfo) {
+            // อัปเดตชื่อเมืองและรหัสสนามบิน
+            routeTitle.textContent = `${flightData.departureCity} (${flightData.departureCity.substring(0, 3).toUpperCase()}) → ${flightData.arrivalCity} (${flightData.arrivalCity.substring(0, 3).toUpperCase()})`;
+            
+            // อัปเดตข้อมูลวันที่และรายละเอียดการเดินทาง
+            const departureDate = new Date(flightData.departureTime);
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            const formattedDate = departureDate.toLocaleDateString('th-TH', options);
+            
+            let seatClassText = 'ชั้นประหยัด';
+            if (flightData.seatClass === 'premium-economy') {
+                seatClassText = 'ชั้นประหยัดพิเศษ';
+            } else if (flightData.seatClass === 'business') {
+                seatClassText = 'ชั้นธุรกิจ';
+            } else if (flightData.seatClass === 'first') {
+                seatClassText = 'ชั้นหนึ่ง';
+            }
+            
+            routeInfo.textContent = `${formattedDate} | ผู้โดยสาร ${flightData.passengers} คน | ${seatClassText} | ${flightData.flightNumber}`;
+        }
+    }
+    
+    /**
+     * อัปเดตข้อมูลผู้โดยสาร
+     */
+    function updatePassengerInfo(passengerData) {
+        if (!passengerData) return;
+        
+        const passengerInfoElement = document.getElementById('passengerInfo');
+        if (passengerInfoElement) {
+            // แสดงชื่อผู้โดยสาร
+            if (passengerData.passenger && passengerData.passenger.firstName && passengerData.passenger.lastName) {
+                let title = '';
+                if (passengerData.passenger.title === 'mr') {
+                    title = 'นาย';
+                } else if (passengerData.passenger.title === 'mrs') {
+                    title = 'นาง';
+                } else if (passengerData.passenger.title === 'ms') {
+                    title = 'นางสาว';
+                }
+                
+                passengerInfoElement.textContent = `กรุณาเลือกที่นั่งสำหรับผู้โดยสาร: ${title} ${passengerData.passenger.firstName} ${passengerData.passenger.lastName}`;
+            }
+        }
     }
     
     /**
@@ -367,6 +440,11 @@ document.addEventListener('DOMContentLoaded', async function() {
                 
                 // อัพเดทการแสดงผลที่นั่งที่เลือก
                 updateSelectedSeatsDisplay();
+                
+                // เปิดใช้งานปุ่ม Continue ถ้าเลือกครบแล้ว
+                if (continueBtn) {
+                    continueBtn.disabled = selectedSeats.length < passengersCount;
+                }
             });
         });
     }
