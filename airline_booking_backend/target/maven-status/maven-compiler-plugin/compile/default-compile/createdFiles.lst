@@ -26,3 +26,4 @@ com/airline/booking/model/User.class
 com/airline/booking/service/BookingService.class
 com/airline/booking/service/FlightService.class
 com/airline/booking/repository/SeatRepository.class
+com/airline/booking/config/DatabaseInitializer.class
