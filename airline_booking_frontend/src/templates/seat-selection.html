@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>เลือกที่นั่ง - Skyways Airlines</title>
+    <link rel="stylesheet" href="../assets/css/common.css">
+    <link rel="stylesheet" href="../assets/css/seat-selection.css">
+    <link rel="icon" type="image/x-icon" href="../../public/favicon.ico">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <header class="site-header">
+        <div class="container">
+            <div class="logo">
+                <a href="index.html">
+                    <img src="../../public/images/backgrounds/logo_skyways_airline.png" alt="Skyways Airlines Logo">
+                </a>
+            </div>
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="index.html">หน้าหลัก</a></li>
+                    <li><a href="promotions.html">โปรโมชั่น</a></li>
+                    <li><a href="booking-status.html">ตรวจสอบการจอง</a></li>
+                    <li><a href="contact.html">ติดต่อเรา</a></li>
+                </ul>
+            </nav>
+            <div class="user-actions" id="userActionsContainer">
+                <!-- จะถูกแทนที่ด้วย JavaScript -->
+                <a href="login.html" class="btn btn-outline" id="loginBtn">เข้าสู่ระบบ</a>
+                <a href="register.html" class="btn btn-primary" id="registerBtn">สมัครสมาชิก</a>
+            </div>
+            <button class="mobile-menu-toggle" aria-label="Toggle mobile menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </header>
+
+    <div class="mobile-menu" style="display: none;" id="mobileMenuContainer">
+        <ul>
+            <li><a href="index.html">หน้าหลัก</a></li>
+            <li><a href="promotions.html">โปรโมชั่น</a></li>
+            <li><a href="booking-status.html">ตรวจสอบการจอง</a></li>
+            <li><a href="contact.html">ติดต่อเรา</a></li>
+        </ul>
+        <div class="mobile-menu-user-actions" id="mobileUserActions">
+            <!-- จะถูกแทนที่ด้วย JavaScript -->
+            <a href="login.html" class="btn btn-outline">เข้าสู่ระบบ</a>
+            <a href="register.html" class="btn btn-primary">สมัครสมาชิก</a>
+        </div>
+    </div>
+
+    <main>
+        <!-- Booking Progress -->
+        <div class="booking-progress">
+            <div class="progress-container">
+                <div class="progress-step completed">
+                    <div class="step-number">1</div>
+                    <div class="step-label">เลือกเที่ยวบิน</div>
+                </div>
+                <div class="progress-line completed"></div>
+                <div class="progress-step completed">
+                    <div class="step-number">2</div>
+                    <div class="step-label">ข้อมูลผู้โดยสาร</div>
+                </div>
+                <div class="progress-line completed"></div>
+                <div class="progress-step active">
+                    <div class="step-number">3</div>
+                    <div class="step-label">เลือกที่นั่ง</div>
+                </div>
+                <div class="progress-line"></div>
+                <div class="progress-step">
+                    <div class="step-number">4</div>
+                    <div class="step-label">ชำระเงิน</div>
+                </div>
+                <div class="progress-line"></div>
+                <div class="progress-step">
+                    <div class="step-number">5</div>
+                    <div class="step-label">ยืนยันการจอง</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Flight Summary -->
+        <section class="flight-summary">
+            <div class="container">
+                <div class="flight-route">
+                    <h2 id="routeTitle">กำลังโหลดข้อมูลเส้นทาง...</h2>
+                    <p id="routeInfo">กำลังโหลดข้อมูลเที่ยวบิน...</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Seat Selection -->
+        <section class="seat-selection">
+            <div class="container">
+                <div class="seat-selection-container">
+                    <div class="seat-instructions">
+                        <h2>เลือกที่นั่ง</h2>
+                        <p id="passengerInfo">กรุณาเลือกที่นั่งสำหรับผู้โดยสาร</p>
+                        
+                        <div class="seat-legend">
+                            <div class="legend-item">
+                                <div class="seat-icon available"></div>
+                                <span>ที่นั่งว่าง</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="seat-icon selected"></div>
+                                <span>ที่นั่งที่เลือก</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="seat-icon occupied"></div>
+                                <span>ที่นั่งไม่ว่าง</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="seat-icon premium"></div>
+                                <span>ที่นั่งพรีเมียม (+฿350)</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="seat-icon exit-row"></div>
+                                <span>ที่นั่งแถวทางออกฉุกเฉิน (+฿250)</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="airplane-container">
+                        <div class="airplane-header">
+                            <div class="airplane-front">
+                                <span>หัวเครื่อง</span>
+                            </div>
+                        </div>
+                        
+                        <div class="airplane-body">
+                            <!-- ข้อมูลที่นั่งจะถูกโหลดด้วย JavaScript -->
+                            <div class="loading-indicator">
+                                <i class="fas fa-spinner fa-spin"></i>
+                                <p>กำลังโหลดข้อมูลที่นั่ง...</p>
+                            </div>
+                        </div>
+                        
+                        <div class="airplane-tail">
+                            <span>ท้ายเครื่อง</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="selected-seats-summary">
+                    <h3>ที่นั่งที่เลือก</h3>
+                    <div class="selected-seat-info">
+                        <div id="selected-seat-display">ยังไม่ได้เลือกที่นั่ง</div>
+                        <div class="seat-price">
+                            <span>ราคาเพิ่มเติม: </span>
+                            <span id="seat-price-display">฿0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Action Buttons -->
+        <section class="action-buttons">
+            <div class="container">
+                <button class="btn btn-outline" id="backButton">ย้อนกลับ</button>
+                <button class="btn btn-primary" id="continue-btn" disabled>ดำเนินการต่อ</button>
+            </div>
+        </section>
+    </main>
+    
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <img src="../../public/images/backgrounds/logo_skyways_airline.png" alt="Skyways Airlines Logo">
+                    <p>เราให้บริการการเดินทางที่ปลอดภัยและสะดวกสบาย</p>
+                </div>
+                <div class="footer-links">
+                    <div class="footer-column">
+                        <h3>หน้า</h3>
+                        <ul>
+                            <li><a href="index.html">หน้าหลัก</a></li>
+                            <li><a href="promotions.html">โปรโมชั่น</a></li>
+                            <li><a href="booking-status.html">ตรวจสอบการจอง</a></li>
+                            <li><a href="contact.html">ติดต่อเรา</a></li>
+                        </ul>
+                    </div>
+                    <div class="footer-column">
+                        <h3>บริการ</h3>
+                        <ul>
+                            <li><a href="#">จองตั๋ว</a></li>
+                            <li><a href="#">เช็คอิน</a></li>
+                            <li><a href="#">บริการพิเศษ</a></li>
+                            <li><a href="#">สถานะเที่ยวบิน</a></li>
+                        </ul>
+                    </div>
+                    <div class="footer-column">
+                        <h3>ติดต่อเรา</h3>
+                        <ul>
+                            <li><i class="fas fa-phone"></i> 02-123-4567</li>
+                            <li><i class="fas fa-envelope"></i> support@skyways.com</li>
+                            <li><i class="fas fa-map-marker-alt"></i> 123 ถนนสุขุมวิท กรุงเทพฯ</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 Skyways Airlines. สงวนลิขสิทธิ์</p>
+                <div class="footer-social">
+                    <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                    <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                    <a href="#" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script type="module" src="../assets/js/script.js"></script>
+    <script type="module" src="../assets/js/seat-selection.js"></script>
+</body>
+</html>

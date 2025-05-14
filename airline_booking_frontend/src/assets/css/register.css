@@ -1,0 +1,274 @@
+/* Register Page Styles */
+.register-section {
+    padding: 40px 0;
+    background-color: #f9f9f9;
+    min-height: calc(100vh - 300px);
+    display: flex;
+    align-items: center;
+}
+
+.register-container {
+    display: flex;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.register-image {
+    flex: 1;
+    display: none;
+}
+
+.register-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.register-form-container {
+    flex: 1;
+    padding: 40px;
+}
+
+.register-form-container h1 {
+    margin-bottom: 10px;
+    color: #333;
+    font-size: 2rem;
+}
+
+.register-subheading {
+    margin-bottom: 30px;
+    color: #666;
+    font-size: 1rem;
+}
+
+.register-form {
+    margin-bottom: 20px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-row {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 0;
+}
+
+@media (max-width: 767px) {
+    .form-row {
+        flex-direction: column;
+        gap: 0;
+    }
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: #333;
+}
+
+.input-with-icon {
+    position: relative;
+}
+
+.input-icon {
+    position: absolute;
+    left: 10px; /* Adjusted for better alignment */
+    top: 50%;
+    transform: translateY(-50%); /* Center the icon vertically */
+    color: #007bff; /* Change icon color to match the theme */
+    font-size: 1.2rem; /* Increase icon size for better visibility */
+}
+
+input[type="text"],
+input[type="email"],
+input[type="tel"],
+input[type="password"] {
+    padding: 12px 40px 12px 40px; /* Added padding for icon space */
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 16px;
+    width: 100%;
+}
+
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="tel"]:focus,
+input[type="password"]:focus {
+    border-color: #007bff; /* Change border color on focus */
+    outline: none;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5); /* Add shadow for focus effect */
+}
+
+.toggle-password {
+    position: absolute;
+    right: 10px; /* Position the toggle button */
+    top: 50%;
+    transform: translateY(-50%); /* Center the button vertically */
+    background: none;
+    border: none;
+    color: #007bff; /* Match the theme color */
+    cursor: pointer;
+    font-size: 1rem; /* Adjust size for better visibility */
+}
+
+
+.error-message {
+    color: #e74c3c;
+    font-size: 14px;
+    margin-top: 5px;
+    display: none;
+}
+
+.form-options {
+    margin-bottom: 20px;
+}
+
+.terms-agreement {
+    display: flex;
+    align-items: flex-start;
+}
+
+.terms-agreement input[type="checkbox"] {
+    margin-right: 8px;
+    margin-top: 3px;
+}
+
+.terms-agreement label {
+    font-size: 14px;
+    line-height: 1.4;
+    color: #666;
+}
+
+.terms-agreement a {
+    color: #007bff;
+    text-decoration: none;
+}
+
+.terms-agreement a:hover {
+    text-decoration: underline;
+}
+
+.btn-full {
+    width: 100%;
+    padding: 12px;
+    font-size: 16px;
+    margin-bottom: 20px;
+}
+
+.social-login {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.social-login p {
+    margin-bottom: 15px;
+    color: #666;
+    position: relative;
+}
+
+.social-login p::before,
+.social-login p::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    width: 30%;
+    height: 1px;
+    background-color: #ddd;
+}
+
+.social-login p::before {
+    left: 0;
+}
+
+.social-login p::after {
+    right: 0;
+}
+
+.social-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+.btn-social {
+    flex: 1;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    color: #333;
+    padding: 10px 15px;
+    border-radius: 6px;
+    font-weight: 500;
+    transition: background-color 0.3s;
+}
+
+.btn-google:hover {
+    background-color: #f2f2f2;
+}
+
+.btn-facebook {
+    background-color: #3b5998;
+    color: #fff;
+}
+
+.btn-facebook:hover {
+    background-color: #344e86;
+}
+
+.login-link {
+    text-align: center;
+    color: #666;
+}
+
+.login-link a {
+    color: #007bff;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.login-link a:hover {
+    text-decoration: underline;
+}
+
+.toggle-password {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    color: #666;
+}
+
+.hide-password {
+    display: none;
+}
+
+/* Responsive Design */
+@media (min-width: 768px) {
+    .register-image {
+        display: block;
+    }
+}
+
+@media (max-width: 767px) {
+    .register-container {
+        flex-direction: column;
+        margin: 0 20px;
+    }
+    
+    .register-form-container {
+        padding: 30px 20px;
+    }
+    
+    .social-buttons {
+        flex-direction: column;
+    }
+}

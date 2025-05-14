@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>เข้าสู่ระบบ - Skyways Airlines</title>
+    <link rel="stylesheet" href="../assets/css/common.css">
+    <link rel="stylesheet" href="../assets/css/login.css">
+    <link rel="icon" type="image/x-icon" href="../../public/favicon.ico">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <header class="site-header">
+        <div class="container">
+            <div class="logo">
+                <a href="index.html">
+                    <img src="../../public/images/backgrounds/logo_skyways_airline.png" alt="Skyways Airlines Logo">
+                </a>
+            </div>
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="index.html">หน้าหลัก</a></li>
+                    <li><a href="promotions.html">โปรโมชั่น</a></li>
+                    <li><a href="booking-status.html">ตรวจสอบการจอง</a></li>
+                    <li><a href="contact.html">ติดต่อเรา</a></li>
+                </ul>
+            </nav>
+            <div class="user-actions">
+                <a href="login.html" class="btn btn-primary active">เข้าสู่ระบบ</a>
+                <a href="register.html" class="btn btn-outline">สมัครสมาชิก</a>
+            </div>
+            <button class="mobile-menu-toggle" aria-label="Toggle mobile menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </header>
+
+    <div class="mobile-menu" style="display: none;">
+        <ul>
+            <li><a href="index.html">หน้าหลัก</a></li>
+            <li><a href="promotions.html">โปรโมชั่น</a></li>
+            <li><a href="booking-status.html">ตรวจสอบการจอง</a></li>
+            <li><a href="contact.html">ติดต่อเรา</a></li>
+        </ul>
+        <div class="mobile-menu-user-actions">
+            <a href="login.html" class="btn btn-primary">เข้าสู่ระบบ</a>
+            <a href="register.html" class="btn btn-outline">สมัครสมาชิก</a>
+        </div>
+    </div>
+
+    <main>
+        <section class="login-section">
+            <div class="container">
+                <div class="login-container">
+                    <div class="login-image">
+                        <img src="../../public/images/backgrounds/idkBgPic.jpg" alt="Airline Travel Image">
+                    </div>
+                    <div class="login-form-container">
+                        <h1>เข้าสู่ระบบ</h1>
+                        <p class="login-subheading">ยินดีต้อนรับกลับมา! กรุณาเข้าสู่ระบบเพื่อจัดการการเดินทางของคุณ</p>
+                        
+                        <!-- แสดงข้อความแจ้งผลการเข้าสู่ระบบ -->
+                        <div id="login-message" class="alert" style="display: none;"></div>
+                        
+                        <form id="loginForm" class="login-form">
+                            <div class="form-group">
+                                <label for="username">ชื่อผู้ใช้</label>
+                                <div class="input-with-icon">
+                                    <i class="fas fa-user input-icon"></i>
+                                    <input type="text" id="username" name="username" placeholder="ชื่อผู้ใช้" required>
+                                </div>
+                                <div class="error-message" id="username-error"></div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="password">รหัสผ่าน</label>
+                                <div class="input-with-icon">
+                                    <i class="fas fa-lock input-icon"></i>
+                                    <input type="password" id="password" name="password" placeholder="••••••••" required>
+                                    <button type="button" class="toggle-password" aria-label="Toggle password visibility">
+                                        <span class="show-password">แสดง</span>
+                                        <span class="hide-password">ซ่อน</span>
+                                    </button>
+                                </div>
+                                <div class="error-message" id="password-error"></div>
+                            </div>
+                            
+                            <div class="form-options">
+                                <div class="remember-me">
+                                    <input type="checkbox" id="remember" name="remember">
+                                    <label for="remember">จดจำฉัน</label>
+                                </div>
+                                <a href="#" class="forgot-password">ลืมรหัสผ่าน?</a>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-primary btn-full">เข้าสู่ระบบ</button>
+                            
+                            <div class="social-login">
+                                <p>หรือเข้าสู่ระบบด้วย</p>
+                                <div class="social-buttons">
+                                    <button type="button" class="btn btn-social btn-google">
+                                        <i class="fab fa-google"></i> Google
+                                    </button>
+                                    <button type="button" class="btn btn-social btn-facebook">
+                                        <i class="fab fa-facebook-f"></i> Facebook
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                        
+                        <div class="signup-link">
+                            <p>ยังไม่มีบัญชี? <a href="register.html">สมัครสมาชิก</a></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <img src="../../public/images/backgrounds/logo_skyways_airline.png" alt="Skyways Airlines Logo">
+                    <p>เราให้บริการการเดินทางที่ปลอดภัยและสะดวกสบาย</p>
+                </div>
+                <div class="footer-links">
+                    <div class="footer-column">
+                        <h3>หน้า</h3>
+                        <ul>
+                            <li><a href="index.html">หน้าหลัก</a></li>
+                            <li><a href="promotions.html">โปรโมชั่น</a></li>
+                            <li><a href="booking-status.html">ตรวจสอบการจอง</a></li>
+                            <li><a href="contact.html">ติดต่อเรา</a></li>
+                        </ul>
+                    </div>
+                    <div class="footer-column">
+                        <h3>บริการ</h3>
+                        <ul>
+                            <li><a href="#">จองตั๋ว</a></li>
+                            <li><a href="#">เช็คอิน</a></li>
+                            <li><a href="#">บริการพิเศษ</a></li>
+                            <li><a href="#">สถานะเที่ยวบิน</a></li>
+                        </ul>
+                    </div>
+                    <div class="footer-column">
+                        <h3>ติดต่อเรา</h3>
+                        <ul>
+                            <li><i class="fas fa-phone"></i> 02-123-4567</li>
+                            <li><i class="fas fa-envelope"></i> support@skyways.com</li>
+                            <li><i class="fas fa-map-marker-alt"></i> 123 ถนนสุขุมวิท กรุงเทพฯ</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 Skyways Airlines. สงวนลิขสิทธิ์</p>
+                <div class="footer-social">
+                    <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                    <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                    <a href="#" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+    // สไตล์เพิ่มเติมสำหรับข้อความแจ้งเตือน
+    document.head.insertAdjacentHTML('beforeend', `
+        <style>
+            .alert {
+                padding: 12px 15px;
+                margin-bottom: 20px;
+                border-radius: 4px;
+                font-size: 14px;
+            }
+            
+            .alert-success {
+                background-color: #d4edda;
+                color: #155724;
+                border: 1px solid #c3e6cb;
+            }
+            
+            .alert-danger {
+                background-color: #f8d7da;
+                color: #721c24;
+                border: 1px solid #f5c6cb;
+            }
+            
+            .loading-spinner {
+                display: inline-block;
+                width: 16px;
+                height: 16px;
+                border: 2px solid rgba(255,255,255,0.3);
+                border-radius: 50%;
+                border-top-color: white;
+                animation: spin 1s linear infinite;
+                margin-right: 8px;
+                vertical-align: middle;
+            }
+            
+            @keyframes spin {
+                to { transform: rotate(360deg); }
+            }
+        </style>
+    `);
+
+    document.addEventListener('DOMContentLoaded', function() {
+        // เลือก elements ที่เกี่ยวข้อง
+        const loginForm = document.getElementById('loginForm');
+        const usernameField = document.getElementById('username');
+        const passwordField = document.getElementById('password');
+        const usernameError = document.getElementById('username-error');
+        const passwordError = document.getElementById('password-error');
+        const togglePasswordButton = document.querySelector('.toggle-password');
+        const loginMessage = document.getElementById('login-message');
+        
+        // ตรวจสอบการเข้าสู่ระบบและกรอกข้อมูลอัตโนมัติ
+        checkLoginStatus();
+        
+        // จัดการการเปิด/ปิดการแสดงรหัสผ่าน
+        if (togglePasswordButton && passwordField) {
+            togglePasswordButton.addEventListener('click', function() {
+                const showText = this.querySelector('.show-password');
+                const hideText = this.querySelector('.hide-password');
+                
+                if (passwordField.type === 'password') {
+                    passwordField.type = 'text';
+                    showText.style.display = 'none';
+                    hideText.style.display = 'inline';
+                } else {
+                    passwordField.type = 'password';
+                    showText.style.display = 'inline';
+                    hideText.style.display = 'none';
+                }
+            });
+        }
+        
+        // จัดการการส่งฟอร์มเข้าสู่ระบบ
+        if (loginForm) {
+            loginForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                // รีเซ็ตข้อความผิดพลาด
+                clearErrors();
+                
+                // ตรวจสอบความถูกต้องของข้อมูล
+                if (!validateLoginForm()) {
+                    return;
+                }
+                
+                // แสดงสถานะการโหลด
+                const submitBtn = this.querySelector('button[type="submit"]');
+                const originalBtnText = submitBtn.textContent;
+                submitBtn.innerHTML = '<span class="loading-spinner"></span> กำลังเข้าสู่ระบบ...';
+                submitBtn.disabled = true;
+                
+                try {
+                    // เตรียมข้อมูลสำหรับส่งไปยัง API
+                    const loginData = {
+                        username: usernameField.value,
+                        password: passwordField.value
+                    };
+                    
+                    // เรียกใช้ API เพื่อเข้าสู่ระบบ
+                    const response = await fetch('http://localhost:8080/api/auth/login', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify(loginData)
+                    });
+                    
+                    if (!response.ok) {
+                        // แสดงข้อความผิดพลาดจาก API
+                        const errorData = await response.json();
+                        throw new Error(errorData.message || 'การเข้าสู่ระบบล้มเหลว');
+                    }
+                    
+                    const data = await response.json();
+                    
+                    // บันทึก token และข้อมูลผู้ใช้
+                    localStorage.setItem('authToken', data.token);
+                    localStorage.setItem('userData', JSON.stringify(data.user));
+                    
+                    // แสดงข้อความสำเร็จ
+                    showMessage('เข้าสู่ระบบสำเร็จ! กำลังนำคุณไปยังหน้าหลัก...', 'success');
+                    
+                    // Redirect ไปยังหน้าหลักหลังจากเข้าสู่ระบบสำเร็จ
+                    setTimeout(() => {
+                        window.location.href = 'index.html';
+                    }, 1500);
+                } catch (error) {
+                    console.error('Login error:', error);
+                    
+                    // แสดงข้อความผิดพลาด
+                    showMessage(error.message || 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง', 'danger');
+                    
+                    // คืนค่าสถานะปุ่ม
+                    submitBtn.innerHTML = originalBtnText;
+                    submitBtn.disabled = false;
+                }
+            });
+        }
+        
+        // ตรวจสอบสถานะการเข้าสู่ระบบ
+        function checkLoginStatus() {
+            const token = localStorage.getItem('authToken');
+            const userData = localStorage.getItem('userData');
+            
+            if (token && userData) {
+                try {
+                    // ผู้ใช้เข้าสู่ระบบแล้ว redirect ไปหน้าหลัก
+                    const user = JSON.parse(userData);
+                    
+                    // หรือเปลี่ยนฟอร์มเป็นข้อความแจ้งว่าเข้าสู่ระบบแล้ว
+                    if (loginForm) {
+                        loginForm.innerHTML = `
+                            <div class="already-logged-in">
+                                <h2>คุณเข้าสู่ระบบแล้ว</h2>
+                                <p>ยินดีต้อนรับ, ${user.username || user.email || 'คุณ'}</p>
+                                <button type="button" class="btn btn-primary logout-btn">ออกจากระบบ</button>
+                                <a href="index.html" class="btn btn-outline">กลับไปยังหน้าหลัก</a>
+                            </div>
+                        `;
+                        
+                        // เพิ่ม event listener สำหรับปุ่มออกจากระบบ
+                        const logoutBtn = document.querySelector('.logout-btn');
+                        if (logoutBtn) {
+                            logoutBtn.addEventListener('click', handleLogout);
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error parsing user data:', error);
+                    // ถ้าข้อมูลผู้ใช้ไม่ถูกต้อง ให้ล้างข้อมูลและโหลดหน้าใหม่
+                    localStorage.removeItem('authToken');
+                    localStorage.removeItem('userData');
+                    window.location.reload();
+                }
+            }
+        }
+        
+        // จัดการการออกจากระบบ
+        function handleLogout() {
+            // ล้างข้อมูลการเข้าสู่ระบบ
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('userData');
+            
+            // โหลดหน้าใหม่
+            window.location.reload();
+        }
+        
+        // ตรวจสอบความถูกต้องของข้อมูลในฟอร์ม
+        function validateLoginForm() {
+            let isValid = true;
+            
+            // ตรวจสอบชื่อผู้ใช้
+            if (!usernameField.value.trim()) {
+                showError(usernameError, 'กรุณากรอกชื่อผู้ใช้');
+                isValid = false;
+            }
+            
+            // ตรวจสอบรหัสผ่าน
+            if (!passwordField.value) {
+                showError(passwordError, 'กรุณากรอกรหัสผ่าน');
+                isValid = false;
+            }
+            
+            return isValid;
+        }
+        
+        // แสดงข้อความผิดพลาด
+        function showError(element, message) {
+            if (element) {
+                element.textContent = message;
+                element.style.display = 'block';
+            }
+        }
+        
+        // ล้างข้อความผิดพลาด
+        function clearErrors() {
+            if (usernameError) usernameError.style.display = 'none';
+            if (passwordError) passwordError.style.display = 'none';
+            if (loginMessage) loginMessage.style.display = 'none';
+        }
+        
+        // แสดงข้อความแจ้งเตือน
+        function showMessage(message, type) {
+            if (loginMessage) {
+                loginMessage.textContent = message;
+                loginMessage.className = `alert alert-${type}`;
+                loginMessage.style.display = 'block';
+            }
+        }
+        
+        // เพิ่ม event listener สำหรับการเปลี่ยนข้อมูลใน input field
+        if (usernameField) {
+            usernameField.addEventListener('input', function() {
+                if (usernameError) usernameError.style.display = 'none';
+            });
+        }
+        
+        if (passwordField) {
+            passwordField.addEventListener('input', function() {
+                if (passwordError) passwordError.style.display = 'none';
+            });
+        }
+        
+        // CSS เพิ่มเติม
+        document.head.insertAdjacentHTML('beforeend', `
+            <style>
+                .already-logged-in {
+                    text-align: center;
+                    padding: 2rem;
+                }
+                
+                .already-logged-in h2 {
+                    margin-bottom: 1rem;
+                    color: var(--primary-color);
+                }
+                
+                .already-logged-in p {
+                    margin-bottom: 2rem;
+                }
+                
+                .already-logged-in .logout-btn {
+                    margin-right: 1rem;
+                }
+            </style>
+        `);
+    });
+    </script>
+</body>
+</html>

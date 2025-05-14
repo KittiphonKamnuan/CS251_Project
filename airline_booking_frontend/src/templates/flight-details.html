@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>รายละเอียดเที่ยวบิน - Skyways Airlines</title>
+    <link rel="stylesheet" href="../assets/css/common.css">
+    <link rel="stylesheet" href="../assets/css/flight-details.css">
+    <link rel="icon" type="image/x-icon" href="../../public/favicon.ico">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <header class="site-header">
+        <div class="container">
+            <div class="logo">
+                <a href="index.html">
+                    <img src="../../public/images/backgrounds/logo_skyways_airline.png" alt="Skyways Airlines Logo">
+                </a>
+            </div>
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="index.html">หน้าหลัก</a></li>
+                    <li><a href="promotions.html">โปรโมชั่น</a></li>
+                    <li><a href="booking-status.html">ตรวจสอบการจอง</a></li>
+                    <li><a href="contact.html">ติดต่อเรา</a></li>
+                </ul>
+            </nav>
+            <div class="user-actions" id="userActionsContainer">
+                <!-- จะถูกแทนที่ด้วย JavaScript -->
+                <a href="login.html" class="btn btn-outline" id="loginBtn">เข้าสู่ระบบ</a>
+                <a href="register.html" class="btn btn-primary" id="registerBtn">สมัครสมาชิก</a>
+            </div>
+            <button class="mobile-menu-toggle" aria-label="Toggle mobile menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </header>
+
+    <div class="mobile-menu" style="display: none;" id="mobileMenuContainer">
+        <ul>
+            <li><a href="index.html">หน้าหลัก</a></li>
+            <li><a href="promotions.html">โปรโมชั่น</a></li>
+            <li><a href="booking-status.html">ตรวจสอบการจอง</a></li>
+            <li><a href="contact.html">ติดต่อเรา</a></li>
+        </ul>
+        <div class="mobile-menu-user-actions" id="mobileUserActions">
+            <!-- จะถูกแทนที่ด้วย JavaScript -->
+            <a href="login.html" class="btn btn-outline">เข้าสู่ระบบ</a>
+            <a href="register.html" class="btn btn-primary">สมัครสมาชิก</a>
+        </div>
+    </div>
+
+    <main>
+        <!-- Booking Progress -->
+        <div class="booking-progress">
+            <div class="progress-container">
+                <div class="progress-step active">
+                    <div class="step-number">1</div>
+                    <div class="step-label">เลือกเที่ยวบิน</div>
+                </div>
+                <div class="progress-line"></div>
+                <div class="progress-step">
+                    <div class="step-number">2</div>
+                    <div class="step-label">ข้อมูลผู้โดยสาร</div>
+                </div>
+                <div class="progress-line"></div>
+                <div class="progress-step">
+                    <div class="step-number">3</div>
+                    <div class="step-label">เลือกที่นั่ง</div>
+                </div>
+                <div class="progress-line"></div>
+                <div class="progress-step">
+                    <div class="step-number">4</div>
+                    <div class="step-label">ชำระเงิน</div>
+                </div>
+                <div class="progress-line"></div>
+                <div class="progress-step">
+                    <div class="step-number">5</div>
+                    <div class="step-label">ยืนยันการจอง</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Flight Summary -->
+        <section class="flight-summary">
+            <div class="container">
+                <div class="flight-route">
+                    <h2 id="routeTitle">กำลังโหลดข้อมูลเส้นทาง...</h2>
+                    <p id="routeInfo">กำลังโหลดข้อมูลเที่ยวบิน...</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Flight Details -->
+        <section class="flight-details">
+            <div class="container">
+                <div class="flight-card selected" id="flightCard">
+                    <div class="selected-badge">เที่ยวบินที่เลือก</div>
+                    <div class="flight-info" id="flightInfo">
+                        <div class="flight-header">
+                            <img src="../assets/images/icons/airplane.svg" alt="Airline Logo" class="airline-logo">
+                            <div>
+                                <div class="airline-name" id="airlineName">กำลังโหลด...</div>
+                                <div class="flight-number" id="flightNumber">กำลังโหลด...</div>
+                            </div>
+                        </div>
+                        <div class="flight-times">
+                            <div class="departure">
+                                <div class="time" id="departureTime">--:--</div>
+                                <div class="date" id="departureDate">--/--/----</div>
+                                <div class="airport" id="departureAirport">กำลังโหลด...</div>
+                                <div class="terminal" id="departureTerminal">เทอร์มินัล</div>
+                            </div>
+                            <div class="flight-duration">
+                                <div class="flight-path"></div>
+                                <div class="duration" id="flightDuration">-h --m</div>
+                                <div class="plane-icon">
+                                    <i class="fas fa-plane"></i>
+                                </div>
+                            </div>
+                            <div class="arrival">
+                                <div class="time" id="arrivalTime">--:--</div>
+                                <div class="date" id="arrivalDate">--/--/----</div>
+                                <div class="airport" id="arrivalAirport">กำลังโหลด...</div>
+                                <div class="terminal" id="arrivalTerminal">เทอร์มินัล</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flight-details-extra">
+                        <div class="detail-item">
+                            <i class="fas fa-suitcase"></i>
+                            <div class="detail-info">
+                                <div class="detail-title">สัมภาระ</div>
+                                <div class="detail-text" id="baggageInfo">กระเป๋าถือ 7 กก. + กระเป๋าโหลด 20 กก.</div>
+                            </div>
+                        </div>
+                        <div class="detail-item">
+                            <i class="fas fa-utensils"></i>
+                            <div class="detail-info">
+                                <div class="detail-title">อาหาร</div>
+                                <div class="detail-text" id="mealInfo">อาหารและเครื่องดื่มบนเที่ยวบิน</div>
+                            </div>
+                        </div>
+                        <div class="detail-item">
+                            <i class="fas fa-wifi"></i>
+                            <div class="detail-info">
+                                <div class="detail-title">Wi-Fi</div>
+                                <div class="detail-text" id="wifiInfo">มีบริการ Wi-Fi บนเครื่อง (มีค่าใช้จ่าย)</div>
+                            </div>
+                        </div>
+                        <div class="detail-item">
+                            <i class="fas fa-plane-departure"></i>
+                            <div class="detail-info">
+                                <div class="detail-title">เครื่องบิน</div>
+                                <div class="detail-text" id="aircraftInfo">กำลังโหลด...</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Fare Information -->
+        <section class="fare-info">
+            <div class="container">
+                <h2>รายละเอียดราคา</h2>
+                <div class="fare-details">
+                    <div class="fare-row">
+                        <div class="fare-label" id="basePriceLabel">ค่าโดยสารผู้ใหญ่ (1)</div>
+                        <div class="fare-value" id="basePrice">฿0</div>
+                    </div>
+                    <div class="fare-row">
+                        <div class="fare-label">ภาษีและค่าธรรมเนียม</div>
+                        <div class="fare-value" id="taxesAndFees">฿0</div>
+                    </div>
+                    <div class="fare-row total">
+                        <div class="fare-label">ราคารวม</div>
+                        <div class="fare-value" id="totalPrice">฿0</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Next Steps -->
+        <section class="next-steps">
+            <div class="container">
+                <h2>ข้อมูลผู้โดยสาร</h2>
+                <form id="passenger-form">
+                    <div class="form-section">
+                        <h3>ข้อมูลผู้ติดต่อ</h3>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="contact-email">อีเมล <span class="required">*</span></label>
+                                <input type="email" id="contact-email" required>
+                                <small>ใช้สำหรับส่งบัตรโดยสารและการแจ้งเตือน</small>
+                            </div>
+                            <div class="form-group">
+                                <label for="contact-phone">เบอร์โทรศัพท์ <span class="required">*</span></label>
+                                <input type="tel" id="contact-phone" required>
+                                <small>ใช้สำหรับติดต่อกรณีฉุกเฉิน</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-section" id="passengerSection">
+                        <h3>ผู้โดยสารคนที่ 1 (ผู้ใหญ่)</h3>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="title">คำนำหน้า <span class="required">*</span></label>
+                                <select id="title" required>
+                                    <option value="">เลือก</option>
+                                    <option value="mr">นาย</option>
+                                    <option value="mrs">นาง</option>
+                                    <option value="ms">นางสาว</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="first-name">ชื่อ (ภาษาอังกฤษ) <span class="required">*</span></label>
+                                <input type="text" id="first-name" required>
+                                <small>ต้องตรงกับหนังสือเดินทาง/บัตรประชาชน</small>
+                            </div>
+                            <div class="form-group">
+                                <label for="last-name">นามสกุล (ภาษาอังกฤษ) <span class="required">*</span></label>
+                                <input type="text" id="last-name" required>
+                                <small>ต้องตรงกับหนังสือเดินทาง/บัตรประชาชน</small>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="dob">วันเกิด <span class="required">*</span></label>
+                                <input type="date" id="dob" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="nationality">สัญชาติ <span class="required">*</span></label>
+                                <select id="nationality" required>
+                                    <option value="">เลือก</option>
+                                    <option value="th">ไทย</option>
+                                    <option value="us">อเมริกัน</option>
+                                    <option value="cn">จีน</option>
+                                    <option value="jp">ญี่ปุ่น</option>
+                                    <option value="gb">อังกฤษ</option>
+                                    <option value="other">อื่นๆ</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="passport">เลขที่หนังสือเดินทาง/บัตรประชาชน <span class="required">*</span></label>
+                                <input type="text" id="passport" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h3>บริการเสริม</h3>
+                        <div class="addon-list" id="addonList">
+                            <div class="addon-item">
+                                <div class="addon-check">
+                                    <input type="checkbox" id="addon-meal">
+                                </div>
+                                <div class="addon-info">
+                                    <label for="addon-meal">อาหารพิเศษ</label>
+                                    <p>มังสวิรัติ, ฮาลาล, ไม่มีแลคโตส และอื่นๆ</p>
+                                </div>
+                                <div class="addon-price">+ ฿150</div>
+                            </div>
+                            <div class="addon-item">
+                                <div class="addon-check">
+                                    <input type="checkbox" id="addon-baggage">
+                                </div>
+                                <div class="addon-info">
+                                    <label for="addon-baggage">น้ำหนักกระเป๋าเพิ่ม</label>
+                                    <p>เพิ่มน้ำหนักกระเป๋าโหลดอีก 10 กก.</p>
+                                </div>
+                                <div class="addon-price">+ ฿350</div>
+                            </div>
+                            <div class="addon-item">
+                                <div class="addon-check">
+                                    <input type="checkbox" id="addon-insurance">
+                                </div>
+                                <div class="addon-info">
+                                    <label for="addon-insurance">ประกันการเดินทาง</label>
+                                    <p>คุ้มครองค่ารักษาพยาบาลและอุบัติเหตุระหว่างการเดินทาง</p>
+                                </div>
+                                <div class="addon-price">+ ฿200</div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <!-- Action Buttons -->
+        <section class="action-buttons">
+            <div class="container">
+                <button class="btn btn-outline" id="backButton">ย้อนกลับ</button>
+                <button class="btn btn-primary" id="continueButton">ดำเนินการต่อ</button>
+            </div>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <img src="../../public/images/backgrounds/logo_skyways_airline.png" alt="Skyways Airlines Logo">
+                    <p>เราให้บริการการเดินทางที่ปลอดภัยและสะดวกสบาย</p>
+                </div>
+                <div class="footer-links">
+                    <div class="footer-column">
+                        <h3>หน้า</h3>
+                        <ul>
+                            <li><a href="index.html">หน้าหลัก</a></li>
+                            <li><a href="promotions.html">โปรโมชั่น</a></li>
+                            <li><a href="booking-status.html">ตรวจสอบการจอง</a></li>
+                            <li><a href="contact.html">ติดต่อเรา</a></li>
+                        </ul>
+                    </div>
+                    <div class="footer-column">
+                        <h3>บริการ</h3>
+                        <ul>
+                            <li><a href="#">จองตั๋ว</a></li>
+                            <li><a href="#">เช็คอิน</a></li>
+                            <li><a href="#">บริการพิเศษ</a></li>
+                            <li><a href="#">สถานะเที่ยวบิน</a></li>
+                        </ul>
+                    </div>
+                    <div class="footer-column">
+                        <h3>ติดต่อเรา</h3>
+                        <ul>
+                            <li><i class="fas fa-phone"></i> 02-123-4567</li>
+                            <li><i class="fas fa-envelope"></i> support@skyways.com</li>
+                            <li><i class="fas fa-map-marker-alt"></i> 123 ถนนสุขุมวิท กรุงเทพฯ</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 Skyways Airlines. สงวนลิขสิทธิ์</p>
+                <div class="footer-social">
+                    <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                    <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                    <a href="#" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script type="module" src="../assets/js/script.js"></script>
+    <script type="module" src="../assets/js/flight-details.js"></script>
+</body>
+</html>
