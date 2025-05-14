@@ -9,15 +9,16 @@
     <version>0.0.1-SNAPSHOT</version>
     <name>airline-booking-backend</name>
     <description>Backend for Airline Booking System</description>
+
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.5.5</version>  <!-- Ensure you are using a compatible version -->
+        <version>2.7.18</version>  <!-- Keep this version as per your current requirement -->
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
 
     <dependencies>
-        <!-- Spring Boot Web Starter -->
+        <!-- Spring Boot Web Starter for building web applications (including RESTful services) -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
@@ -33,6 +34,7 @@
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
+            <version>8.0.29</version> <!-- Specify the version here -->
         </dependency>
 
         <!-- Spring Boot DevTools for automatic restarts and live reload (optional) -->
@@ -49,11 +51,17 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- Optional: Validation API (for validating user inputs) -->
+        <!-- Optional: Validation API for input validation -->
         <dependency>
             <groupId>javax.validation</groupId>
             <artifactId>validation-api</artifactId>
         </dependency>
+
+        <!-- Optional: Spring Security (if you plan to add security in the future) -->
+        <!-- <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
+        </dependency> -->
     </dependencies>
 
     <build>
@@ -67,6 +75,6 @@
     </build>
 
     <properties>
-        <java.version>11</java.version>  <!-- Ensure using JDK 11 (or 8) -->
+        <java.version>11</java.version>  <!-- Ensure using JDK 11 or higher -->
     </properties>
 </project>
