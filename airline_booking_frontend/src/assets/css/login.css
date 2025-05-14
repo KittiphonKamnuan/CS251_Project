@@ -63,35 +63,38 @@
 .input-with-icon {
     position: relative;
 }
-
 .input-icon {
     position: absolute;
-    left: 12px;
+    left: 10px; /* Adjusted for better alignment */
     top: 50%;
-    transform: translateY(-50%);
-    width: 20px;
-    height: 20px;
-    color: #888;
+    transform: translateY(-50%); /* Center the icon vertically */
+    color: #007bff; /* Change icon color to match the theme */
+    font-size: 1.2rem; /* Increase icon size for better visibility */
 }
-
-.input-with-icon input {
-    padding-left: 40px;
-}
-
-input[type="email"],
+input[type="text"],
 input[type="password"] {
-    width: 100%;
-    padding: 12px 15px;
+    padding: 12px 40px 12px 40px; /* Added padding for icon space */
     border: 1px solid #ddd;
     border-radius: 6px;
     font-size: 16px;
-    transition: border-color 0.3s;
+    width: 100%;
 }
-
-input[type="email"]:focus,
+input[type="text"]:focus,
 input[type="password"]:focus {
-    border-color: #007bff;
+    border-color: #007bff; /* Change border color on focus */
     outline: none;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5); /* Add shadow for focus effect */
+}
+.toggle-password {
+    position: absolute;
+    right: 10px; /* Position the toggle button */
+    top: 50%;
+    transform: translateY(-50%); /* Center the button vertically */
+    background: none;
+    border: none;
+    color: #007bff; /* Match the theme color */
+    cursor: pointer;
+    font-size: 1rem; /* Adjust size for better visibility */
 }
 
 .error-message {
