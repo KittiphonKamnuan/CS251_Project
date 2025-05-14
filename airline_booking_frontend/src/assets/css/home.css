@@ -4,7 +4,7 @@
 .hero-section {
     position: relative;
     height: 70vh; /* Adjust height as needed */
-    background: url('../image/BigBG.jpg') center/cover no-repeat; /* Replace with your image path */
+    background: url('../../../public/images/backgrounds/BigBG.jpg') center/cover no-repeat; /* Replace with your image path */
     display: flex;
     align-items: center;
     justify-content: center;
