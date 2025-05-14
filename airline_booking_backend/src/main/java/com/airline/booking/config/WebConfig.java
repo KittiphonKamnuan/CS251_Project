@@ -21,17 +21,17 @@ public class WebConfig implements WebMvcConfigurer {
    public ObjectMapper objectMapper() {
        ObjectMapper objectMapper = new ObjectMapper();
        
-       // ลงทะเบียนโมดูลสำหรับ Java 8 date/time
+       // Register module for Java 8 date/time
        objectMapper.registerModule(new JavaTimeModule());
        
-       // ปิดการใช้งานคุณสมบัติที่อาจทำให้เกิดปัญหา
+       // Disable features that could cause issues
        objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
        objectMapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
        
-       // ไม่รวมคุณสมบัติที่เป็น null เพื่อลดขนาด JSON
+       // Exclude properties that are null to reduce JSON size
        objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
        
-       // ไม่ล้มเหลวเมื่อพบคุณสมบัติที่ไม่รู้จัก
+       // Do not fail when encountering unknown properties
        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
        
        return objectMapper;
@@ -49,13 +49,15 @@ public class WebConfig implements WebMvcConfigurer {
        converters.add(mappingJackson2HttpMessageConverter());
    }
    
-   // กำหนดค่า CORS
+   // Configure CORS
    @Override
    public void addCorsMappings(CorsRegistry registry) {
+       // Replace "*" with your actual allowed origins
        registry.addMapping("/api/**")
-           .allowedOrigins("*")
+           .allowedOrigins("http://localhost:3000")  // Allow only this origin
            .allowedMethods("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
            .allowedHeaders("*")
-           .maxAge(3600);
+           .allowCredentials(true)  // Allow credentials (cookies, authorization headers)
+           .maxAge(3600);  // Cache preflight request for 1 hour (3600 seconds)
    }
 }
