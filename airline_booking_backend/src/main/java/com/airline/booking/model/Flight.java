@@ -34,7 +34,7 @@ public class Flight {
     @Column(name = "FlightStatus", length = 20)
     private String flightStatus;
 
-    // Relationships
+    // Relationships - ใช้ JsonIgnore เพื่อป้องกัน infinite recursion
     @OneToMany(mappedBy = "flight", cascade = CascadeType.ALL)
     private Set<Booking> bookings = new HashSet<>();
 
@@ -136,6 +136,27 @@ public class Flight {
 
     public void setSeats(Set<Seat> seats) {
         this.seats = seats;
+    }
+
+    // Helper methods
+    public void addBooking(Booking booking) {
+        this.bookings.add(booking);
+        booking.setFlight(this);
+    }
+
+    public void removeBooking(Booking booking) {
+        this.bookings.remove(booking);
+        booking.setFlight(null);
+    }
+
+    public void addSeat(Seat seat) {
+        this.seats.add(seat);
+        seat.setFlight(this);
+    }
+
+    public void removeSeat(Seat seat) {
+        this.seats.remove(seat);
+        seat.setFlight(null);
     }
 
     @Override

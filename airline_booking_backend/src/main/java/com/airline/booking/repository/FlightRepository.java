@@ -1,6 +1,8 @@
 package com.airline.booking.repository;
 
 import com.airline.booking.model.Flight;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -27,6 +29,17 @@ public interface FlightRepository extends JpaRepository<Flight, String> {
             @Param("arrivalCity") String arrivalCity,
             @Param("startDate") LocalDateTime startDate,
             @Param("endDate") LocalDateTime endDate);
+    
+    // เพิ่มเมธอดที่รองรับ Pagination
+    @Query("SELECT f FROM Flight f WHERE f.departureCity = :departureCity " +
+           "AND f.arrivalCity = :arrivalCity " +
+           "AND f.departureTime BETWEEN :startDate AND :endDate")
+    Page<Flight> findFlightsWithPagination(
+            @Param("departureCity") String departureCity,
+            @Param("arrivalCity") String arrivalCity,
+            @Param("startDate") LocalDateTime startDate,
+            @Param("endDate") LocalDateTime endDate,
+            Pageable pageable);
     
     // ค้นหาเที่ยวบินตามสถานะ
     List<Flight> findByFlightStatus(String flightStatus);

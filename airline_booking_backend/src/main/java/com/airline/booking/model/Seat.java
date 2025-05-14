@@ -90,6 +90,15 @@ public class Seat {
         this.price = price;
     }
 
+    // Helper methods
+    public String getFlightId() {
+        return flight != null ? flight.getFlightId() : null;
+    }
+    
+    public String getFlightNumber() {
+        return flight != null ? flight.getFlightNumber() : null;
+    }
+
     @Override
     public String toString() {
         return "Seat{" +

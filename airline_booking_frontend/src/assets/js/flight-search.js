@@ -129,6 +129,20 @@ document.addEventListener('DOMContentLoaded', function() {
             searchButton.innerHTML = '<span class="loading-spinner"></span> กำลังค้นหา...';
             searchButton.disabled = true;
             
+            // แสดงส่วนผลลัพธ์และเพิ่ม loading spinner
+            if (flightResults && resultsContainer) {
+                flightResults.style.display = 'block';
+                resultsContainer.innerHTML = `
+                    <div class="loading-results">
+                        <div class="loading-spinner-large"></div>
+                        <p>กำลังค้นหาเที่ยวบินที่ดีที่สุดสำหรับคุณ...</p>
+                    </div>
+                `;
+                
+                // เลื่อนไปที่ส่วนผลลัพธ์
+                flightResults.scrollIntoView({ behavior: 'smooth' });
+            }
+            
             try {
                 // Prepare search parameters
                 const searchParams = prepareSearchParams();
@@ -140,7 +154,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 displayFlightResults(flights, searchParams);
             } catch (error) {
                 console.error('Error searching flights:', error);
-                showSearchError('ไม่สามารถค้นหาเที่ยวบินได้ กรุณาลองใหม่อีกครั้ง');
+                showSearchError(error.message || 'ไม่สามารถค้นหาเที่ยวบินได้ กรุณาลองใหม่อีกครั้ง');
             } finally {
                 // Reset button state
                 searchButton.innerHTML = originalButtonText;
@@ -212,16 +226,32 @@ document.addEventListener('DOMContentLoaded', function() {
         return params;
     }
     
-    // Function to search flights via API
+    // Function to search flights via API - updated with better error handling
     async function searchFlights(searchParams) {
         try {
+            console.log('Searching flights with params:', searchParams);
+            
             // ใช้ API Service เพื่อค้นหาเที่ยวบิน
-            return await apiService.searchFlights(
+            const flights = await apiService.searchFlights(
                 searchParams.from,
                 searchParams.to,
                 searchParams.departureFrom,
                 searchParams.departureTo
             );
+            
+            console.log('Flights data received:', flights);
+            
+            // ตรวจสอบรูปแบบของข้อมูลที่ได้
+            if (!flights) {
+                return [];
+            }
+            
+            if (Array.isArray(flights)) {
+                return flights;
+            } else {
+                console.error('Invalid flight data format:', flights);
+                throw new Error('ข้อมูลเที่ยวบินไม่อยู่ในรูปแบบที่ถูกต้อง');
+            }
         } catch (error) {
             console.error('API search error:', error);
             throw error;
@@ -260,23 +290,38 @@ document.addEventListener('DOMContentLoaded', function() {
                 <i class="fas fa-search"></i>
                 <h3>ไม่พบเที่ยวบิน</h3>
                 <p>ไม่พบเที่ยวบินตามที่คุณค้นหา กรุณาลองค้นหาใหม่อีกครั้ง</p>
+                <button class="btn btn-primary retry-search-btn">ค้นหาใหม่</button>
             `;
             resultsContainer.appendChild(noResults);
+            
+            // เพิ่ม event listener สำหรับปุ่มค้นหาใหม่
+            const retryBtn = noResults.querySelector('.retry-search-btn');
+            if (retryBtn) {
+                retryBtn.addEventListener('click', function() {
+                    // เลื่อนไปที่ฟอร์มค้นหา
+                    searchForm.scrollIntoView({ behavior: 'smooth' });
+                });
+            }
         } else {
             // Show filter buttons
-            document.querySelector('.results-filters')?.classList.add('active');
+            const filtersSection = document.querySelector('.results-filters');
+            if (filtersSection) {
+                filtersSection.classList.add('active');
+            }
             
             // Display flights
             flights.forEach(flight => {
                 resultsContainer.appendChild(createFlightCard(flight, searchParams));
             });
+            
+            // แสดงจำนวนเที่ยวบินที่พบ
+            const resultsCount = document.createElement('div');
+            resultsCount.className = 'results-count';
+            resultsCount.innerHTML = `
+                <p>พบ ${flights.length} เที่ยวบิน</p>
+            `;
+            resultsContainer.insertBefore(resultsCount, resultsContainer.children[1]);
         }
-        
-        // Show results section
-        flightResults.style.display = 'block';
-        
-        // Scroll to results
-        flightResults.scrollIntoView({ behavior: 'smooth' });
     }
     
     // Function to create a flight card
@@ -436,10 +481,15 @@ document.addEventListener('DOMContentLoaded', function() {
         if (resultsContainer) {
             // Keep the header
             const header = resultsContainer.querySelector('.results-header');
+            const resultsCount = resultsContainer.querySelector('.results-count');
             resultsContainer.innerHTML = '';
             
             if (header) {
                 resultsContainer.appendChild(header);
+            }
+            
+            if (resultsCount) {
+                resultsContainer.appendChild(resultsCount);
             }
             
             // Display filtered flights
@@ -456,8 +506,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         try {
             // ดึงข้อมูลเมืองจาก API
-            const citiesResponse = await apiService.request('/cities');
-            const cities = citiesResponse.map(city => `${city.name} (${city.code})`);
+            const cities = await fetchCities();
             
             // Create suggestions container
             let suggestionsContainer = document.createElement('div');
@@ -477,7 +526,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Click outside
             document.addEventListener('click', function(e) {
-                if (e.target !== input && e.target !== suggestionsContainer) {
+                if (e.target !== input && e.target !== suggestionsContainer && !suggestionsContainer.contains(e.target)) {
                     suggestionsContainer.style.display = 'none';
                 }
             });
@@ -498,7 +547,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Populate suggestions
                 suggestionsContainer.innerHTML = '';
                 
-                filteredCities.forEach(city => {
+                // Limit to first 10 suggestions for performance
+                const limitedCities = filteredCities.slice(0, 10);
+                
+                limitedCities.forEach(city => {
                     const suggestion = document.createElement('div');
                     suggestion.className = 'suggestion';
                     suggestion.textContent = city;
@@ -512,7 +564,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
                 
                 // Show if there are suggestions
-                if (filteredCities.length > 0) {
+                if (limitedCities.length > 0) {
                     suggestionsContainer.style.display = 'block';
                 } else {
                     suggestionsContainer.style.display = 'none';
@@ -520,23 +572,40 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         } catch (error) {
             console.error('Error loading cities:', error);
-            
-            // กรณีไม่สามารถดึงข้อมูลเมืองได้ ให้ใช้ข้อมูลสำรอง
-            const fallbackCities = [
-                'กรุงเทพฯ (BKK)',
-                'เชียงใหม่ (CNX)',
-                'ภูเก็ต (HKT)',
-                'กระบี่ (KBV)',
-                'เชียงราย (CEI)',
-                'หาดใหญ่ (HDY)',
-                'สุราษฎร์ธานี (URT)',
-                'อุดรธานี (UTH)',
-                'ขอนแก่น (KKC)',
-                'อุบลราชธานี (UBP)'
-            ];
-            
-            setupCitySuggestionsWithFallback(input, fallbackCities);
+            setupCitySuggestionsWithFallback(input, getFallbackCities());
         }
+    }
+    
+    // Function to fetch cities
+    async function fetchCities() {
+        try {
+            const citiesResponse = await apiService.getCities();
+            
+            if (citiesResponse && Array.isArray(citiesResponse)) {
+                return citiesResponse.map(city => `${city.name} (${city.code})`);
+            } else {
+                throw new Error('Invalid cities data format');
+            }
+        } catch (error) {
+            console.error('Error fetching cities:', error);
+            return getFallbackCities();
+        }
+    }
+    
+    // Function to get fallback cities
+    function getFallbackCities() {
+        return [
+            'กรุงเทพฯ (BKK)',
+            'เชียงใหม่ (CNX)',
+            'ภูเก็ต (HKT)',
+            'กระบี่ (KBV)',
+            'เชียงราย (CEI)',
+            'หาดใหญ่ (HDY)',
+            'สุราษฎร์ธานี (URT)',
+            'อุดรธานี (UTH)',
+            'ขอนแก่น (KKC)',
+            'อุบลราชธานี (UBP)'
+        ];
     }
     
     // Function to set up city suggestions with fallback data
@@ -559,7 +628,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Click outside
         document.addEventListener('click', function(e) {
-            if (e.target !== input && e.target !== suggestionsContainer) {
+            if (e.target !== input && e.target !== suggestionsContainer && !suggestionsContainer.contains(e.target)) {
                 suggestionsContainer.style.display = 'none';
             }
         });
@@ -648,8 +717,34 @@ document.addEventListener('DOMContentLoaded', function() {
                 vertical-align: middle;
             }
             
+            .loading-spinner-large {
+                display: inline-block;
+                width: 40px;
+                height: 40px;
+                border: 3px solid rgba(0,0,0,0.1);
+                border-radius: 50%;
+                border-top-color: var(--primary-color);
+                animation: spin 1s linear infinite;
+                margin-bottom: 16px;
+            }
+            
             @keyframes spin {
                 to { transform: rotate(360deg); }
+            }
+            
+            .loading-results {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                padding: 60px 0;
+                text-align: center;
+            }
+            
+            .loading-results p {
+                font-size: 1.1rem;
+                color: #555;
+                margin-top: 10px;
             }
             
             .no-results {
@@ -673,6 +768,31 @@ document.addEventListener('DOMContentLoaded', function() {
             .results-filters.active {
                 display: flex;
             }
+            
+            .results-count {
+                margin: 10px 0 20px;
+                font-size: 0.9rem;
+                color: #777;
+            }
+            
+            .search-error {
+                text-align: center;
+                padding: 40px 20px;
+                background-color: #fff5f5;
+                border: 1px solid #ffebee;
+                border-radius: 8px;
+                margin: 20px 0;
+                color: #d32f2f;
+            }
+            
+            .search-error i {
+                font-size: 2.5rem;
+                margin-bottom: 1rem;
+            }
+            
+            .search-error h3 {
+                margin-bottom: 0.5rem;
+            }
         `;
         document.head.appendChild(style);
     }
@@ -690,8 +810,18 @@ document.addEventListener('DOMContentLoaded', function() {
                 <i class="fas fa-exclamation-circle"></i>
                 <h3>เกิดข้อผิดพลาดในการค้นหา</h3>
                 <p>${message}</p>
+                <button class="btn btn-primary retry-search-btn">ลองใหม่อีกครั้ง</button>
             </div>
         `;
+        
+        // เพิ่ม event listener สำหรับปุ่มลองใหม่
+        const retryBtn = resultsContainer.querySelector('.retry-search-btn');
+        if (retryBtn) {
+            retryBtn.addEventListener('click', function() {
+                // เลื่อนไปที่ฟอร์มค้นหา
+                searchForm.scrollIntoView({ behavior: 'smooth' });
+            });
+        }
         
         // Scroll to results
         flightResults.scrollIntoView({ behavior: 'smooth' });

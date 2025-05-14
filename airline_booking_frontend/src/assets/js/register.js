@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const lastNameField = document.getElementById('lastName');
     const emailField = document.getElementById('email');
     const phoneField = document.getElementById('phone');
+    const usernameField = document.getElementById('username'); // เพิ่มการดึง element username
     const passwordField = document.getElementById('password');
     const confirmPasswordField = document.getElementById('confirmPassword');
     const termsCheckbox = document.getElementById('terms');
@@ -14,6 +15,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const lastNameError = document.getElementById('lastName-error');
     const emailError = document.getElementById('email-error');
     const phoneError = document.getElementById('phone-error');
+    const usernameError = document.getElementById('username-error'); // เพิ่มการดึง element แสดง error
     const passwordError = document.getElementById('password-error');
     const confirmPasswordError = document.getElementById('confirmPassword-error');
     const termsError = document.getElementById('terms-error');
@@ -47,7 +49,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Reset all error messages
         const errorElements = [firstNameError, lastNameError, emailError, phoneError, 
-                              passwordError, confirmPasswordError, termsError];
+                              usernameError, passwordError, confirmPasswordError, termsError]; // เพิ่ม usernameError
         errorElements.forEach(element => {
             if (element) element.style.display = 'none';
         });
@@ -74,6 +76,13 @@ document.addEventListener('DOMContentLoaded', function() {
         } else if (!isValidEmail(emailField.value.trim())) {
             emailError.textContent = 'กรุณากรอกอีเมลให้ถูกต้อง';
             emailError.style.display = 'block';
+            isValid = false;
+        }
+        
+        // Validate username - เพิ่มการตรวจสอบ username
+        if (!usernameField.value.trim()) {
+            usernameError.textContent = 'กรุณากรอกชื่อผู้ใช้';
+            usernameError.style.display = 'block';
             isValid = false;
         }
         
@@ -119,21 +128,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Submit form if valid
         if (isValid) {
-            // สร้าง username ที่ไม่ซ้ำกันจากอีเมล
-            // เพิ่มบรรทัดนี้เพื่อแก้ปัญหา Column 'Username' cannot be null
-            const username = emailField.value.trim().split('@')[0] + Math.floor(Math.random() * 1000);
-            
-            // แสดงข้อมูลที่จะส่งในคอนโซล
-            console.log('User data being sent:', {
-                firstName: firstNameField.value,
-                lastName: lastNameField.value,
-                username: username, // ส่ง username ไปด้วย
-                email: emailField.value,
-                phone: phoneField.value,
-                password: passwordField.value
-            });
-            
-            registerUser(emailField.value, username);
+            registerUser();
         }
     });
 
@@ -150,8 +145,8 @@ document.addEventListener('DOMContentLoaded', function() {
         return phoneRegex.test(phone.replace(/[- ]/g, ''));
     }
 
-    // Register user function
-    async function registerUser(email, username) {
+    // Register user function - แก้ไขให้ใช้ username จากฟอร์ม
+    async function registerUser() {
         // Show loading state
         const submitBtn = registerForm.querySelector('button[type="submit"]');
         const originalBtnText = submitBtn.textContent;
@@ -163,11 +158,15 @@ document.addEventListener('DOMContentLoaded', function() {
             const userData = {
                 firstName: firstNameField.value.trim(),
                 lastName: lastNameField.value.trim(),
-                username: username, // ใช้ username ที่สร้าง
+                username: usernameField.value.trim(), // ใช้ username ที่ผู้ใช้กรอก
                 email: emailField.value.trim(),
                 phone: phoneField.value.trim(),
-                password: passwordField.value
+                password: passwordField.value,
+                role: "Customer" // เพิ่ม role เพื่อแก้ปัญหา constraint
             };
+            
+            // แสดงข้อมูลที่จะส่งในคอนโซล
+            console.log('User data being sent:', userData);
             
             // เรียกใช้ API เพื่อลงทะเบียน
             const response = await apiService.register(userData);
@@ -186,8 +185,16 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // แสดงข้อความผิดพลาดที่เฉพาะเจาะจง
             if (error.message && error.message.includes('constraint')) {
-                emailError.textContent = 'อีเมลหรือชื่อผู้ใช้นี้มีอยู่ในระบบแล้ว กรุณาใช้อีเมลอื่น';
-                emailError.style.display = 'block';
+                if (error.message.includes('Username')) {
+                    usernameError.textContent = 'ชื่อผู้ใช้นี้มีอยู่ในระบบแล้ว กรุณาใช้ชื่อผู้ใช้อื่น';
+                    usernameError.style.display = 'block';
+                } else if (error.message.includes('Email')) {
+                    emailError.textContent = 'อีเมลนี้มีอยู่ในระบบแล้ว กรุณาใช้อีเมลอื่น';
+                    emailError.style.display = 'block';
+                } else {
+                    // แสดงข้อความผิดพลาดทั่วไปเกี่ยวกับ constraint
+                    alert('ไม่สามารถสมัครสมาชิกได้: ข้อมูลที่ส่งไม่ถูกต้องหรือมีอยู่แล้วในระบบ');
+                }
             } else {
                 // แสดงข้อความผิดพลาดทั่วไป
                 alert('ไม่สามารถสมัครสมาชิกได้: ' + error.message);

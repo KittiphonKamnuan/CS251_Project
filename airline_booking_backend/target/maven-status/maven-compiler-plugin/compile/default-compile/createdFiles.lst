@@ -1,5 +1,5 @@
 com/airline/booking/model/LoyaltyPoints.class
-com/airline/booking/exception/ErrorDetails.class
+com/airline/booking/service/FlightServiceImpl.class
 com/airline/booking/repository/UserRepository.class
 com/airline/booking/controller/BookingController.class
 com/airline/booking/model/Flight.class
@@ -10,6 +10,7 @@ com/airline/booking/model/Payment.class
 com/airline/booking/exception/GlobalExceptionHandler.class
 com/airline/booking/controller/UserController.class
 com/airline/booking/repository/DiscountRepository.class
+com/airline/booking/dto/FlightDTO.class
 com/airline/booking/repository/LoyaltyPointsRepository.class
 com/airline/booking/controller/AuthController.class
 com/airline/booking/model/Booking.class
@@ -23,6 +24,8 @@ com/airline/booking/exception/ResourceNotFoundException.class
 com/airline/booking/model/Discount.class
 com/airline/booking/controller/UtilityController.class
 com/airline/booking/model/User.class
+com/airline/booking/config/WebConfig.class
+com/airline/booking/dto/FlightSearchResponse.class
 com/airline/booking/service/BookingService.class
 com/airline/booking/service/FlightService.class
 com/airline/booking/repository/SeatRepository.class

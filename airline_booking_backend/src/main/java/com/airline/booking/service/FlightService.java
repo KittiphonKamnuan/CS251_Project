@@ -1,14 +1,20 @@
 package com.airline.booking.service;
 
+import com.airline.booking.dto.FlightDTO;
 import com.airline.booking.exception.ResourceNotFoundException;
 import com.airline.booking.model.Flight;
+import com.airline.booking.model.Seat;
 import com.airline.booking.repository.FlightRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 @Service
 public class FlightService {
@@ -45,6 +51,13 @@ public class FlightService {
     public List<Flight> searchFlights(String departureCity, String arrivalCity, 
                                    LocalDateTime startDate, LocalDateTime endDate) {
         return flightRepository.findFlights(departureCity, arrivalCity, startDate, endDate);
+    }
+    
+    // ค้นหาเที่ยวบินตามเมืองต้นทาง ปลายทาง และช่วงเวลาเดินทาง พร้อม Pagination
+    public Page<Flight> searchFlightsWithPagination(String departureCity, String arrivalCity,
+                                                 LocalDateTime startDate, LocalDateTime endDate,
+                                                 Pageable pageable) {
+        return flightRepository.findFlightsWithPagination(departureCity, arrivalCity, startDate, endDate, pageable);
     }
 
     // ค้นหาเที่ยวบินตามสถานะ
@@ -123,5 +136,38 @@ public class FlightService {
         
         // รวมกันเป็น ID
         return prefix + number;
+    }
+    
+    // แปลง Flight เป็น FlightDTO
+    public FlightDTO convertToDTO(Flight flight) {
+        FlightDTO dto = new FlightDTO();
+        dto.setFlightId(flight.getFlightId());
+        dto.setFlightNumber(flight.getFlightNumber());
+        dto.setDepartureCity(flight.getDepartureCity());
+        dto.setArrivalCity(flight.getArrivalCity());
+        dto.setDepartureTime(flight.getDepartureTime());
+        dto.setArrivalTime(flight.getArrivalTime());
+        dto.setAircraft(flight.getAircraft());
+        dto.setFlightStatus(flight.getFlightStatus());
+        
+        // หาราคาเริ่มต้นจากที่นั่งที่ถูกที่สุด หรือใช้ค่าเริ่มต้น
+        BigDecimal basePrice = new BigDecimal("1290");
+        if (flight.getSeats() != null && !flight.getSeats().isEmpty()) {
+            basePrice = flight.getSeats().stream()
+                .map(Seat::getPrice)
+                .min(BigDecimal::compareTo)
+                .orElse(basePrice);
+        }
+        
+        dto.setPrice(basePrice);
+        
+        return dto;
+    }
+    
+    // แปลง List<Flight> เป็น List<FlightDTO>
+    public List<FlightDTO> convertToDTOList(List<Flight> flights) {
+        return flights.stream()
+            .map(this::convertToDTO)
+            .collect(Collectors.toList());
     }
 }
