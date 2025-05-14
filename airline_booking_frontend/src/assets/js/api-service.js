@@ -48,13 +48,11 @@ class ApiService {
             const response = await fetch(url, options);
             
             console.log('Response status:', response.status);
-            console.log('Response headers:', response.headers);
             
             // ตรวจสอบว่า response เป็น JSON หรือไม่
             const contentType = response.headers.get('content-type');
             if (contentType && contentType.includes('application/json')) {
                 const result = await response.json();
-                console.log('Response data:', result);
                 
                 if (!response.ok) {
                     const errorMessage = result.message || result.error || 'Unknown error';
@@ -65,7 +63,6 @@ class ApiService {
             } else {
                 // ถ้าไม่ใช่ JSON ให้ดึงข้อมูลเป็น text
                 const textResult = await response.text();
-                console.log('Response text:', textResult);
                 
                 if (!response.ok) {
                     throw new Error(textResult || 'Server error with non-JSON response');
@@ -81,15 +78,13 @@ class ApiService {
   
     // ======== USER ENDPOINTS ========
     
-    // Login user (will need to implement auth endpoint in backend)
+    // Login user
     async login(username, password) {
       return this.request('/auth/login', 'POST', { username, password });
     }
     
     // Register new user
     async register(userData) {
-        console.log('Registering user with data:', userData);
-        
         // ถ้าไม่มี username ให้สร้างจากอีเมล
         if (!userData.username && userData.email) {
             userData.username = userData.email.split('@')[0] + Math.floor(Math.random() * 1000);
@@ -273,6 +268,28 @@ class ApiService {
     // Apply discount to booking
     async applyDiscount(bookingId, discountId) {
       return this.request(`/bookings/${bookingId}/discounts/${discountId}`, 'POST');
+    }
+    
+    // ======== ADDITIONAL ENDPOINTS ========
+    
+    // Get popular destinations
+    async getPopularDestinations() {
+      return this.request('/destinations/popular');
+    }
+    
+    // Get special offers
+    async getSpecialOffers() {
+      return this.request('/promotions/featured');
+    }
+    
+    // Get all cities
+    async getCities() {
+      return this.request('/cities');
+    }
+    
+    // Subscribe to newsletter
+    async subscribeToNewsletter(email) {
+      return this.request('/newsletter/subscribe', 'POST', { email });
     }
   }
   

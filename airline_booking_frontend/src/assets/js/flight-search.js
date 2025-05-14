@@ -186,13 +186,17 @@ document.addEventListener('DOMContentLoaded', function() {
     function prepareSearchParams() {
         const departureCode = extractAirportCode(departureInput.value);
         const arrivalCode = extractAirportCode(arrivalInput.value);
-        const departureDate = departureDateInput.value;
+        
+        // แปลงวันที่เป็น LocalDateTime ตามรูปแบบที่ API ต้องการ (ISO-8601)
+        const departureDateValue = departureDateInput.value;
+        const departureDateTime = `${departureDateValue}T00:00:00`;
+        const departureDateTimeTo = `${departureDateValue}T23:59:59`;
         
         const params = {
             from: departureCode,
             to: arrivalCode,
-            departureFrom: departureDate,
-            departureTo: departureDate,
+            departureFrom: departureDateTime,
+            departureTo: departureDateTimeTo,
             passengers: passengersSelect.value,
             seatClass: seatClassSelect.value
         };
@@ -200,8 +204,9 @@ document.addEventListener('DOMContentLoaded', function() {
         // Add return date if round trip
         const activeTab = document.querySelector('.tab-btn.active');
         if (activeTab && activeTab.dataset.tab === 'round-trip') {
-            params.returnFrom = returnDateInput.value;
-            params.returnTo = returnDateInput.value;
+            const returnDateValue = returnDateInput.value;
+            params.returnFrom = `${returnDateValue}T00:00:00`;
+            params.returnTo = `${returnDateValue}T23:59:59`;
         }
         
         return params;
@@ -210,7 +215,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Function to search flights via API
     async function searchFlights(searchParams) {
         try {
-            // We're using the advanced search API endpoint
+            // ใช้ API Service เพื่อค้นหาเที่ยวบิน
             return await apiService.searchFlights(
                 searchParams.from,
                 searchParams.to,
@@ -247,7 +252,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Save flights in a global variable for filtering
         window.currentFlights = flights;
         
-        if (flights.length === 0) {
+        if (!flights || flights.length === 0) {
             // No flights found
             const noResults = document.createElement('div');
             noResults.className = 'no-results';
@@ -446,23 +451,96 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // Function to set up city suggestions
-    function setupCitySuggestions(input) {
+    async function setupCitySuggestions(input) {
         if (!input) return;
         
-        // List of cities to suggest
-        const cities = [
-            'กรุงเทพฯ (BKK)',
-            'เชียงใหม่ (CNX)',
-            'ภูเก็ต (HKT)',
-            'กระบี่ (KBV)',
-            'เชียงราย (CEI)',
-            'หาดใหญ่ (HDY)',
-            'สุราษฎร์ธานี (URT)',
-            'อุดรธานี (UTH)',
-            'ขอนแก่น (KKC)',
-            'อุบลราชธานี (UBP)'
-        ];
-        
+        try {
+            // ดึงข้อมูลเมืองจาก API
+            const citiesResponse = await apiService.request('/cities');
+            const cities = citiesResponse.map(city => `${city.name} (${city.code})`);
+            
+            // Create suggestions container
+            let suggestionsContainer = document.createElement('div');
+            suggestionsContainer.className = 'city-suggestions';
+            suggestionsContainer.style.display = 'none';
+            document.body.appendChild(suggestionsContainer);
+            
+            // Focus event
+            input.addEventListener('focus', function() {
+                showSuggestions(this.value);
+            });
+            
+            // Input event
+            input.addEventListener('input', function() {
+                showSuggestions(this.value);
+            });
+            
+            // Click outside
+            document.addEventListener('click', function(e) {
+                if (e.target !== input && e.target !== suggestionsContainer) {
+                    suggestionsContainer.style.display = 'none';
+                }
+            });
+            
+            // Show suggestions function
+            function showSuggestions(value) {
+                // Position suggestions container
+                const inputRect = input.getBoundingClientRect();
+                suggestionsContainer.style.width = `${input.offsetWidth}px`;
+                suggestionsContainer.style.left = `${inputRect.left}px`;
+                suggestionsContainer.style.top = `${inputRect.bottom}px`;
+                
+                // Filter cities based on input value
+                const filteredCities = cities.filter(city => 
+                    city.toLowerCase().includes(value.toLowerCase())
+                );
+                
+                // Populate suggestions
+                suggestionsContainer.innerHTML = '';
+                
+                filteredCities.forEach(city => {
+                    const suggestion = document.createElement('div');
+                    suggestion.className = 'suggestion';
+                    suggestion.textContent = city;
+                    
+                    suggestion.addEventListener('click', function() {
+                        input.value = city;
+                        suggestionsContainer.style.display = 'none';
+                    });
+                    
+                    suggestionsContainer.appendChild(suggestion);
+                });
+                
+                // Show if there are suggestions
+                if (filteredCities.length > 0) {
+                    suggestionsContainer.style.display = 'block';
+                } else {
+                    suggestionsContainer.style.display = 'none';
+                }
+            }
+        } catch (error) {
+            console.error('Error loading cities:', error);
+            
+            // กรณีไม่สามารถดึงข้อมูลเมืองได้ ให้ใช้ข้อมูลสำรอง
+            const fallbackCities = [
+                'กรุงเทพฯ (BKK)',
+                'เชียงใหม่ (CNX)',
+                'ภูเก็ต (HKT)',
+                'กระบี่ (KBV)',
+                'เชียงราย (CEI)',
+                'หาดใหญ่ (HDY)',
+                'สุราษฎร์ธานี (URT)',
+                'อุดรธานี (UTH)',
+                'ขอนแก่น (KKC)',
+                'อุบลราชธานี (UBP)'
+            ];
+            
+            setupCitySuggestionsWithFallback(input, fallbackCities);
+        }
+    }
+    
+    // Function to set up city suggestions with fallback data
+    function setupCitySuggestionsWithFallback(input, cities) {
         // Create suggestions container
         let suggestionsContainer = document.createElement('div');
         suggestionsContainer.className = 'city-suggestions';

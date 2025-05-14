@@ -11,6 +11,7 @@
 /Users/cyberninja/Library/CloudStorage/OneDrive-ThammasatUniversity/year2/CS251/project/airline_booking_backend/src/main/java/com/airline/booking/repository/SeatRepository.java
 /Users/cyberninja/Library/CloudStorage/OneDrive-ThammasatUniversity/year2/CS251/project/airline_booking_backend/src/main/java/com/airline/booking/repository/LoyaltyPointsRepository.java
 /Users/cyberninja/Library/CloudStorage/OneDrive-ThammasatUniversity/year2/CS251/project/airline_booking_backend/src/main/java/com/airline/booking/model/Flight.java
+/Users/cyberninja/Library/CloudStorage/OneDrive-ThammasatUniversity/year2/CS251/project/airline_booking_backend/src/main/java/com/airline/booking/controller/AuthController.java
 /Users/cyberninja/Library/CloudStorage/OneDrive-ThammasatUniversity/year2/CS251/project/airline_booking_backend/src/main/java/com/airline/booking/model/Seat.java
 /Users/cyberninja/Library/CloudStorage/OneDrive-ThammasatUniversity/year2/CS251/project/airline_booking_backend/src/main/java/com/airline/booking/service/UserService.java
 /Users/cyberninja/Library/CloudStorage/OneDrive-ThammasatUniversity/year2/CS251/project/airline_booking_backend/src/main/java/com/airline/booking/exception/GlobalExceptionHandler.java

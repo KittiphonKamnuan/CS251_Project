@@ -61,14 +61,17 @@
                         <h1>เข้าสู่ระบบ</h1>
                         <p class="login-subheading">ยินดีต้อนรับกลับมา! กรุณาเข้าสู่ระบบเพื่อจัดการการเดินทางของคุณ</p>
                         
+                        <!-- แสดงข้อความแจ้งผลการเข้าสู่ระบบ -->
+                        <div id="login-message" class="alert" style="display: none;"></div>
+                        
                         <form id="loginForm" class="login-form">
                             <div class="form-group">
-                                <label for="email">อีเมล</label>
+                                <label for="username">ชื่อผู้ใช้</label>
                                 <div class="input-with-icon">
-                                    <i class="fas fa-envelope input-icon"></i>
-                                    <input type="email" id="email" name="email" placeholder="example@mail.com" required>
+                                    <i class="fas fa-user input-icon"></i>
+                                    <input type="text" id="username" name="username" placeholder="ชื่อผู้ใช้" required>
                                 </div>
-                                <div class="error-message" id="email-error"></div>
+                                <div class="error-message" id="username-error"></div>
                             </div>
                             
                             <div class="form-group">
@@ -164,7 +167,272 @@
         </div>
     </footer>
 
-    <script type="module" src="../assets/js/script.js"></script>
-    <script type="module" src="../assets/js/login.js"></script>
+    <script>
+    // สไตล์เพิ่มเติมสำหรับข้อความแจ้งเตือน
+    document.head.insertAdjacentHTML('beforeend', `
+        <style>
+            .alert {
+                padding: 12px 15px;
+                margin-bottom: 20px;
+                border-radius: 4px;
+                font-size: 14px;
+            }
+            
+            .alert-success {
+                background-color: #d4edda;
+                color: #155724;
+                border: 1px solid #c3e6cb;
+            }
+            
+            .alert-danger {
+                background-color: #f8d7da;
+                color: #721c24;
+                border: 1px solid #f5c6cb;
+            }
+            
+            .loading-spinner {
+                display: inline-block;
+                width: 16px;
+                height: 16px;
+                border: 2px solid rgba(255,255,255,0.3);
+                border-radius: 50%;
+                border-top-color: white;
+                animation: spin 1s linear infinite;
+                margin-right: 8px;
+                vertical-align: middle;
+            }
+            
+            @keyframes spin {
+                to { transform: rotate(360deg); }
+            }
+        </style>
+    `);
+
+    document.addEventListener('DOMContentLoaded', function() {
+        // เลือก elements ที่เกี่ยวข้อง
+        const loginForm = document.getElementById('loginForm');
+        const usernameField = document.getElementById('username');
+        const passwordField = document.getElementById('password');
+        const usernameError = document.getElementById('username-error');
+        const passwordError = document.getElementById('password-error');
+        const togglePasswordButton = document.querySelector('.toggle-password');
+        const loginMessage = document.getElementById('login-message');
+        
+        // ตรวจสอบการเข้าสู่ระบบและกรอกข้อมูลอัตโนมัติ
+        checkLoginStatus();
+        
+        // จัดการการเปิด/ปิดการแสดงรหัสผ่าน
+        if (togglePasswordButton && passwordField) {
+            togglePasswordButton.addEventListener('click', function() {
+                const showText = this.querySelector('.show-password');
+                const hideText = this.querySelector('.hide-password');
+                
+                if (passwordField.type === 'password') {
+                    passwordField.type = 'text';
+                    showText.style.display = 'none';
+                    hideText.style.display = 'inline';
+                } else {
+                    passwordField.type = 'password';
+                    showText.style.display = 'inline';
+                    hideText.style.display = 'none';
+                }
+            });
+        }
+        
+        // จัดการการส่งฟอร์มเข้าสู่ระบบ
+        if (loginForm) {
+            loginForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                // รีเซ็ตข้อความผิดพลาด
+                clearErrors();
+                
+                // ตรวจสอบความถูกต้องของข้อมูล
+                if (!validateLoginForm()) {
+                    return;
+                }
+                
+                // แสดงสถานะการโหลด
+                const submitBtn = this.querySelector('button[type="submit"]');
+                const originalBtnText = submitBtn.textContent;
+                submitBtn.innerHTML = '<span class="loading-spinner"></span> กำลังเข้าสู่ระบบ...';
+                submitBtn.disabled = true;
+                
+                try {
+                    // เตรียมข้อมูลสำหรับส่งไปยัง API
+                    const loginData = {
+                        username: usernameField.value,
+                        password: passwordField.value
+                    };
+                    
+                    // เรียกใช้ API เพื่อเข้าสู่ระบบ
+                    const response = await fetch('http://localhost:8080/api/auth/login', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify(loginData)
+                    });
+                    
+                    if (!response.ok) {
+                        // แสดงข้อความผิดพลาดจาก API
+                        const errorData = await response.json();
+                        throw new Error(errorData.message || 'การเข้าสู่ระบบล้มเหลว');
+                    }
+                    
+                    const data = await response.json();
+                    
+                    // บันทึก token และข้อมูลผู้ใช้
+                    localStorage.setItem('authToken', data.token);
+                    localStorage.setItem('userData', JSON.stringify(data.user));
+                    
+                    // แสดงข้อความสำเร็จ
+                    showMessage('เข้าสู่ระบบสำเร็จ! กำลังนำคุณไปยังหน้าหลัก...', 'success');
+                    
+                    // Redirect ไปยังหน้าหลักหลังจากเข้าสู่ระบบสำเร็จ
+                    setTimeout(() => {
+                        window.location.href = 'index.html';
+                    }, 1500);
+                } catch (error) {
+                    console.error('Login error:', error);
+                    
+                    // แสดงข้อความผิดพลาด
+                    showMessage(error.message || 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง', 'danger');
+                    
+                    // คืนค่าสถานะปุ่ม
+                    submitBtn.innerHTML = originalBtnText;
+                    submitBtn.disabled = false;
+                }
+            });
+        }
+        
+        // ตรวจสอบสถานะการเข้าสู่ระบบ
+        function checkLoginStatus() {
+            const token = localStorage.getItem('authToken');
+            const userData = localStorage.getItem('userData');
+            
+            if (token && userData) {
+                try {
+                    // ผู้ใช้เข้าสู่ระบบแล้ว redirect ไปหน้าหลัก
+                    const user = JSON.parse(userData);
+                    
+                    // หรือเปลี่ยนฟอร์มเป็นข้อความแจ้งว่าเข้าสู่ระบบแล้ว
+                    if (loginForm) {
+                        loginForm.innerHTML = `
+                            <div class="already-logged-in">
+                                <h2>คุณเข้าสู่ระบบแล้ว</h2>
+                                <p>ยินดีต้อนรับ, ${user.username || user.email || 'คุณ'}</p>
+                                <button type="button" class="btn btn-primary logout-btn">ออกจากระบบ</button>
+                                <a href="index.html" class="btn btn-outline">กลับไปยังหน้าหลัก</a>
+                            </div>
+                        `;
+                        
+                        // เพิ่ม event listener สำหรับปุ่มออกจากระบบ
+                        const logoutBtn = document.querySelector('.logout-btn');
+                        if (logoutBtn) {
+                            logoutBtn.addEventListener('click', handleLogout);
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error parsing user data:', error);
+                    // ถ้าข้อมูลผู้ใช้ไม่ถูกต้อง ให้ล้างข้อมูลและโหลดหน้าใหม่
+                    localStorage.removeItem('authToken');
+                    localStorage.removeItem('userData');
+                    window.location.reload();
+                }
+            }
+        }
+        
+        // จัดการการออกจากระบบ
+        function handleLogout() {
+            // ล้างข้อมูลการเข้าสู่ระบบ
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('userData');
+            
+            // โหลดหน้าใหม่
+            window.location.reload();
+        }
+        
+        // ตรวจสอบความถูกต้องของข้อมูลในฟอร์ม
+        function validateLoginForm() {
+            let isValid = true;
+            
+            // ตรวจสอบชื่อผู้ใช้
+            if (!usernameField.value.trim()) {
+                showError(usernameError, 'กรุณากรอกชื่อผู้ใช้');
+                isValid = false;
+            }
+            
+            // ตรวจสอบรหัสผ่าน
+            if (!passwordField.value) {
+                showError(passwordError, 'กรุณากรอกรหัสผ่าน');
+                isValid = false;
+            }
+            
+            return isValid;
+        }
+        
+        // แสดงข้อความผิดพลาด
+        function showError(element, message) {
+            if (element) {
+                element.textContent = message;
+                element.style.display = 'block';
+            }
+        }
+        
+        // ล้างข้อความผิดพลาด
+        function clearErrors() {
+            if (usernameError) usernameError.style.display = 'none';
+            if (passwordError) passwordError.style.display = 'none';
+            if (loginMessage) loginMessage.style.display = 'none';
+        }
+        
+        // แสดงข้อความแจ้งเตือน
+        function showMessage(message, type) {
+            if (loginMessage) {
+                loginMessage.textContent = message;
+                loginMessage.className = `alert alert-${type}`;
+                loginMessage.style.display = 'block';
+            }
+        }
+        
+        // เพิ่ม event listener สำหรับการเปลี่ยนข้อมูลใน input field
+        if (usernameField) {
+            usernameField.addEventListener('input', function() {
+                if (usernameError) usernameError.style.display = 'none';
+            });
+        }
+        
+        if (passwordField) {
+            passwordField.addEventListener('input', function() {
+                if (passwordError) passwordError.style.display = 'none';
+            });
+        }
+        
+        // CSS เพิ่มเติม
+        document.head.insertAdjacentHTML('beforeend', `
+            <style>
+                .already-logged-in {
+                    text-align: center;
+                    padding: 2rem;
+                }
+                
+                .already-logged-in h2 {
+                    margin-bottom: 1rem;
+                    color: var(--primary-color);
+                }
+                
+                .already-logged-in p {
+                    margin-bottom: 2rem;
+                }
+                
+                .already-logged-in .logout-btn {
+                    margin-right: 1rem;
+                }
+            </style>
+        `);
+    });
+    </script>
 </body>
 </html>

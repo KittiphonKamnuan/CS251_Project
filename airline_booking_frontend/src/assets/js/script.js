@@ -1,69 +1,86 @@
+// Import API service if using ES modules
 import { apiService } from './api-service.js';
 
 document.addEventListener('DOMContentLoaded', function() {
-    // เช็คสถานะการเข้าสู่ระบบและอัปเดต UI
-    updateAuthUI();
-    
-    // Navigation Mobile Toggle
-    setupMobileMenu();
-    
-    // Modal Functionality
-    setupAuthModals();
-    
-    // ตั้งค่าข้อมูล user ที่ทุกหน้าต้องใช้
-    setupUserData();
-    
-    // Newsletter Form
+    // Initialize page components
+    initUserInterface();
+    loadPopularDestinations();
+    loadSpecialOffers();
     setupNewsletterForm();
     
-    // Social Sharing Setup
-    setupSocialSharing();
-    
-    // Flight Status Updates (for status page if exists)
-    setupFlightStatusUpdates();
-    
-    // Special Offers Click Handlers
-    setupSpecialOffersHandlers();
-    
-    // ตั้งค่า Smooth Scrolling สำหรับการคลิกลิงก์ภายในเว็บไซต์
-    setupSmoothScrolling();
+    /**
+     * เริ่มต้นองค์ประกอบ UI ของหน้า
+     */
+    function initUserInterface() {
+        // ตรวจสอบสถานะการเข้าสู่ระบบและอัปเดต UI
+        updateAuthUI();
+        
+        // ตั้งค่าเมนูมือถือ
+        setupMobileMenu();
+        
+        // ตั้งค่าแท็บการค้นหา
+        setupSearchTabs();
+        
+        // ตั้งค่าค่าเริ่มต้นสำหรับฟิลด์วันที่
+        setupDateInputs();
+    }
     
     /**
-     * เช็คสถานะการเข้าสู่ระบบและอัปเดต UI
+     * อัปเดต UI ตามสถานะการเข้าสู่ระบบ
      */
     function updateAuthUI() {
         const token = localStorage.getItem('authToken');
         const userData = localStorage.getItem('userData');
-        const userActionsContainer = document.querySelector('.user-actions');
         
-        if (token && userData && userActionsContainer) {
+        const userActionsContainer = document.getElementById('userActionsContainer');
+        const mobileUserActions = document.getElementById('mobileUserActions');
+        
+        if (token && userData) {
             try {
                 const user = JSON.parse(userData);
                 
-                // เปลี่ยน UI เป็นสถานะเข้าสู่ระบบแล้ว
-                userActionsContainer.innerHTML = `
-                    <div class="user-welcome">ยินดีต้อนรับ, ${user.firstName || user.email || 'คุณ'}</div>
-                    <div class="user-dropdown">
-                        <button class="user-dropdown-btn">
-                            <i class="fas fa-user-circle"></i>
-                            <i class="fas fa-caret-down"></i>
-                        </button>
-                        <div class="user-dropdown-content">
-                            <a href="profile.html">
-                                <i class="fas fa-user"></i> โปรไฟล์
-                            </a>
-                            <a href="booking-status.html">
-                                <i class="fas fa-ticket-alt"></i> การจองของฉัน
-                            </a>
-                            <a href="#" id="logoutBtn">
-                                <i class="fas fa-sign-out-alt"></i> ออกจากระบบ
-                            </a>
+                // อัปเดต UI สำหรับผู้ใช้ที่เข้าสู่ระบบแล้ว
+                if (userActionsContainer) {
+                    userActionsContainer.innerHTML = `
+                        <div class="user-welcome">ยินดีต้อนรับ, ${user.firstName || user.username || 'คุณ'}</div>
+                        <div class="user-dropdown">
+                            <button class="user-dropdown-btn">
+                                <i class="fas fa-user-circle"></i>
+                                <i class="fas fa-caret-down"></i>
+                            </button>
+                            <div class="user-dropdown-content">
+                                <a href="profile.html">
+                                    <i class="fas fa-user"></i> โปรไฟล์
+                                </a>
+                                <a href="booking-status.html">
+                                    <i class="fas fa-ticket-alt"></i> การจองของฉัน
+                                </a>
+                                <a href="#" id="logoutBtn">
+                                    <i class="fas fa-sign-out-alt"></i> ออกจากระบบ
+                                </a>
+                            </div>
                         </div>
-                    </div>
-                `;
+                    `;
+                    
+                    // ตั้งค่า dropdown ผู้ใช้
+                    setupUserDropdown();
+                }
                 
-                // ตั้งค่า dropdown สำหรับเมนูผู้ใช้
-                setupUserDropdown();
+                // อัปเดตเมนูมือถือ
+                if (mobileUserActions) {
+                    mobileUserActions.innerHTML = `
+                        <div class="user-welcome-mobile">ยินดีต้อนรับ, ${user.firstName || user.username || 'คุณ'}</div>
+                        <a href="profile.html" class="btn btn-outline">โปรไฟล์</a>
+                        <a href="booking-status.html" class="btn btn-outline">การจองของฉัน</a>
+                        <a href="#" id="mobileLogoutBtn" class="btn btn-primary">ออกจากระบบ</a>
+                    `;
+                    
+                    // เพิ่ม event listener สำหรับปุ่มออกจากระบบบนมือถือ
+                    const mobileLogoutBtn = document.getElementById('mobileLogoutBtn');
+                    if (mobileLogoutBtn) {
+                        mobileLogoutBtn.addEventListener('click', handleLogout);
+                    }
+                }
                 
                 // เพิ่ม event listener สำหรับปุ่มออกจากระบบ
                 const logoutBtn = document.getElementById('logoutBtn');
@@ -81,7 +98,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     /**
-     * ตั้งค่า dropdown สำหรับเมนูผู้ใช้
+     * จัดการ dropdown ของเมนูผู้ใช้
      */
     function setupUserDropdown() {
         const dropdownBtn = document.querySelector('.user-dropdown-btn');
@@ -112,11 +129,14 @@ document.addEventListener('DOMContentLoaded', function() {
         e.preventDefault();
         
         // ล้างข้อมูลการเข้าสู่ระบบ
-        apiService.clearToken();
+        localStorage.removeItem('authToken');
         localStorage.removeItem('userData');
         
-        // Redirect ไปยังหน้าหลัก
-        window.location.href = 'index.html';
+        // ล้างข้อมูล API service
+        apiService.clearToken();
+        
+        // โหลดหน้าใหม่
+        window.location.reload();
     }
     
     /**
@@ -138,216 +158,254 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     /**
-     * ตั้งค่า modals สำหรับเข้าสู่ระบบและสมัครสมาชิก
+     * ตั้งค่าแท็บการค้นหา
      */
-    function setupAuthModals() {
-        const loginBtn = document.getElementById('loginBtn');
-        const registerBtn = document.getElementById('registerBtn');
-        const loginModal = document.getElementById('login-modal');
-        const registerModal = document.getElementById('register-modal');
-        const closeBtns = document.querySelectorAll('.close');
-        const switchToRegister = document.getElementById('switch-to-register');
-        const switchToLogin = document.getElementById('switch-to-login');
+    function setupSearchTabs() {
+        const tabButtons = document.querySelectorAll('.tab-btn');
+        const returnDateGroup = document.querySelector('.return-date');
         
-        // เปิด login modal
-        if (loginBtn && loginModal) {
-            loginBtn.addEventListener('click', function(e) {
-                e.preventDefault();
-                loginModal.style.display = 'block';
-            });
-        }
-        
-        // เปิด register modal
-        if (registerBtn && registerModal) {
-            registerBtn.addEventListener('click', function(e) {
-                e.preventDefault();
-                registerModal.style.display = 'block';
-            });
-        }
-        
-        // ปิด modals
-        if (closeBtns) {
-            closeBtns.forEach(btn => {
-                btn.addEventListener('click', function() {
-                    if (loginModal) loginModal.style.display = 'none';
-                    if (registerModal) registerModal.style.display = 'none';
+        if (tabButtons && returnDateGroup) {
+            tabButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    // ลบ class active จากทุกปุ่ม
+                    tabButtons.forEach(btn => btn.classList.remove('active'));
+                    
+                    // เพิ่ม class active ให้กับปุ่มที่คลิก
+                    this.classList.add('active');
+                    
+                    // Toggle return date visibility based on selected tab
+                    if (this.dataset.tab === 'one-way') {
+                        returnDateGroup.style.display = 'none';
+                        document.getElementById('return-date').removeAttribute('required');
+                    } else if (this.dataset.tab === 'round-trip') {
+                        returnDateGroup.style.display = 'block';
+                        document.getElementById('return-date').setAttribute('required', '');
+                    } else if (this.dataset.tab === 'multi-city') {
+                        // In a real app, we would show additional inputs for multi-city
+                        returnDateGroup.style.display = 'none';
+                        document.getElementById('return-date').removeAttribute('required');
+                        alert('การค้นหาแบบหลายเมืองจะเพิ่มในอนาคต');
+                    }
                 });
             });
         }
-        
-        // สลับระหว่าง login และ register modals
-        if (switchToRegister) {
-            switchToRegister.addEventListener('click', function(e) {
-                e.preventDefault();
-                if (loginModal) loginModal.style.display = 'none';
-                if (registerModal) registerModal.style.display = 'block';
-            });
-        }
-        
-        if (switchToLogin) {
-            switchToLogin.addEventListener('click', function(e) {
-                e.preventDefault();
-                if (registerModal) registerModal.style.display = 'none';
-                if (loginModal) loginModal.style.display = 'block';
-            });
-        }
-        
-        // ปิด modal เมื่อคลิกพื้นหลัง
-        window.addEventListener('click', function(e) {
-            if (e.target === loginModal) {
-                loginModal.style.display = 'none';
-            }
-            if (e.target === registerModal) {
-                registerModal.style.display = 'none';
-            }
-        });
-        
-        // จัดการการส่งฟอร์ม login
-        const loginForm = document.getElementById('login-form');
-        if (loginForm) {
-            loginForm.addEventListener('submit', async function(e) {
-                e.preventDefault();
-                
-                const email = document.getElementById('login-email').value;
-                const password = document.getElementById('login-password').value;
-                
-                if (!email || !password) {
-                    alert('กรุณากรอกอีเมลและรหัสผ่าน');
-                    return;
-                }
-                
-                try {
-                    // แสดงสถานะการโหลด
-                    const submitBtn = loginForm.querySelector('button[type="submit"]');
-                    submitBtn.disabled = true;
-                    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> กำลังเข้าสู่ระบบ...';
-                    
-                    // เรียกใช้ API
-                    const response = await apiService.login(email, password);
-                    
-                    // บันทึก token
-                    apiService.setToken(response.token);
-                    
-                    // บันทึกข้อมูลผู้ใช้
-                    localStorage.setItem('userData', JSON.stringify(response.user));
-                    
-                    // รีโหลดหน้าเพื่อใช้ข้อมูลผู้ใช้ใหม่
-                    window.location.reload();
-                } catch (error) {
-                    console.error('Login error:', error);
-                    alert('เข้าสู่ระบบไม่สำเร็จ: ' + (error.message || 'กรุณาตรวจสอบอีเมลและรหัสผ่าน'));
-                    
-                    // คืนค่าสถานะปุ่ม
-                    const submitBtn = loginForm.querySelector('button[type="submit"]');
-                    submitBtn.disabled = false;
-                    submitBtn.innerHTML = 'เข้าสู่ระบบ';
-                }
-            });
-        }
-        
-        // จัดการการส่งฟอร์ม register
-        const registerForm = document.getElementById('register-form');
-        if (registerForm) {
-            registerForm.addEventListener('submit', async function(e) {
-                e.preventDefault();
-                
-                const firstName = document.getElementById('first-name').value;
-                const lastName = document.getElementById('last-name').value;
-                const email = document.getElementById('register-email').value;
-                const phone = document.getElementById('phone').value;
-                const password = document.getElementById('register-password').value;
-                const confirmPassword = document.getElementById('confirm-password').value;
-                const terms = document.getElementById('terms')?.checked;
-                
-                // ตรวจสอบข้อมูล
-                if (!firstName || !lastName || !email || !phone || !password || !confirmPassword) {
-                    alert('กรุณากรอกข้อมูลให้ครบถ้วน');
-                    return;
-                }
-                
-                if (password !== confirmPassword) {
-                    alert('รหัสผ่านไม่ตรงกัน');
-                    return;
-                }
-                
-                if (!terms) {
-                    alert('กรุณายอมรับข้อกำหนดและเงื่อนไข');
-                    return;
-                }
-                
-                try {
-                    // แสดงสถานะการโหลด
-                    const submitBtn = registerForm.querySelector('button[type="submit"]');
-                    submitBtn.disabled = true;
-                    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> กำลังสมัครสมาชิก...';
-                    
-                    // เรียกใช้ API
-                    const userData = {
-                        firstName,
-                        lastName,
-                        email,
-                        phone,
-                        password
-                    };
-                    
-                    await apiService.register(userData);
-                    
-                    // แสดงข้อความสำเร็จ
-                    alert('สมัครสมาชิกสำเร็จ! กรุณาเข้าสู่ระบบ');
-                    
-                    // ปิด register modal และเปิด login modal
-                    registerModal.style.display = 'none';
-                    loginModal.style.display = 'block';
-                    
-                    // รีเซ็ตฟอร์ม
-                    registerForm.reset();
-                } catch (error) {
-                    console.error('Registration error:', error);
-                    alert('สมัครสมาชิกไม่สำเร็จ: ' + (error.message || 'กรุณาลองใหม่อีกครั้ง'));
-                    
-                    // คืนค่าสถานะปุ่ม
-                    const submitBtn = registerForm.querySelector('button[type="submit"]');
-                    submitBtn.disabled = false;
-                    submitBtn.innerHTML = 'สมัครสมาชิก';
-                }
-            });
-        }
     }
     
     /**
-     * ตั้งค่าข้อมูล user ที่ทุกหน้าต้องใช้
+     * ตั้งค่าฟิลด์วันที่
      */
-    async function setupUserData() {
-        const token = localStorage.getItem('authToken');
-        const userData = localStorage.getItem('userData');
+    function setupDateInputs() {
+        const departureDate = document.getElementById('departure-date');
+        const returnDate = document.getElementById('return-date');
         
-        if (token && userData) {
-            try {
-                // อาจจะมีการดึงข้อมูลผู้ใช้เพิ่มเติมถ้าจำเป็น
-                const user = JSON.parse(userData);
+        if (departureDate && returnDate) {
+            // Set min dates to today
+            const today = new Date();
+            const tomorrow = new Date(today);
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            
+            // Format date as YYYY-MM-DD
+            const formatDate = (date) => {
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const day = String(date.getDate()).padStart(2, '0');
+                return `${year}-${month}-${day}`;
+            };
+            
+            // Set min and default values
+            departureDate.min = formatDate(today);
+            departureDate.value = formatDate(tomorrow);
+            
+            const nextWeek = new Date(today);
+            nextWeek.setDate(nextWeek.getDate() + 7);
+            
+            returnDate.min = formatDate(tomorrow);
+            returnDate.value = formatDate(nextWeek);
+            
+            // Event handlers for date changes
+            departureDate.addEventListener('change', function() {
+                // Ensure return date is after departure date
+                const depDate = new Date(this.value);
+                const retDate = new Date(returnDate.value);
                 
-                // ถ้าต้องการข้อมูลเพิ่มเติมของผู้ใช้ที่ไม่ได้เก็บไว้ใน localStorage
-                // สามารถดึงข้อมูลเพิ่มเติมจาก API ได้
-                // const userDetails = await apiService.getUserById(user.userId);
-                
-                // สามารถนำข้อมูลผู้ใช้ไปใช้ในส่วนต่างๆ ของเว็บไซต์ตรงนี้ได้
-                
-                // ตัวอย่าง: แสดงชื่อผู้ใช้ในส่วน header
-                const userWelcomeElement = document.querySelector('.user-welcome');
-                if (userWelcomeElement) {
-                    userWelcomeElement.textContent = `ยินดีต้อนรับ, ${user.firstName || user.email || 'คุณ'}`;
+                if (retDate <= depDate) {
+                    // Set return date to day after departure
+                    const nextDay = new Date(depDate);
+                    nextDay.setDate(nextDay.getDate() + 1);
+                    returnDate.value = formatDate(nextDay);
                 }
-            } catch (error) {
-                console.error('Error setting up user data:', error);
+                
+                returnDate.min = formatDate(depDate);
+            });
+        }
+    }
+    
+    /**
+     * โหลดข้อมูลจุดหมายปลายทางยอดนิยมจาก API
+     */
+    async function loadPopularDestinations() {
+        const destinationsGrid = document.getElementById('popular-destinations-grid');
+        if (!destinationsGrid) return;
+        
+        try {
+            // แสดงตัวแสดงการโหลด
+            destinationsGrid.innerHTML = `
+                <div class="loading-spinner-container">
+                    <div class="loading-spinner"></div>
+                    <p>กำลังโหลดข้อมูล...</p>
+                </div>
+            `;
+            
+            // ดึงข้อมูลจุดหมายปลายทางยอดนิยมจาก API จริง
+            const destinations = await apiService.request('/destinations/popular');
+            
+            // ล้างข้อมูลเดิมและแสดงข้อมูลใหม่
+            destinationsGrid.innerHTML = '';
+            
+            if (destinations && destinations.length > 0) {
+                destinations.forEach(destination => {
+                    const card = document.createElement('div');
+                    card.className = 'destination-card';
+                    card.dataset.destination = `${destination.name} (${destination.code})`;
+                    
+                    card.innerHTML = `
+                        <div class="destination-img">
+                            <img src="${destination.imageUrl}" alt="${destination.name}">
+                        </div>
+                        <div class="destination-info">
+                            <h3 class="destination-name">${destination.name}</h3>
+                            <p class="destination-price">เริ่มต้นที่ ฿${destination.price.toLocaleString()}</p>
+                        </div>
+                    `;
+                    
+                    destinationsGrid.appendChild(card);
+                });
+            } else {
+                // กรณีไม่มีข้อมูล
+                destinationsGrid.innerHTML = `
+                    <div class="no-data-message">
+                        <p>ไม่มีข้อมูลจุดหมายปลายทางยอดนิยมในขณะนี้</p>
+                    </div>
+                `;
+            }
+            
+            // เพิ่ม event listener สำหรับการคลิกการ์ดจุดหมายปลายทาง
+            setupDestinationCardEvents();
+        } catch (error) {
+            console.error('Error loading popular destinations:', error);
+            destinationsGrid.innerHTML = `
+                <div class="error-message">
+                    <p>ไม่สามารถโหลดข้อมูลจุดหมายปลายทางได้ในขณะนี้</p>
+                    <button class="btn btn-outline retry-btn">ลองใหม่</button>
+                </div>
+            `;
+            
+            // เพิ่ม event listener สำหรับปุ่มลองใหม่
+            const retryBtn = destinationsGrid.querySelector('.retry-btn');
+            if (retryBtn) {
+                retryBtn.addEventListener('click', loadPopularDestinations);
             }
         }
     }
     
     /**
-     * ตั้งค่าฟอร์ม Newsletter
+     * ตั้งค่า event listeners สำหรับการคลิกการ์ดจุดหมายปลายทาง
+     */
+    function setupDestinationCardEvents() {
+        const destinationCards = document.querySelectorAll('.destination-card');
+        
+        destinationCards.forEach(card => {
+            card.addEventListener('click', function() {
+                const destination = this.dataset.destination;
+                if (!destination) return;
+                
+                // กรอกข้อมูลในฟอร์มค้นหา
+                const departureInput = document.getElementById('departure');
+                const arrivalInput = document.getElementById('arrival');
+                
+                if (departureInput && arrivalInput) {
+                    departureInput.value = 'กรุงเทพฯ (BKK)';
+                    arrivalInput.value = destination;
+                    
+                    // เลื่อนไปที่ฟอร์มค้นหา
+                    document.querySelector('.search-form-container').scrollIntoView({ behavior: 'smooth' });
+                }
+            });
+        });
+    }
+    
+    /**
+     * โหลดข้อมูลโปรโมชั่นพิเศษจาก API
+     */
+    async function loadSpecialOffers() {
+        const offersGrid = document.getElementById('special-offers-grid');
+        if (!offersGrid) return;
+        
+        try {
+            // แสดงตัวแสดงการโหลด
+            offersGrid.innerHTML = `
+                <div class="loading-spinner-container">
+                    <div class="loading-spinner"></div>
+                    <p>กำลังโหลดข้อมูล...</p>
+                </div>
+            `;
+            
+            // ดึงข้อมูลโปรโมชั่นพิเศษจาก API จริง
+            const offers = await apiService.request('/promotions/featured');
+            
+            // ล้างข้อมูลเดิมและแสดงข้อมูลใหม่
+            offersGrid.innerHTML = '';
+            
+            if (offers && offers.length > 0) {
+                offers.forEach(offer => {
+                    const card = document.createElement('div');
+                    card.className = 'offer-card';
+                    
+                    card.innerHTML = `
+                        <div class="offer-img">
+                            <img src="${offer.imageUrl}" alt="${offer.title}">
+                        </div>
+                        <div class="offer-content">
+                            <h3 class="offer-title">${offer.title}</h3>
+                            <p class="offer-details">${offer.details}</p>
+                            <div class="offer-price">เริ่มต้น ฿${offer.price.toLocaleString()}</div>
+                            <a href="promotions.html?id=${offer.id}" class="btn btn-outline">ดูรายละเอียด</a>
+                        </div>
+                    `;
+                    
+                    offersGrid.appendChild(card);
+                });
+            } else {
+                // กรณีไม่มีข้อมูล
+                offersGrid.innerHTML = `
+                    <div class="no-data-message">
+                        <p>ไม่มีข้อมูลโปรโมชั่นพิเศษในขณะนี้</p>
+                    </div>
+                `;
+            }
+        } catch (error) {
+            console.error('Error loading special offers:', error);
+            offersGrid.innerHTML = `
+                <div class="error-message">
+                    <p>ไม่สามารถโหลดข้อมูลโปรโมชั่นได้ในขณะนี้</p>
+                    <button class="btn btn-outline retry-btn">ลองใหม่</button>
+                </div>
+            `;
+            
+            // เพิ่ม event listener สำหรับปุ่มลองใหม่
+            const retryBtn = offersGrid.querySelector('.retry-btn');
+            if (retryBtn) {
+                retryBtn.addEventListener('click', loadSpecialOffers);
+            }
+        }
+    }
+    
+    /**
+     * ตั้งค่าฟอร์มรับข่าวสาร
      */
     function setupNewsletterForm() {
         const newsletterForm = document.querySelector('.newsletter-form');
+        const newsletterMessage = document.getElementById('newsletter-message');
         
         if (newsletterForm) {
             newsletterForm.addEventListener('submit', async function(e) {
@@ -357,7 +415,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 const email = emailInput.value;
                 
                 if (!email) {
-                    alert('กรุณากรอกอีเมล');
+                    showNewsletterMessage('กรุณากรอกอีเมล', 'error');
                     return;
                 }
                 
@@ -365,24 +423,20 @@ document.addEventListener('DOMContentLoaded', function() {
                 const submitBtn = this.querySelector('button[type="submit"]');
                 const originalBtnText = submitBtn.textContent;
                 submitBtn.disabled = true;
-                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> กำลังลงทะเบียน...';
+                submitBtn.innerHTML = '<span class="loading-spinner-btn"></span> กำลังลงทะเบียน...';
                 
                 try {
-                    // ในกรณีที่มี API สำหรับ newsletter (ยังไม่มีใน api-service)
-                    // สามารถเพิ่ม method ใน api-service และเรียกใช้ได้
-                    // await apiService.subscribeNewsletter(email);
-                    
-                    // จำลองการส่งข้อมูล
-                    await new Promise(resolve => setTimeout(resolve, 1000));
+                    // ส่งข้อมูลการสมัครรับข่าวสารไปยัง API จริง
+                    const response = await apiService.request('/newsletter/subscribe', 'POST', { email });
                     
                     // แสดงข้อความสำเร็จ
-                    alert('ขอบคุณสำหรับการลงทะเบียน! เราจะส่งข้อเสนอพิเศษให้คุณเร็วๆ นี้');
+                    showNewsletterMessage('ขอบคุณสำหรับการลงทะเบียน! เราจะส่งข้อเสนอพิเศษให้คุณเร็วๆ นี้', 'success');
                     
-                    // รีเซ็ตฟอร์ม
+                    // ล้างฟอร์ม
                     emailInput.value = '';
                 } catch (error) {
                     console.error('Newsletter subscription error:', error);
-                    alert('ไม่สามารถลงทะเบียนได้ในขณะนี้ กรุณาลองใหม่อีกครั้งภายหลัง');
+                    showNewsletterMessage('ไม่สามารถลงทะเบียนได้ในขณะนี้ กรุณาลองใหม่อีกครั้งภายหลัง', 'error');
                 } finally {
                     // คืนค่าสถานะปุ่ม
                     submitBtn.disabled = false;
@@ -390,264 +444,193 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             });
         }
-    }
-    
-    /**
-     * ตั้งค่าการแชร์ลงโซเชียลมีเดีย
-     */
-    function setupSocialSharing() {
-        const shareButtons = document.querySelectorAll('.share-btn');
         
-        if (shareButtons.length > 0) {
-            shareButtons.forEach(btn => {
-                btn.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    
-                    const platform = this.dataset.platform;
-                    const url = encodeURIComponent(window.location.href);
-                    const title = encodeURIComponent(document.title);
-                    
-                    let shareUrl = '';
-                    
-                    switch (platform) {
-                        case 'facebook':
-                            shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${url}`;
-                            break;
-                        case 'twitter':
-                            shareUrl = `https://twitter.com/intent/tweet?url=${url}&text=${title}`;
-                            break;
-                        case 'line':
-                            shareUrl = `https://social-plugins.line.me/lineit/share?url=${url}`;
-                            break;
-                        default:
-                            alert('ไม่สามารถแชร์ไปยังแพลตฟอร์มนี้ได้');
-                            return;
-                    }
-                    
-                    // เปิดหน้าต่างใหม่สำหรับแชร์
-                    window.open(shareUrl, 'share-window', 'width=600,height=400');
-                });
-            });
-        }
-    }
-    
-    /**
-     * ตั้งค่าการอัปเดตสถานะเที่ยวบิน (สำหรับหน้าสถานะเที่ยวบินถ้ามี)
-     */
-    function setupFlightStatusUpdates() {
-        const flightStatusTable = document.querySelector('.flight-status-table');
-        
-        if (flightStatusTable) {
-            // ดึงข้อมูลสถานะเที่ยวบินครั้งแรก
-            fetchFlightStatuses();
-            
-            // อัปเดตข้อมูลทุก 1 นาที
-            setInterval(fetchFlightStatuses, 60000);
-        }
-        
-        async function fetchFlightStatuses() {
-            try {
-                // ดึงข้อมูลสถานะเที่ยวบินจาก API
-                // สามารถใช้ apiService.getFlightsByStatus('Scheduled') เพื่อดึงเที่ยวบินตามสถานะ
-                // หรือการเรียกใช้ API อื่นๆ ที่เหมาะสม
+        // แสดงข้อความ
+        function showNewsletterMessage(message, type) {
+            if (newsletterMessage) {
+                newsletterMessage.textContent = message;
+                newsletterMessage.className = `newsletter-message ${type}`;
+                newsletterMessage.style.display = 'block';
                 
-                // ตัวอย่าง: จำลองการดึงข้อมูล
-                const flights = [
-                    { flightNumber: 'TG123', status: 'On Time' },
-                    { flightNumber: 'TG456', status: 'Delayed' },
-                    { flightNumber: 'TG789', status: 'Boarding' }
-                ];
-                
-                // อัปเดตสถานะในตาราง
-                updateFlightStatusTable(flights);
-            } catch (error) {
-                console.error('Error fetching flight statuses:', error);
+                // ซ่อนข้อความหลังจาก 5 วินาที
+                setTimeout(() => {
+                    newsletterMessage.style.display = 'none';
+                }, 5000);
             }
         }
-        
-        function updateFlightStatusTable(flights) {
-            const statusCells = flightStatusTable.querySelectorAll('.status');
+    }
+    
+    // เพิ่ม style สำหรับ loading spinner และข้อความแจ้งเตือน
+    addStyles();
+    
+    /**
+     * เพิ่ม styles ที่จำเป็นสำหรับองค์ประกอบ UI เพิ่มเติม
+     */
+    function addStyles() {
+        const style = document.createElement('style');
+        style.textContent = `
+            .user-dropdown {
+                position: relative;
+                display: inline-block;
+            }
             
-            // อัปเดตสถานะ
-            flights.forEach((flight, index) => {
-                if (statusCells[index]) {
-                    // ลบคลาสเดิม
-                    statusCells[index].className = 'status';
-                    
-                    // เพิ่มคลาสใหม่ตามสถานะ
-                    let className = '';
-                    
-                    switch (flight.status) {
-                        case 'On Time':
-                            className = 'on-time';
-                            break;
-                        case 'Delayed':
-                            className = 'delayed';
-                            break;
-                        case 'Boarding':
-                            className = 'boarding';
-                            break;
-                        case 'Departed':
-                            className = 'departed';
-                            break;
-                        case 'Arrived':
-                            className = 'arrived';
-                            break;
-                        case 'Cancelled':
-                            className = 'cancelled';
-                            break;
-                        default:
-                            className = '';
-                    }
-                    
-                    statusCells[index].classList.add(className);
-                    statusCells[index].textContent = flight.status;
-                }
-            });
-        }
+            .user-dropdown-btn {
+                background-color: transparent;
+                border: none;
+                color: var(--primary-color);
+                font-size: 1rem;
+                cursor: pointer;
+                padding: 0.5rem;
+                display: flex;
+                align-items: center;
+            }
+            
+            .user-dropdown-btn i {
+                margin-right: 5px;
+            }
+            
+            .user-dropdown-content {
+                display: none;
+                position: absolute;
+                right: 0;
+                background-color: white;
+                min-width: 200px;
+                box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+                z-index: 1000;
+                border-radius: 4px;
+                overflow: hidden;
+            }
+            
+            .user-dropdown-content a {
+                color: #333;
+                padding: 12px 16px;
+                text-decoration: none;
+                display: flex;
+                align-items: center;
+                transition: background-color 0.3s;
+            }
+            
+            .user-dropdown-content a i {
+                margin-right: 10px;
+                width: 16px;
+                text-align: center;
+            }
+            
+            .user-dropdown-content a:hover {
+                background-color: #f5f5f5;
+            }
+            
+            .user-dropdown-content.show {
+                display: block;
+                animation: fadeIn 0.3s;
+            }
+            
+            @keyframes fadeIn {
+                from { opacity: 0; transform: translateY(-10px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
+            
+            .loading-spinner-container {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                width: 100%;
+                padding: 3rem 0;
+            }
+            
+            .loading-spinner {
+                border: 4px solid #f3f3f3;
+                border-top: 4px solid var(--primary-color);
+                border-radius: 50%;
+                width: 40px;
+                height: 40px;
+                animation: spin 1s linear infinite;
+                margin-bottom: 1rem;
+            }
+            
+            .loading-spinner-btn {
+                display: inline-block;
+                width: 16px;
+                height: 16px;
+                border: 2px solid rgba(255,255,255,0.3);
+                border-radius: 50%;
+                border-top-color: white;
+                animation: spin 1s linear infinite;
+                vertical-align: middle;
+                margin-right: 8px;
+            }
+            
+            @keyframes spin {
+                to { transform: rotate(360deg); }
+            }
+            
+            .error-message {
+                text-align: center;
+                padding: 2rem;
+                background-color: #f8f8f8;
+                border-radius: 8px;
+                margin: 2rem 0;
+            }
+            
+            .error-message p {
+                margin-bottom: 1rem;
+                color: #d32f2f;
+            }
+            
+            .no-data-message {
+                text-align: center;
+                padding: 2rem;
+                background-color: #f8f8f8;
+                border-radius: 8px;
+                margin: 2rem 0;
+                color: #666;
+            }
+            
+            .newsletter-message {
+                margin-top: 1rem;
+                padding: 0.75rem 1rem;
+                border-radius: 4px;
+                text-align: center;
+            }
+            
+            .newsletter-message.success {
+                background-color: #e8f5e9;
+                color: #2e7d32;
+                border: 1px solid #c8e6c9;
+            }
+            
+            .newsletter-message.error {
+                background-color: #ffebee;
+                color: #c62828;
+                border: 1px solid #ffcdd2;
+            }
+            
+            .user-welcome {
+                margin-right: 15px;
+                color: var(--primary-color);
+                font-weight: 500;
+            }
+            
+            .user-welcome-mobile {
+                text-align: center;
+                margin-bottom: 15px;
+                font-weight: 500;
+                color: var(--primary-color);
+            }
+            
+            .mobile-menu-toggle.active span:nth-child(1) {
+                transform: rotate(45deg) translate(5px, 5px);
+            }
+            
+            .mobile-menu-toggle.active span:nth-child(2) {
+                opacity: 0;
+            }
+            
+            .mobile-menu-toggle.active span:nth-child(3) {
+                transform: rotate(-45deg) translate(5px, -5px);
+            }
+        `;
+        document.head.appendChild(style);
     }
-    
-    /**
-     * ตั้งค่าการคลิกบนโปรโมชั่นพิเศษ
-     */
-    function setupSpecialOffersHandlers() {
-        const offerCards = document.querySelectorAll('.offer-card .btn');
-        
-        offerCards.forEach(btn => {
-            btn.addEventListener('click', function() {
-                // Scroll ไปที่ฟอร์มค้นหา
-                const searchContainer = document.querySelector('.search-container') || 
-                                        document.querySelector('.search-form-section');
-                if (searchContainer) {
-                    searchContainer.scrollIntoView({ behavior: 'smooth' });
-                }
-                
-                // ถ้ามีรหัสโปรโมชั่น ให้คัดลอกลงคลิปบอร์ด
-                const offerContent = this.closest('.offer-content');
-                const offerCode = offerContent?.querySelector('.offer-code strong');
-                
-                if (offerCode) {
-                    // สร้าง input element ชั่วคราว
-                    const tempInput = document.createElement('input');
-                    tempInput.value = offerCode.textContent;
-                    document.body.appendChild(tempInput);
-                    
-                    // เลือกและคัดลอกข้อความ
-                    tempInput.select();
-                    document.execCommand('copy');
-                    
-                    // ลบ element ชั่วคราว
-                    document.body.removeChild(tempInput);
-                    
-                    // แสดงข้อความยืนยัน
-                    alert(`รหัสโปรโมชั่น ${offerCode.textContent} ถูกคัดลอกแล้ว`);
-                }
-            });
-        });
-    }
-    
-    /**
-     * ตั้งค่า Smooth Scrolling สำหรับการคลิกลิงก์ภายใน
-     */
-    function setupSmoothScrolling() {
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-                
-                const targetId = this.getAttribute('href');
-                
-                if (targetId === '#') return;
-                
-                const targetElement = document.querySelector(targetId);
-                
-                if (targetElement) {
-                    targetElement.scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'start'
-                    });
-                }
-            });
-        });
-    }
-    
-    // เพิ่ม CSS สำหรับ dropdown และ spinner
-    const style = document.createElement('style');
-    style.textContent = `
-        .user-dropdown {
-            position: relative;
-            display: inline-block;
-        }
-        
-        .user-dropdown-btn {
-            background-color: transparent;
-            border: none;
-            color: var(--primary-color);
-            font-size: 1rem;
-            cursor: pointer;
-            padding: 0.5rem;
-        }
-        
-        .user-dropdown-content {
-            display: none;
-            position: absolute;
-            right: 0;
-            background-color: white;
-            min-width: 200px;
-            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
-            z-index: 1000;
-            border-radius: 4px;
-            overflow: hidden;
-        }
-        
-        .user-dropdown-content a {
-            color: #333;
-            padding: 12px 16px;
-            text-decoration: none;
-            display: block;
-            transition: background-color 0.3s;
-        }
-        
-        .user-dropdown-content a:hover {
-            background-color: #f5f5f5;
-        }
-        
-        .user-dropdown-content.show {
-            display: block;
-            animation: fadeIn 0.3s;
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        .mobile-menu-toggle.active span:nth-child(1) {
-            transform: rotate(45deg) translate(5px, 5px);
-        }
-        
-        .mobile-menu-toggle.active span:nth-child(2) {
-            opacity: 0;
-        }
-        
-        .mobile-menu-toggle.active span:nth-child(3) {
-            transform: rotate(-45deg) translate(5px, -5px);
-        }
-        
-        .loading-spinner {
-            display: inline-block;
-            width: 16px;
-            height: 16px;
-            border: 2px solid rgba(255,255,255,0.3);
-            border-radius: 50%;
-            border-top-color: white;
-            animation: spin 1s linear infinite;
-            margin-right: 6px;
-            vertical-align: middle;
-        }
-        
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-    `;
-    document.head.appendChild(style);
 });

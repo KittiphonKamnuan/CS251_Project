@@ -10,8 +10,8 @@
     <link rel="icon" type="image/x-icon" href="../public/favicon.ico">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Added 'defer' to scripts to avoid blocking page load -->
-    <script src="../assets/js/script.js" defer></script>
-    <script src="../assets/js/flight-search.js" defer></script>
+    <script type="module" src="../assets/js/script.js" defer></script>
+    <script type="module" src="../assets/js/flight-search.js" defer></script>
 </head>
 <body>
     <!-- Standardized header with consistent navigation -->
@@ -30,7 +30,8 @@
                     <li><a href="contact.html">ติดต่อเรา</a></li>
                 </ul>
             </nav>
-            <div class="user-actions">
+            <div class="user-actions" id="userActionsContainer">
+                <!-- Dynamic content will be inserted here -->
                 <a href="login.html" class="btn btn-outline" id="loginBtn">เข้าสู่ระบบ</a>
                 <a href="register.html" class="btn btn-primary" id="registerBtn">สมัครสมาชิก</a>
             </div>
@@ -50,7 +51,8 @@
             <li><a href="booking-status.html">ตรวจสอบการจอง</a></li>
             <li><a href="contact.html">ติดต่อเรา</a></li>
         </ul>
-        <div class="mobile-menu-user-actions">
+        <div class="mobile-menu-user-actions" id="mobileUserActions">
+            <!-- Dynamic content will be inserted here -->
             <a href="login.html" class="btn btn-outline">เข้าสู่ระบบ</a>
             <a href="register.html" class="btn btn-primary">สมัครสมาชิก</a>
         </div>
@@ -138,60 +140,11 @@
         <section class="popular-destinations">
             <div class="container">
                 <h2 class="section-title">จุดหมายปลายทางยอดนิยม</h2>
-                <div class="destinations-grid">
-                    <div class="destination-card" data-destination="เชียงใหม่ (CNX)">
-                        <div class="destination-img">
-                            <img src="https://img.toursmidea.com/toursmidea/upload/trip_overview_album/6.jpg" alt="เชียงใหม่">
-                        </div>
-                        <div class="destination-info">
-                            <h3 class="destination-name">เชียงใหม่</h3>
-                            <p class="destination-price">เริ่มต้นที่ ฿1,290</p>
-                        </div>
-                    </div>
-                    <div class="destination-card" data-destination="ภูเก็ต (HKT)">
-                        <div class="destination-img">
-                            <img src="https://res.klook.com/image/upload/fl_lossy.progressive,q_85/c_fill,w_1000/v1601900476/blog/fdhbeum4iydf3uuvrql8.webp" alt="ภูเก็ต">
-                        </div>
-                        <div class="destination-info">
-                            <h3 class="destination-name">ภูเก็ต</h3>
-                            <p class="destination-price">เริ่มต้นที่ ฿1,590</p>
-                        </div>
-                    </div>
-                    <div class="destination-card" data-destination="กระบี่ (KBV)">
-                        <div class="destination-img">
-                            <img src="https://www.inspirationtourism.com/wp-content/uploads/2023/05/krabi-beach-1.jpg" alt="กระบี่">
-                        </div>
-                        <div class="destination-info">
-                            <h3 class="destination-name">กระบี่</h3>
-                            <p class="destination-price">เริ่มต้นที่ ฿1,490</p>
-                        </div>
-                    </div>
-                    <div class="destination-card" data-destination="เชียงราย (CEI)">
-                        <div class="destination-img">
-                            <img src="https://media-cdn.tripadvisor.com/media/photo-s/01/0a/55/74/the-white-temple.jpg" alt="เชียงราย">
-                        </div>
-                        <div class="destination-info">
-                            <h3 class="destination-name">เชียงราย</h3>
-                            <p class="destination-price">เริ่มต้นที่ ฿1,390</p>
-                        </div>
-                    </div>
-                    <div class="destination-card" data-destination="หาดใหญ่ (HDY)">
-                        <div class="destination-img">
-                            <img src="https://blog.airpaz.com/wp-content/uploads/hat-yai-city-view.jpeg" alt="หาดใหญ่">
-                        </div>
-                        <div class="destination-info">
-                            <h3 class="destination-name">หาดใหญ่</h3>
-                            <p class="destination-price">เริ่มต้นที่ ฿1,290</p>
-                        </div>
-                    </div>
-                    <div class="destination-card" data-destination="ขอนแก่น (KKC)">
-                        <div class="destination-img">
-                            <img src="https://a.cdn-hotels.com/gdcs/production151/d1733/3f4e93c8-aa7d-490e-b41a-11231cc049c4.jpg" alt="ขอนแก่น">
-                        </div>
-                        <div class="destination-info">
-                            <h3 class="destination-name">ขอนแก่น</h3>
-                            <p class="destination-price">เริ่มต้นที่ ฿1,190</p>
-                        </div>
+                <div class="destinations-grid" id="popular-destinations-grid">
+                    <!-- Popular destinations will be populated by JavaScript -->
+                    <div class="loading-spinner-container">
+                        <div class="loading-spinner"></div>
+                        <p>กำลังโหลดข้อมูล...</p>
                     </div>
                 </div>
             </div>
@@ -201,39 +154,11 @@
         <section class="special-offers">
             <div class="container">
                 <h2 class="section-title">โปรโมชั่นพิเศษ</h2>
-                <div class="offers-grid">
-                    <div class="offer-card">
-                        <div class="offer-img">
-                            <img src="https://images.squarespace-cdn.com/content/v1/5a5dbe4632601eb31977f947/f3dd0618-e187-40e5-920b-9bc264f940bc/0-cover_square.png" alt="โปรโมชั่นซัมเมอร์">
-                        </div>
-                        <div class="offer-content">
-                            <h3 class="offer-title">โปรโมชั่นซัมเมอร์ 2025</h3>
-                            <p class="offer-details">ลดสูงสุด 30% สำหรับเส้นทางภายในประเทศและต่างประเทศ</p>
-                            <div class="offer-price">เริ่มต้น ฿1,090</div>
-                            <a href="promotions.html" class="btn btn-outline">ดูรายละเอียด</a>
-                        </div>
-                    </div>
-                    <div class="offer-card">
-                        <div class="offer-img">
-                            <img src="https://img.salehere.co.th/p/1200x0/2021/12/03/elrcpuzt4a87.jpg" alt="โปรโมชั่นเที่ยวบินไป-กลับ">
-                        </div>
-                        <div class="offer-content">
-                            <h3 class="offer-title">โปรโมชั่นเที่ยวบินไป-กลับ</h3>
-                            <p class="offer-details">รับส่วนลด 20% สำหรับเที่ยวบินไป-กลับทุกเส้นทางในประเทศ</p>
-                            <div class="offer-price">เริ่มต้น ฿2,190</div>
-                            <a href="promotions.html" class="btn btn-outline">ดูรายละเอียด</a>
-                        </div>
-                    </div>
-                    <div class="offer-card">
-                        <div class="offer-img">
-                            <img src="https://img.salehere.co.th/p/1200x0/2021/06/02/sstae8ruqvew.jpg" alt="แพ็คเกจเที่ยวบิน + โรงแรม">
-                        </div>
-                        <div class="offer-content">
-                            <h3 class="offer-title">แพ็คเกจเที่ยวบิน + โรงแรม</h3>
-                            <p class="offer-details">ประหยัดสูงสุด 30% เมื่อจองเที่ยวบินพร้อมที่พัก 3 คืนขึ้นไป</p>
-                            <div class="offer-price">เริ่มต้น ฿3,990</div>
-                            <a href="promotions.html" class="btn btn-outline">ดูรายละเอียด</a>
-                        </div>
+                <div class="offers-grid" id="special-offers-grid">
+                    <!-- Special offers will be populated by JavaScript -->
+                    <div class="loading-spinner-container">
+                        <div class="loading-spinner"></div>
+                        <p>กำลังโหลดข้อมูล...</p>
                     </div>
                 </div>
                 <div class="view-all-link">
@@ -277,10 +202,11 @@
                 <div class="newsletter-container">
                     <h2 class="newsletter-title">รับข่าวสารและโปรโมชั่นพิเศษ</h2>
                     <p>ลงทะเบียนรับข่าวสารจากเราเพื่อรับโปรโมชั่นพิเศษก่อนใคร</p>
-                    <form class="newsletter-form">
+                    <form class="newsletter-form" id="newsletter-form">
                         <input type="email" placeholder="อีเมลของคุณ" required>
                         <button type="submit" class="btn btn-primary">ลงทะเบียน</button>
                     </form>
+                    <div class="newsletter-message" id="newsletter-message" style="display: none;"></div>
                 </div>
             </div>
         </section>
@@ -316,9 +242,9 @@
                     <div class="footer-column">
                         <h3>ติดต่อเรา</h3>
                         <ul>
-                            <li>โทร: 02-123-4567</li>
-                            <li>อีเมล: support@skyways.com</li>
-                            <li>ที่อยู่: 123 ถนนสุขุมวิท กรุงเทพฯ</li>
+                            <li><i class="fas fa-phone"></i> 02-123-4567</li>
+                            <li><i class="fas fa-envelope"></i> support@skyways.com</li>
+                            <li><i class="fas fa-map-marker-alt"></i> 123 ถนนสุขุมวิท กรุงเทพฯ</li>
                         </ul>
                     </div>
                 </div>
@@ -326,16 +252,13 @@
             <div class="footer-bottom">
                 <p>&copy; 2025 Skyways Airlines. สงวนลิขสิทธิ์</p>
                 <div class="footer-social">
-                    <a href="#" aria-label="Facebook">FB</a>
-                    <a href="#" aria-label="Twitter">TW</a>
-                    <a href="#" aria-label="Instagram">IG</a>
-                    <a href="#" aria-label="YouTube">YT</a>
+                    <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                    <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                    <a href="#" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
                 </div>
             </div>
         </div>
     </footer>
-
-    <script type="module" src="../assets/js/script.js"></script>
-    <script type="module" src="../assets/js/flight-search.js"></script>
 </body>
 </html>
