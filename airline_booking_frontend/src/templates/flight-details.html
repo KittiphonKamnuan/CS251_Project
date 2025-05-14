@@ -25,7 +25,8 @@
                     <li><a href="contact.html">ติดต่อเรา</a></li>
                 </ul>
             </nav>
-            <div class="user-actions">
+            <div class="user-actions" id="userActionsContainer">
+                <!-- จะถูกแทนที่ด้วย JavaScript -->
                 <a href="login.html" class="btn btn-outline" id="loginBtn">เข้าสู่ระบบ</a>
                 <a href="register.html" class="btn btn-primary" id="registerBtn">สมัครสมาชิก</a>
             </div>
@@ -37,14 +38,15 @@
         </div>
     </header>
 
-    <div class="mobile-menu" style="display: none;">
+    <div class="mobile-menu" style="display: none;" id="mobileMenuContainer">
         <ul>
             <li><a href="index.html">หน้าหลัก</a></li>
             <li><a href="promotions.html">โปรโมชั่น</a></li>
             <li><a href="booking-status.html">ตรวจสอบการจอง</a></li>
             <li><a href="contact.html">ติดต่อเรา</a></li>
         </ul>
-        <div class="mobile-menu-user-actions">
+        <div class="mobile-menu-user-actions" id="mobileUserActions">
+            <!-- จะถูกแทนที่ด้วย JavaScript -->
             <a href="login.html" class="btn btn-outline">เข้าสู่ระบบ</a>
             <a href="register.html" class="btn btn-primary">สมัครสมาชิก</a>
         </div>
@@ -85,8 +87,8 @@
         <section class="flight-summary">
             <div class="container">
                 <div class="flight-route">
-                    <h2>กรุงเทพฯ (BKK) → เชียงใหม่ (CNX)</h2>
-                    <p>วันพุธที่ 19 มีนาคม 2025 | ผู้โดยสาร 1 คน | ชั้นประหยัด</p>
+                    <h2 id="routeTitle">กำลังโหลดข้อมูลเส้นทาง...</h2>
+                    <p id="routeInfo">กำลังโหลดข้อมูลเที่ยวบิน...</p>
                 </div>
             </div>
         </section>
@@ -94,35 +96,35 @@
         <!-- Flight Details -->
         <section class="flight-details">
             <div class="container">
-                <div class="flight-card selected">
+                <div class="flight-card selected" id="flightCard">
                     <div class="selected-badge">เที่ยวบินที่เลือก</div>
-                    <div class="flight-info">
+                    <div class="flight-info" id="flightInfo">
                         <div class="flight-header">
-                            <img src="../assets/images/icons/airplane.svg" alt="Thai Airways" class="airline-logo">
+                            <img src="../assets/images/icons/airplane.svg" alt="Airline Logo" class="airline-logo">
                             <div>
-                                <div class="airline-name">Thai Airways</div>
-                                <div class="flight-number">TG123</div>
+                                <div class="airline-name" id="airlineName">กำลังโหลด...</div>
+                                <div class="flight-number" id="flightNumber">กำลังโหลด...</div>
                             </div>
                         </div>
                         <div class="flight-times">
                             <div class="departure">
-                                <div class="time">08:30</div>
-                                <div class="date">19 มี.ค. 2025</div>
-                                <div class="airport">กรุงเทพฯ (BKK)</div>
-                                <div class="terminal">เทอร์มินัล D</div>
+                                <div class="time" id="departureTime">--:--</div>
+                                <div class="date" id="departureDate">--/--/----</div>
+                                <div class="airport" id="departureAirport">กำลังโหลด...</div>
+                                <div class="terminal" id="departureTerminal">เทอร์มินัล</div>
                             </div>
                             <div class="flight-duration">
                                 <div class="flight-path"></div>
-                                <div class="duration">1h 30m</div>
+                                <div class="duration" id="flightDuration">-h --m</div>
                                 <div class="plane-icon">
                                     <i class="fas fa-plane"></i>
                                 </div>
                             </div>
                             <div class="arrival">
-                                <div class="time">10:00</div>
-                                <div class="date">19 มี.ค. 2025</div>
-                                <div class="airport">เชียงใหม่ (CNX)</div>
-                                <div class="terminal">เทอร์มินัล 1</div>
+                                <div class="time" id="arrivalTime">--:--</div>
+                                <div class="date" id="arrivalDate">--/--/----</div>
+                                <div class="airport" id="arrivalAirport">กำลังโหลด...</div>
+                                <div class="terminal" id="arrivalTerminal">เทอร์มินัล</div>
                             </div>
                         </div>
                     </div>
@@ -131,28 +133,28 @@
                             <i class="fas fa-suitcase"></i>
                             <div class="detail-info">
                                 <div class="detail-title">สัมภาระ</div>
-                                <div class="detail-text">กระเป๋าถือ 7 กก. + กระเป๋าโหลด 20 กก.</div>
+                                <div class="detail-text" id="baggageInfo">กระเป๋าถือ 7 กก. + กระเป๋าโหลด 20 กก.</div>
                             </div>
                         </div>
                         <div class="detail-item">
                             <i class="fas fa-utensils"></i>
                             <div class="detail-info">
                                 <div class="detail-title">อาหาร</div>
-                                <div class="detail-text">อาหารและเครื่องดื่มบนเที่ยวบิน</div>
+                                <div class="detail-text" id="mealInfo">อาหารและเครื่องดื่มบนเที่ยวบิน</div>
                             </div>
                         </div>
                         <div class="detail-item">
                             <i class="fas fa-wifi"></i>
                             <div class="detail-info">
                                 <div class="detail-title">Wi-Fi</div>
-                                <div class="detail-text">มีบริการ Wi-Fi บนเครื่อง (มีค่าใช้จ่าย)</div>
+                                <div class="detail-text" id="wifiInfo">มีบริการ Wi-Fi บนเครื่อง (มีค่าใช้จ่าย)</div>
                             </div>
                         </div>
                         <div class="detail-item">
                             <i class="fas fa-plane-departure"></i>
                             <div class="detail-info">
                                 <div class="detail-title">เครื่องบิน</div>
-                                <div class="detail-text">Airbus A320</div>
+                                <div class="detail-text" id="aircraftInfo">กำลังโหลด...</div>
                             </div>
                         </div>
                     </div>
@@ -166,16 +168,16 @@
                 <h2>รายละเอียดราคา</h2>
                 <div class="fare-details">
                     <div class="fare-row">
-                        <div class="fare-label">ค่าโดยสารผู้ใหญ่ (1)</div>
-                        <div class="fare-value">฿1,200</div>
+                        <div class="fare-label" id="basePriceLabel">ค่าโดยสารผู้ใหญ่ (1)</div>
+                        <div class="fare-value" id="basePrice">฿0</div>
                     </div>
                     <div class="fare-row">
                         <div class="fare-label">ภาษีและค่าธรรมเนียม</div>
-                        <div class="fare-value">฿390</div>
+                        <div class="fare-value" id="taxesAndFees">฿0</div>
                     </div>
                     <div class="fare-row total">
                         <div class="fare-label">ราคารวม</div>
-                        <div class="fare-value">฿1,590</div>
+                        <div class="fare-value" id="totalPrice">฿0</div>
                     </div>
                 </div>
             </div>
@@ -190,23 +192,23 @@
                         <h3>ข้อมูลผู้ติดต่อ</h3>
                         <div class="form-row">
                             <div class="form-group">
-                                <label for="contact-email">อีเมล</label>
+                                <label for="contact-email">อีเมล <span class="required">*</span></label>
                                 <input type="email" id="contact-email" required>
                                 <small>ใช้สำหรับส่งบัตรโดยสารและการแจ้งเตือน</small>
                             </div>
                             <div class="form-group">
-                                <label for="contact-phone">เบอร์โทรศัพท์</label>
+                                <label for="contact-phone">เบอร์โทรศัพท์ <span class="required">*</span></label>
                                 <input type="tel" id="contact-phone" required>
                                 <small>ใช้สำหรับติดต่อกรณีฉุกเฉิน</small>
                             </div>
                         </div>
                     </div>
 
-                    <div class="form-section">
+                    <div class="form-section" id="passengerSection">
                         <h3>ผู้โดยสารคนที่ 1 (ผู้ใหญ่)</h3>
                         <div class="form-row">
                             <div class="form-group">
-                                <label for="title">คำนำหน้า</label>
+                                <label for="title">คำนำหน้า <span class="required">*</span></label>
                                 <select id="title" required>
                                     <option value="">เลือก</option>
                                     <option value="mr">นาย</option>
@@ -215,23 +217,23 @@
                                 </select>
                             </div>
                             <div class="form-group">
-                                <label for="first-name">ชื่อ (ภาษาอังกฤษ)</label>
+                                <label for="first-name">ชื่อ (ภาษาอังกฤษ) <span class="required">*</span></label>
                                 <input type="text" id="first-name" required>
                                 <small>ต้องตรงกับหนังสือเดินทาง/บัตรประชาชน</small>
                             </div>
                             <div class="form-group">
-                                <label for="last-name">นามสกุล (ภาษาอังกฤษ)</label>
+                                <label for="last-name">นามสกุล (ภาษาอังกฤษ) <span class="required">*</span></label>
                                 <input type="text" id="last-name" required>
                                 <small>ต้องตรงกับหนังสือเดินทาง/บัตรประชาชน</small>
                             </div>
                         </div>
                         <div class="form-row">
                             <div class="form-group">
-                                <label for="dob">วันเกิด</label>
+                                <label for="dob">วันเกิด <span class="required">*</span></label>
                                 <input type="date" id="dob" required>
                             </div>
                             <div class="form-group">
-                                <label for="nationality">สัญชาติ</label>
+                                <label for="nationality">สัญชาติ <span class="required">*</span></label>
                                 <select id="nationality" required>
                                     <option value="">เลือก</option>
                                     <option value="th">ไทย</option>
@@ -239,10 +241,11 @@
                                     <option value="cn">จีน</option>
                                     <option value="jp">ญี่ปุ่น</option>
                                     <option value="gb">อังกฤษ</option>
+                                    <option value="other">อื่นๆ</option>
                                 </select>
                             </div>
                             <div class="form-group">
-                                <label for="passport">เลขที่หนังสือเดินทาง/บัตรประชาชน</label>
+                                <label for="passport">เลขที่หนังสือเดินทาง/บัตรประชาชน <span class="required">*</span></label>
                                 <input type="text" id="passport" required>
                             </div>
                         </div>
@@ -250,7 +253,7 @@
 
                     <div class="form-section">
                         <h3>บริการเสริม</h3>
-                        <div class="addon-list">
+                        <div class="addon-list" id="addonList">
                             <div class="addon-item">
                                 <div class="addon-check">
                                     <input type="checkbox" id="addon-meal">
@@ -290,8 +293,8 @@
         <!-- Action Buttons -->
         <section class="action-buttons">
             <div class="container">
-                <button class="btn btn-outline" onclick="window.history.back()">ย้อนกลับ</button>
-                <button class="btn btn-primary" onclick="location.href='seat-selection.html'">ดำเนินการต่อ</button>
+                <button class="btn btn-outline" id="backButton">ย้อนกลับ</button>
+                <button class="btn btn-primary" id="continueButton">ดำเนินการต่อ</button>
             </div>
         </section>
     </main>
