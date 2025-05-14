@@ -1,141 +1,140 @@
 package com.airline.booking.service;
 
-import com.airline.booking.exception.ResourceNotFoundException;
 import com.airline.booking.model.Booking;
-import com.airline.booking.model.Flight;
-import com.airline.booking.model.User;
-import com.airline.booking.repository.BookingRepository;
-import com.airline.booking.repository.FlightRepository;
-import com.airline.booking.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import com.airline.booking.model.Passenger;
+import com.airline.booking.exception.ResourceNotFoundException;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Random;
+import java.util.Map;
 
-@Service
-public class BookingService {
-
-    @Autowired
-    private BookingRepository bookingRepository;
+public interface BookingService {
     
-    @Autowired
-    private UserRepository userRepository;
+    /**
+     * ดึงการจองทั้งหมดในระบบ
+     */
+    List<Booking> getAllBookings();
     
-    @Autowired
-    private FlightRepository flightRepository;
-
-    // ดึงการจองทั้งหมด
-    public List<Booking> getAllBookings() {
-        return bookingRepository.findAll();
-    }
-
-    // ดึงการจองตาม ID
-    public Booking getBookingById(String bookingId) {
-        return bookingRepository.findById(bookingId)
-                .orElseThrow(() -> new ResourceNotFoundException("ไม่พบการจองกับรหัส: " + bookingId));
-    }
-
-    // ค้นหาการจองตามผู้ใช้
-    public List<Booking> getBookingsByUserId(String userId) {
-        return bookingRepository.findByUserUserId(userId);
-    }
-
-    // ค้นหาการจองตามเที่ยวบิน
-    public List<Booking> getBookingsByFlightId(String flightId) {
-        return bookingRepository.findByFlightFlightId(flightId);
-    }
-
-    // ค้นหาการจองตามสถานะการจอง
-    public List<Booking> getBookingsByStatus(String bookingStatus) {
-        return bookingRepository.findByBookingStatus(bookingStatus);
-    }
-
-    // ค้นหาการจองตามช่วงวันที่
-    public List<Booking> getBookingsByDateRange(LocalDate startDate, LocalDate endDate) {
-        return bookingRepository.findByBookingDateBetween(startDate, endDate);
-    }
-
-    // สร้างการจองใหม่
-    public Booking createBooking(Booking booking, String userId, String flightId) {
-        // ดึงข้อมูลผู้ใช้
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("ไม่พบผู้ใช้กับรหัส: " + userId));
-        
-        // ดึงข้อมูลเที่ยวบิน
-        Flight flight = flightRepository.findById(flightId)
-                .orElseThrow(() -> new ResourceNotFoundException("ไม่พบเที่ยวบินกับรหัส: " + flightId));
-        
-        // ตรวจสอบว่ามี ID แล้วหรือยัง
-        if (booking.getBookingId() == null || booking.getBookingId().isEmpty()) {
-            // สร้าง ID ใหม่
-            booking.setBookingId(generateBookingId());
-        }
-        
-        // ตั้งค่า User และ Flight
-        booking.setUser(user);
-        booking.setFlight(flight);
-        
-        // ตั้งค่าวันที่จองหากยังไม่ได้ตั้ง
-        if (booking.getBookingDate() == null) {
-            booking.setBookingDate(LocalDate.now());
-        }
-        
-        // ตั้งค่าสถานะการจองหากยังไม่ได้ตั้ง
-        if (booking.getBookingStatus() == null || booking.getBookingStatus().isEmpty()) {
-            booking.setBookingStatus("Pending");
-        }
-        
-        return bookingRepository.save(booking);
-    }
-
-    // อัปเดตข้อมูลการจอง
-    public Booking updateBooking(String bookingId, Booking bookingDetails) {
-        Booking booking = getBookingById(bookingId);
-        
-        // อัปเดตข้อมูล
-        if (bookingDetails.getBookingStatus() != null) {
-            booking.setBookingStatus(bookingDetails.getBookingStatus());
-        }
-        
-        if (bookingDetails.getTotalPrice() != null) {
-            booking.setTotalPrice(bookingDetails.getTotalPrice());
-        }
-        
-        return bookingRepository.save(booking);
-    }
-
-    // อัปเดตสถานะการจอง
-    public Booking updateBookingStatus(String bookingId, String newStatus) {
-        Booking booking = getBookingById(bookingId);
-        booking.setBookingStatus(newStatus);
-        return bookingRepository.save(booking);
-    }
-
-    // ยกเลิกการจอง
-    public Booking cancelBooking(String bookingId) {
-        Booking booking = getBookingById(bookingId);
-        booking.setBookingStatus("Cancelled");
-        return bookingRepository.save(booking);
-    }
-
-    // ลบการจอง
-    public void deleteBooking(String bookingId) {
-        Booking booking = getBookingById(bookingId);
-        bookingRepository.delete(booking);
-    }
-
-    // สร้าง ID สำหรับการจองใหม่
-    private String generateBookingId() {
-        // สร้าง prefix
-        String prefix = "BK";
-        
-        // สร้างเลขสุ่ม 5 หลัก
-        Random random = new Random();
-        int number = 10000 + random.nextInt(90000);
-        
-        // รวมกันเป็น ID
-        return prefix + number;
-    }
+    /**
+     * ดึงการจองตาม ID
+     * @param bookingId รหัสการจอง
+     * @return ข้อมูลการจอง
+     * @throws ResourceNotFoundException ถ้าไม่พบการจอง
+     */
+    Booking getBookingById(String bookingId) throws ResourceNotFoundException;
+    
+    /**
+     * ดึงการจองตามผู้ใช้
+     * @param userId รหัสผู้ใช้
+     * @return รายการการจองของผู้ใช้
+     */
+    List<Booking> getBookingsByUserId(String userId);
+    
+    /**
+     * ดึงการจองตามเที่ยวบิน
+     * @param flightId รหัสเที่ยวบิน
+     * @return รายการการจองสำหรับเที่ยวบิน
+     */
+    List<Booking> getBookingsByFlightId(String flightId);
+    
+    /**
+     * ดึงการจองตามสถานะ
+     * @param status สถานะการจอง
+     * @return รายการการจองที่มีสถานะตามที่ระบุ
+     */
+    List<Booking> getBookingsByStatus(String status);
+    
+    /**
+     * ดึงการจองตามช่วงวันที่
+     * @param fromDate วันที่เริ่มต้น
+     * @param toDate วันที่สิ้นสุด
+     * @return รายการการจองในช่วงวันที่
+     */
+    List<Booking> getBookingsByDateRange(LocalDate fromDate, LocalDate toDate);
+    
+    /**
+     * สร้างการจองใหม่
+     * @param booking ข้อมูลการจอง
+     * @param userId รหัสผู้ใช้
+     * @param flightId รหัสเที่ยวบิน
+     * @return ข้อมูลการจองที่สร้างใหม่
+     * @throws ResourceNotFoundException ถ้าไม่พบผู้ใช้หรือเที่ยวบิน
+     */
+    Booking createBooking(Booking booking, String userId, String flightId) throws ResourceNotFoundException;
+    
+    /**
+     * อัปเดตข้อมูลการจอง
+     * @param bookingId รหัสการจอง
+     * @param bookingDetails ข้อมูลการจองใหม่
+     * @return ข้อมูลการจองที่อัปเดตแล้ว
+     * @throws ResourceNotFoundException ถ้าไม่พบการจอง
+     */
+    Booking updateBooking(String bookingId, Booking bookingDetails) throws ResourceNotFoundException;
+    
+    /**
+     * อัปเดตสถานะการจอง
+     * @param bookingId รหัสการจอง
+     * @param status สถานะใหม่
+     * @return ข้อมูลการจองที่อัปเดตแล้ว
+     * @throws ResourceNotFoundException ถ้าไม่พบการจอง
+     */
+    Booking updateBookingStatus(String bookingId, String status) throws ResourceNotFoundException;
+    
+    /**
+     * ยกเลิกการจอง
+     * @param bookingId รหัสการจอง
+     * @return ข้อมูลการจองที่ยกเลิกแล้ว
+     * @throws ResourceNotFoundException ถ้าไม่พบการจอง
+     */
+    Booking cancelBooking(String bookingId) throws ResourceNotFoundException;
+    
+    /**
+     * ลบการจอง
+     * @param bookingId รหัสการจอง
+     * @throws ResourceNotFoundException ถ้าไม่พบการจอง
+     */
+    void deleteBooking(String bookingId) throws ResourceNotFoundException;
+    
+/**
+     * เพิ่มผู้โดยสารในการจอง
+     * @param bookingId รหัสการจอง
+     * @param passenger ข้อมูลผู้โดยสาร
+     * @return ข้อมูลการจองที่อัปเดตแล้ว
+     * @throws ResourceNotFoundException ถ้าไม่พบการจอง
+     */
+    Booking addPassengerToBooking(String bookingId, Passenger passenger) throws ResourceNotFoundException;
+    
+    /**
+     * ลบผู้โดยสารจากการจอง
+     * @param bookingId รหัสการจอง
+     * @param passengerId รหัสผู้โดยสาร
+     * @return ข้อมูลการจองที่อัปเดตแล้ว
+     * @throws ResourceNotFoundException ถ้าไม่พบการจองหรือผู้โดยสาร
+     */
+    Booking removePassengerFromBooking(String bookingId, String passengerId) throws ResourceNotFoundException;
+    
+    /**
+     * เพิ่มส่วนลดในการจอง
+     * @param bookingId รหัสการจอง
+     * @param discountId รหัสส่วนลด
+     * @return ข้อมูลการจองที่อัปเดตแล้ว
+     * @throws ResourceNotFoundException ถ้าไม่พบการจองหรือส่วนลด
+     */
+    Booking applyDiscountToBooking(String bookingId, String discountId) throws ResourceNotFoundException;
+    
+    /**
+     * ดึงผู้โดยสารในการจอง
+     * @param bookingId รหัสการจอง
+     * @return รายการผู้โดยสารในการจอง
+     * @throws ResourceNotFoundException ถ้าไม่พบการจอง
+     */
+    List<Passenger> getBookingPassengers(String bookingId) throws ResourceNotFoundException;
+    
+    /**
+     * ตรวจสอบสถานะการชำระเงิน
+     * @param bookingId รหัสการจอง
+     * @return ข้อมูลสถานะการชำระเงิน
+     * @throws ResourceNotFoundException ถ้าไม่พบการจอง
+     */
+    Map<String, Object> getBookingPaymentStatus(String bookingId) throws ResourceNotFoundException;
 }

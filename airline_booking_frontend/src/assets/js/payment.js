@@ -1,65 +1,72 @@
 import { apiService } from './api-service.js';
 
 document.addEventListener('DOMContentLoaded', function() {
-    // เลือก elements ที่เกี่ยวข้อง
+    // Elements
     const paymentTabs = document.querySelectorAll('.payment-tab');
     const paymentContents = document.querySelectorAll('.payment-tab-content');
     const cardNumberInput = document.getElementById('card-number');
+    const cardHolderInput = document.getElementById('card-holder');
     const expiryDateInput = document.getElementById('expiry-date');
     const cvvInput = document.getElementById('cvv');
     const payNowBtn = document.getElementById('pay-now-btn');
+    const backButton = document.getElementById('backButton');
+    const discountBtn = document.getElementById('apply-discount-btn');
+    const discountInput = document.getElementById('discount-code-input');
     
-    // ดึงข้อมูลจาก URL parameters
+    // Get data from URL parameters
     const urlParams = new URLSearchParams(window.location.search);
     const bookingId = urlParams.get('bookingId');
     
-    // ดึงข้อมูลที่บันทึกไว้ใน sessionStorage
+    // Get data from sessionStorage
     const selectedFlightData = sessionStorage.getItem('selectedFlight') ? 
         JSON.parse(sessionStorage.getItem('selectedFlight')) : null;
-    const passengerData = sessionStorage.getItem('passengerData') ? 
-        JSON.parse(sessionStorage.getItem('passengerData')) : null;
+    const passengerInfo = sessionStorage.getItem('passengerInfo') ? 
+        JSON.parse(sessionStorage.getItem('passengerInfo')) : null;
     const selectedSeats = sessionStorage.getItem('selectedSeats') ? 
         JSON.parse(sessionStorage.getItem('selectedSeats')) : [];
     const additionalSeatPrice = parseInt(sessionStorage.getItem('additionalSeatPrice') || '0');
     
-    // ข้อมูลการจอง
+    // Booking info
     let bookingInfo = null;
     
-    // ตั้งค่า tabs สำหรับวิธีการชำระเงิน
+    // Setup payment tabs
     setupPaymentTabs();
     
-    // ตั้งค่า formatting สำหรับช่องกรอกข้อมูลบัตรเครดิต
+    // Setup credit card input formatting
     setupCreditCardInputs();
     
-    // โหลดข้อมูลการจอง
+    // Load booking data
     if (bookingId) {
         loadBookingData(bookingId);
     } else {
         loadFlightSummary();
     }
     
-    // ตั้งค่าปุ่มชำระเงิน
+    // Setup pay now button
     setupPayNowButton();
     
-    // ตั้งค่ารหัสส่วนลด
+    // Setup discount code
     setupDiscountCode();
     
+    // Setup back button
+    setupBackButton();
+    
     /**
-     * ตั้งค่า tabs สำหรับวิธีการชำระเงิน
+     * Setup payment tabs
      */
     function setupPaymentTabs() {
         if (!paymentTabs || !paymentContents) return;
         
         paymentTabs.forEach(tab => {
             tab.addEventListener('click', function() {
-                // ลบ class active จากทุก tab และ content
+                // Remove active class from all tabs and content
                 paymentTabs.forEach(t => t.classList.remove('active'));
                 paymentContents.forEach(c => c.classList.remove('active'));
                 
-                // เพิ่ม class active ให้กับ tab ที่คลิก
+                // Add active class to clicked tab
                 this.classList.add('active');
                 
-                // แสดง content ที่เกี่ยวข้อง
+                // Show related content
                 const tabId = this.dataset.tab;
                 document.getElementById(`${tabId}-content`).classList.add('active');
             });
@@ -67,10 +74,10 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     /**
-     * ตั้งค่า formatting สำหรับช่องกรอกข้อมูลบัตรเครดิต
+     * Setup credit card input formatting
      */
     function setupCreditCardInputs() {
-        // Format หมายเลขบัตรเครดิต
+        // Format card number
         if (cardNumberInput) {
             cardNumberInput.addEventListener('input', function(e) {
                 let value = e.target.value.replace(/\s+/g, '').replace(/[^0-9]/gi, '');
@@ -85,34 +92,34 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 e.target.value = formattedValue;
                 
-                // จำกัดให้กรอกได้ไม่เกิน 19 ตัวอักษร (16 ตัวเลข + 3 ช่องว่าง)
+                // Limit to 19 characters (16 numbers + 3 spaces)
                 if (e.target.value.length > 19) {
                     e.target.value = e.target.value.slice(0, 19);
                 }
             });
         }
         
-        // Format วันหมดอายุ (MM/YY)
+        // Format expiry date (MM/YY)
         if (expiryDateInput) {
             expiryDateInput.addEventListener('input', function(e) {
                 let value = e.target.value.replace(/\D/g, '');
                 let formattedValue = '';
                 
                 if (value.length > 0) {
-                    // 2 ตัวแรกคือเดือน
+                    // First 2 digits are month
                     let month = value.substring(0, 2);
-                    // ถ้าเดือนมากกว่า 12 ให้เป็น 12
+                    // If month > 12, set to 12
                     if (parseInt(month) > 12 && month.length === 2) {
                         month = '12';
                     }
                     formattedValue = month;
                     
-                    // เพิ่ม / หลังจากเดือน
+                    // Add / after month
                     if (value.length >= 2) {
                         formattedValue += '/';
                     }
                     
-                    // ตัวเลขที่เหลือคือปี
+                    // Remaining digits are year
                     if (value.length > 2) {
                         formattedValue += value.substring(2, 4);
                     }
@@ -120,20 +127,20 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 e.target.value = formattedValue;
                 
-                // จำกัดให้กรอกได้ไม่เกิน 5 ตัวอักษร (MM/YY)
+                // Limit to 5 characters (MM/YY)
                 if (e.target.value.length > 5) {
                     e.target.value = e.target.value.slice(0, 5);
                 }
             });
         }
         
-        // Format CVV (3 หรือ 4 หลัก)
+        // Format CVV (3 or 4 digits)
         if (cvvInput) {
             cvvInput.addEventListener('input', function(e) {
                 let value = e.target.value.replace(/\D/g, '');
                 e.target.value = value;
                 
-                // จำกัดให้กรอกได้ไม่เกิน 4 ตัวอักษร
+                // Limit to 4 digits
                 if (e.target.value.length > 4) {
                     e.target.value = e.target.value.slice(0, 4);
                 }
@@ -142,88 +149,96 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     /**
-     * โหลดข้อมูลการจอง
+     * Load booking data from API
      */
     async function loadBookingData(bookingId) {
         try {
-            // แสดง loading state
+            // Show loading state
             showLoadingState();
             
-            // ดึงข้อมูลการจองจาก API
+            // Get booking data from API
             const booking = await apiService.getBookingById(bookingId);
             bookingInfo = booking;
             
-            // อัพเดทข้อมูลในหน้า
+            // Update page with booking data
             updateBookingSummary(booking);
             
-            // ซ่อน loading state
+            // Hide loading state
             hideLoadingState();
         } catch (error) {
             console.error('Error loading booking data:', error);
             alert('ไม่สามารถโหลดข้อมูลการจองได้ กรุณาลองใหม่อีกครั้ง');
             
-            // ซ่อน loading state
+            // Hide loading state
             hideLoadingState();
         }
     }
     
     /**
-     * โหลดข้อมูลสรุปเที่ยวบิน (กรณีที่ยังไม่มี bookingId)
+     * Load flight summary from sessionStorage
      */
     function loadFlightSummary() {
-        if (!selectedFlightData || !passengerData) {
+        if (!selectedFlightData || !passengerInfo) {
             alert('ไม่พบข้อมูลการจอง กรุณาเลือกเที่ยวบินและกรอกข้อมูลผู้โดยสารก่อน');
             window.location.href = 'index.html';
             return;
         }
         
-        // สร้างข้อมูลสรุปการจองจากข้อมูลที่บันทึกไว้
+        // Create summary data from sessionStorage
         const summaryData = {
             flight: selectedFlightData,
-            passengers: [passengerData],
+            passengers: [passengerInfo.passenger],
             selectedSeats: selectedSeats,
             baseFare: selectedFlightData.price,
-            taxes: Math.round(selectedFlightData.price * 0.325), // ภาษีและค่าธรรมเนียมประมาณ 32.5%
-            additionalServices: additionalSeatPrice,
-            totalPrice: selectedFlightData.price + Math.round(selectedFlightData.price * 0.325) + additionalSeatPrice
+            taxes: Math.round(selectedFlightData.price * 0.325), // Tax approximately 32.5%
+            additionalServices: additionalSeatPrice + (passengerInfo.additionalCost || 0),
+            additionalSeatPrice: additionalSeatPrice,
+            additionalCost: passengerInfo.additionalCost || 0,
+            contactEmail: passengerInfo.contact.email,
+            contactPhone: passengerInfo.contact.phone,
+            totalPrice: selectedFlightData.price + 
+                        Math.round(selectedFlightData.price * 0.325) + 
+                        additionalSeatPrice + 
+                        (passengerInfo.additionalCost || 0)
         };
         
         bookingInfo = summaryData;
         
-        // อัพเดทข้อมูลในหน้า
+        // Update page with summary data
         updateBookingSummary(summaryData);
     }
     
     /**
-     * อัพเดทข้อมูลสรุปการจอง
+     * Update booking summary
      */
     function updateBookingSummary(data) {
-        // อัพเดทข้อมูลเที่ยวบิน
-        const flightSummary = document.querySelector('.flight-route');
-        if (flightSummary) {
+        // Update flight route
+        const flightRoute = document.querySelector('.flight-route');
+        if (flightRoute && data.flight) {
             const flight = data.flight;
-            const passengers = data.passengers?.length || 1;
             
-            // สร้างข้อความสรุปเที่ยวบิน
-            let summaryText = '';
+            // Create route title
+            let routeTitle = '';
             if (flight.departureCity && flight.arrivalCity) {
                 const departureCode = flight.departureCity.substring(0, 3).toUpperCase();
                 const arrivalCode = flight.arrivalCity.substring(0, 3).toUpperCase();
-                summaryText = `${flight.departureCity} (${departureCode}) → ${flight.arrivalCity} (${arrivalCode})`;
+                routeTitle = `${flight.departureCity} (${departureCode}) → ${flight.arrivalCity} (${arrivalCode})`;
             }
             
-            flightSummary.querySelector('h2').textContent = summaryText;
+            flightRoute.querySelector('h2').textContent = routeTitle;
             
-            // สร้างข้อความรายละเอียดเที่ยวบิน
-            let detailsText = '';
+            // Create route details
+            let routeInfo = '';
             if (flight.departureTime) {
                 const departureDate = new Date(flight.departureTime);
                 const options = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
                 const formattedDate = departureDate.toLocaleDateString('th-TH', options);
                 
-                detailsText = `${formattedDate} | ผู้โดยสาร ${passengers} คน`;
+                const passengers = data.passengers?.length || 1;
                 
-                // เพิ่มชั้นโดยสาร
+                routeInfo = `${formattedDate} | ผู้โดยสาร ${passengers} คน`;
+                
+                // Add seat class
                 if (flight.seatClass) {
                     const seatClassMap = {
                         'economy': 'ชั้นประหยัด',
@@ -231,104 +246,98 @@ document.addEventListener('DOMContentLoaded', function() {
                         'business': 'ชั้นธุรกิจ',
                         'first': 'ชั้นหนึ่ง'
                     };
-                    detailsText += ` | ${seatClassMap[flight.seatClass] || 'ชั้นประหยัด'}`;
+                    routeInfo += ` | ${seatClassMap[flight.seatClass] || 'ชั้นประหยัด'}`;
                 }
                 
-                // เพิ่มรหัสเที่ยวบิน
+                // Add flight number
                 if (flight.flightNumber) {
-                    detailsText += ` | ${flight.flightNumber}`;
+                    routeInfo += ` | ${flight.flightNumber}`;
                 }
             }
             
-            flightSummary.querySelector('p').textContent = detailsText;
+            flightRoute.querySelector('p').textContent = routeInfo;
         }
         
-        // อัพเดทข้อมูลสรุปการจอง
-        const summaryItems = document.querySelectorAll('.summary-item');
-        if (summaryItems.length > 0) {
-            // ข้อมูลเที่ยวบิน
-            const flightNumberItem = summaryItems[0]?.querySelector('.summary-value');
-            if (flightNumberItem) {
-                flightNumberItem.textContent = data.flight.flightNumber || 'N/A';
-            }
+        // Update summary items
+        updateSummaryItem('flightNumberSummary', data.flight?.flightNumber || 'N/A');
+        
+        // Update date
+        if (data.flight?.departureTime) {
+            const departureDate = new Date(data.flight.departureTime);
+            updateSummaryItem('flightDateSummary', departureDate.toLocaleDateString('th-TH', {
+                day: 'numeric',
+                month: 'long',
+                year: 'numeric'
+            }));
             
-            // วันที่
-            const dateItem = summaryItems[1]?.querySelector('.summary-value');
-            if (dateItem && data.flight.departureTime) {
-                const departureDate = new Date(data.flight.departureTime);
-                dateItem.textContent = departureDate.toLocaleDateString('th-TH', {
-                    day: 'numeric',
-                    month: 'long',
-                    year: 'numeric'
-                });
-            }
-            
-            // เวลา
-            const timeItem = summaryItems[2]?.querySelector('.summary-value');
-            if (timeItem && data.flight.departureTime && data.flight.arrivalTime) {
-                const departureTime = new Date(data.flight.departureTime);
-                const arrivalTime = new Date(data.flight.arrivalTime);
-                
-                timeItem.textContent = `${departureTime.toLocaleTimeString('th-TH', {
-                    hour: '2-digit',
-                    minute: '2-digit'
-                })} - ${arrivalTime.toLocaleTimeString('th-TH', {
-                    hour: '2-digit',
-                    minute: '2-digit'
-                })}`;
-            }
-            
-            // ผู้โดยสาร
-            const passengerItem = summaryItems[3]?.querySelector('.summary-value');
-            if (passengerItem && data.passengers) {
-                const passengerName = data.passengers[0]?.firstName && data.passengers[0]?.lastName ?
-                    `${data.passengers[0].firstName} ${data.passengers[0].lastName}` : 'N/A';
-                
-                passengerItem.textContent = `${data.passengers.length} คน (${passengerName})`;
-            }
-            
-            // ที่นั่ง
-            const seatItem = summaryItems[4]?.querySelector('.summary-value');
-            if (seatItem) {
-                const seatNumbers = data.selectedSeats?.map(seat => seat.seatNumber).join(', ') || 
-                    data.passengers?.map(p => p.seatNumber).filter(s => s).join(', ') || 
-                    'ยังไม่ได้เลือก';
-                
-                seatItem.textContent = seatNumbers;
-            }
+            // Update time
+            const arrivalTime = new Date(data.flight.arrivalTime);
+            updateSummaryItem('flightTimeSummary', `${departureDate.toLocaleTimeString('th-TH', {
+                hour: '2-digit',
+                minute: '2-digit'
+            })} - ${arrivalTime.toLocaleTimeString('th-TH', {
+                hour: '2-digit',
+                minute: '2-digit'
+            })}`);
         }
         
-        // อัพเดทราคา
-        const fareItems = document.querySelectorAll('.price-item');
-        if (fareItems.length > 0) {
-            // ค่าโดยสาร
-            const baseFareItem = fareItems[0]?.querySelector('.price-value');
-            if (baseFareItem) {
-                baseFareItem.textContent = `฿${(data.baseFare || 0).toLocaleString()}`;
-            }
+        // Update passenger summary
+        if (data.passengers && data.passengers.length > 0) {
+            const passenger = data.passengers[0];
+            const passengerName = passenger.firstName && passenger.lastName ? 
+                `${passenger.firstName} ${passenger.lastName}` : 'N/A';
             
-            // ภาษีและค่าธรรมเนียม
-            const taxesItem = fareItems[1]?.querySelector('.price-value');
-            if (taxesItem) {
-                taxesItem.textContent = `฿${(data.taxes || 0).toLocaleString()}`;
-            }
-            
-            // บริการเสริม
-            const additionalItem = fareItems[2]?.querySelector('.price-value');
-            if (additionalItem) {
-                additionalItem.textContent = `฿${(data.additionalServices || 0).toLocaleString()}`;
-            }
-            
-            // ยอดรวม
-            const totalItem = document.querySelector('.price-item.total .price-value');
-            if (totalItem) {
-                totalItem.textContent = `฿${(data.totalPrice || 0).toLocaleString()}`;
+            updateSummaryItem('passengerSummary', `${data.passengers.length} คน (${passengerName})`);
+        }
+        
+        // Update seat summary
+        const seatNumbers = data.selectedSeats?.map(seat => seat.seatNumber).join(', ') || 
+            data.passengers?.map(p => p.seatNumber).filter(s => s).join(', ') || 
+            'ยังไม่ได้เลือก';
+        
+        updateSummaryItem('seatSummary', seatNumbers);
+        
+        // Update price breakdown
+        const basePrice = document.getElementById('basePrice');
+        const taxesAndFees = document.getElementById('taxesAndFees');
+        const additionalServices = document.getElementById('additionalServices');
+        const totalPrice = document.getElementById('totalPrice');
+        
+        if (basePrice) basePrice.textContent = `฿${(data.baseFare || 0).toLocaleString()}`;
+        if (taxesAndFees) taxesAndFees.textContent = `฿${(data.taxes || 0).toLocaleString()}`;
+        if (additionalServices) additionalServices.textContent = `฿${(data.additionalServices || 0).toLocaleString()}`;
+        if (totalPrice) totalPrice.textContent = `฿${(data.totalPrice || 0).toLocaleString()}`;
+        
+        // Show loyalty points if user is logged in
+        const userData = localStorage.getItem('userData');
+        if (userData && data.totalPrice) {
+            try {
+                const user = JSON.parse(userData);
+                const pointsEarned = Math.floor(data.totalPrice / 10); // 1 point per 10 THB
+                
+                const loyaltyPointsSection = document.getElementById('loyaltyPointsSection');
+                const loyaltyPointsInfo = document.getElementById('loyaltyPointsInfo');
+                
+                if (loyaltyPointsSection && loyaltyPointsInfo) {
+                    loyaltyPointsSection.style.display = 'block';
+                    loyaltyPointsInfo.textContent = `คุณจะได้รับ ${pointsEarned} คะแนนเมื่อการจองเสร็จสมบูรณ์`;
+                }
+            } catch (error) {
+                console.error('Error parsing user data:', error);
             }
         }
     }
     
     /**
-     * ตั้งค่าปุ่มชำระเงิน
+     * Update summary item by ID
+     */
+    function updateSummaryItem(id, value) {
+        const element = document.getElementById(id);
+        if (element) element.textContent = value;
+    }
+    
+    /**
+     * Setup pay now button
      */
     function setupPayNowButton() {
         if (!payNowBtn) return;
@@ -336,7 +345,7 @@ document.addEventListener('DOMContentLoaded', function() {
         payNowBtn.addEventListener('click', async function(e) {
             e.preventDefault();
             
-            // ตรวจสอบว่ายอมรับข้อตกลงหรือไม่
+            // Check if terms are accepted
             const acceptTerms = document.getElementById('accept-terms');
             const acceptPolicy = document.getElementById('accept-policy');
             
@@ -346,11 +355,11 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             
             if (!acceptPolicy?.checked) {
-                alert('กรุณายอมรับนโยบายความเป็นส่วนตัวของ SkyBooking');
+                alert('กรุณายอมรับนโยบายความเป็นส่วนตัวของ Skyways Airlines');
                 return;
             }
             
-            // ตรวจสอบว่าเลือกวิธีการชำระเงินหรือไม่
+            // Check payment method
             const activeTab = document.querySelector('.payment-tab.active');
             if (!activeTab) {
                 alert('กรุณาเลือกวิธีการชำระเงิน');
@@ -359,7 +368,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             const paymentMethod = activeTab.dataset.tab;
             
-            // ตรวจสอบความถูกต้องของข้อมูลตามวิธีการชำระเงิน
+            // Validate payment form
             if (paymentMethod === 'credit-card') {
                 if (!validateCreditCardForm()) {
                     return;
@@ -370,15 +379,16 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }
             
-            // แสดง loading state
+            // Show loading state
+            showLoadingState();
             const originalBtnText = payNowBtn.innerHTML;
             payNowBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> กำลังดำเนินการ...';
             payNowBtn.disabled = true;
             
             try {
-                // ถ้ามี bookingId ให้อัพเดทการชำระเงินสำหรับการจองที่มีอยู่แล้ว
+                // If bookingId exists, update payment for existing booking
                 if (bookingId) {
-                    // รวบรวมข้อมูลการชำระเงิน
+                    // Collect payment data
                     const paymentData = {
                         bookingId,
                         paymentMethod,
@@ -387,28 +397,28 @@ document.addEventListener('DOMContentLoaded', function() {
                         paymentDate: new Date().toISOString()
                     };
                     
-                    // เพิ่มข้อมูลเพิ่มเติมตามวิธีการชำระเงิน
+                    // Add additional info based on payment method
                     if (paymentMethod === 'credit-card') {
                         paymentData.cardNumber = cardNumberInput.value.replace(/\s/g, '').slice(-4);
-                        paymentData.cardHolder = document.getElementById('card-holder')?.value;
+                        paymentData.cardHolder = cardHolderInput.value;
                         paymentData.expiryDate = expiryDateInput.value;
                     } else if (paymentMethod === 'e-wallet') {
                         paymentData.walletType = document.querySelector('input[name="wallet"]:checked')?.value;
                         paymentData.walletPhone = document.getElementById('wallet-phone')?.value;
                     }
                     
-                    // เรียกใช้ API เพื่อบันทึกการชำระเงิน
+                    // Call API to save payment
                     await apiService.createPayment(bookingId, paymentData);
                     
-                    // อัพเดทสถานะการจอง
+                    // Update booking status
                     await apiService.updateBookingStatus(bookingId, 'Confirmed');
                     
-                    // Redirect ไปยังหน้ายืนยันการจอง
+                    // Redirect to confirmation page
                     window.location.href = `confirmation.html?bookingId=${bookingId}`;
                 } 
-                // ถ้าไม่มี bookingId ให้สร้างการจองใหม่
-                else if (bookingInfo && selectedFlightData && passengerData) {
-                    // สมมติว่าผู้ใช้เข้าสู่ระบบแล้ว
+                // Create new booking
+                else if (bookingInfo && selectedFlightData && passengerInfo) {
+                    // Check if user is logged in
                     const userData = localStorage.getItem('userData');
                     let userId = null;
                     
@@ -421,12 +431,12 @@ document.addEventListener('DOMContentLoaded', function() {
                         }
                     }
                     
-                    // ถ้าไม่มี userId ให้ redirect ไปยังหน้าเข้าสู่ระบบ
+                    // If user is not logged in, save temporary booking and redirect to login
                     if (!userId) {
-                        // บันทึกข้อมูลการจองชั่วคราวเพื่อนำกลับมาใช้หลังจากเข้าสู่ระบบ
+                        // Save booking data to sessionStorage
                         sessionStorage.setItem('pendingBooking', JSON.stringify({
                             flight: selectedFlightData,
-                            passenger: passengerData,
+                            passenger: passengerInfo,
                             seats: selectedSeats,
                             additionalSeatPrice
                         }));
@@ -436,7 +446,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         return;
                     }
                     
-                    // รวบรวมข้อมูลการจอง
+                    // Create booking data
                     const bookingData = {
                         userId,
                         flightId: selectedFlightData.flightId,
@@ -446,24 +456,24 @@ document.addEventListener('DOMContentLoaded', function() {
                         baseFare: bookingInfo.baseFare,
                         taxes: bookingInfo.taxes,
                         additionalServices: bookingInfo.additionalServices,
-                        contactEmail: passengerData.contactEmail,
-                        contactPhone: passengerData.contactPhone,
+                        contactEmail: passengerInfo.contact.email,
+                        contactPhone: passengerInfo.contact.phone,
                         passengers: [{
-                            title: passengerData.title,
-                            firstName: passengerData.firstName,
-                            lastName: passengerData.lastName,
-                            dob: passengerData.dob,
-                            nationality: passengerData.nationality,
-                            passportNumber: passengerData.passportNumber,
+                            title: passengerInfo.passenger.title,
+                            firstName: passengerInfo.passenger.firstName,
+                            lastName: passengerInfo.passenger.lastName,
+                            dateOfBirth: passengerInfo.passenger.dateOfBirth,
+                            nationality: passengerInfo.passenger.nationality,
+                            documentId: passengerInfo.passenger.documentId,
                             seatNumber: selectedSeats.length > 0 ? selectedSeats[0].seatNumber : null,
-                            specialService: passengerData.specialService
+                            specialService: passengerInfo.passenger.specialService
                         }]
                     };
                     
-                    // เรียกใช้ API เพื่อสร้างการจองใหม่
+                    // Create booking
                     const booking = await apiService.createBooking(bookingData, userId, selectedFlightData.flightId);
                     
-                    // รวบรวมข้อมูลการชำระเงิน
+                    // Collect payment data
                     const paymentData = {
                         bookingId: booking.bookingId,
                         paymentMethod,
@@ -472,26 +482,26 @@ document.addEventListener('DOMContentLoaded', function() {
                         paymentDate: new Date().toISOString()
                     };
                     
-                    // เพิ่มข้อมูลเพิ่มเติมตามวิธีการชำระเงิน
+                    // Add additional info based on payment method
                     if (paymentMethod === 'credit-card') {
                         paymentData.cardNumber = cardNumberInput.value.replace(/\s/g, '').slice(-4);
-                        paymentData.cardHolder = document.getElementById('card-holder')?.value;
+                        paymentData.cardHolder = cardHolderInput.value;
                         paymentData.expiryDate = expiryDateInput.value;
                     } else if (paymentMethod === 'e-wallet') {
                         paymentData.walletType = document.querySelector('input[name="wallet"]:checked')?.value;
                         paymentData.walletPhone = document.getElementById('wallet-phone')?.value;
                     }
                     
-                    // เรียกใช้ API เพื่อบันทึกการชำระเงิน
+                    // Save payment
                     await apiService.createPayment(booking.bookingId, paymentData);
                     
-                    // ล้างข้อมูลการจองที่บันทึกไว้ใน sessionStorage
+                    // Clear sessionStorage
                     sessionStorage.removeItem('selectedFlight');
-                    sessionStorage.removeItem('passengerData');
+                    sessionStorage.removeItem('passengerInfo');
                     sessionStorage.removeItem('selectedSeats');
                     sessionStorage.removeItem('additionalSeatPrice');
                     
-                    // Redirect ไปยังหน้ายืนยันการจอง
+                    // Redirect to confirmation page
                     window.location.href = `confirmation.html?bookingId=${booking.bookingId}`;
                 } else {
                     throw new Error('ไม่พบข้อมูลการจอง');
@@ -500,31 +510,32 @@ document.addEventListener('DOMContentLoaded', function() {
                 console.error('Payment error:', error);
                 alert('เกิดข้อผิดพลาดในการชำระเงิน: ' + error.message);
                 
-                // คืนค่าสถานะปุ่ม
+                // Reset button state
                 payNowBtn.innerHTML = originalBtnText;
                 payNowBtn.disabled = false;
+                hideLoadingState();
             }
         });
     }
     
     /**
-     * ตรวจสอบความถูกต้องของฟอร์มบัตรเครดิต
+     * Validate credit card form
      */
     function validateCreditCardForm() {
         const cardNumber = cardNumberInput.value.replace(/\s/g, '');
-        const cardHolder = document.getElementById('card-holder')?.value;
+        const cardHolder = cardHolderInput.value;
         const expiryDate = expiryDateInput.value;
         const cvv = cvvInput.value;
+        
+        if (!cardHolder) {
+            alert('กรุณากรอกชื่อผู้ถือบัตร');
+            cardHolderInput.focus();
+            return false;
+        }
         
         if (!cardNumber || cardNumber.length < 16) {
             alert('กรุณากรอกหมายเลขบัตรให้ถูกต้อง');
             cardNumberInput.focus();
-            return false;
-        }
-        
-        if (!cardHolder) {
-            alert('กรุณากรอกชื่อผู้ถือบัตร');
-            document.getElementById('card-holder').focus();
             return false;
         }
         
@@ -534,11 +545,11 @@ document.addEventListener('DOMContentLoaded', function() {
             return false;
         }
         
-        // ตรวจสอบว่าบัตรหมดอายุหรือไม่
+        // Check if card is expired
         const [month, year] = expiryDate.split('/');
         const currentDate = new Date();
-        const currentYear = currentDate.getFullYear() % 100; // ดึง 2 ตัวสุดท้ายของปี
-        const currentMonth = currentDate.getMonth() + 1; // getMonth() คืนค่า 0-11
+        const currentYear = currentDate.getFullYear() % 100; // Last 2 digits
+        const currentMonth = currentDate.getMonth() + 1; // getMonth() returns 0-11
         
         if (parseInt(year) < currentYear || 
             (parseInt(year) === currentYear && parseInt(month) < currentMonth)) {
@@ -557,7 +568,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     /**
-     * ตรวจสอบความถูกต้องของฟอร์ม E-Wallet
+     * Validate e-wallet form
      */
     function validateEWalletForm() {
         const selectedWallet = document.querySelector('input[name="wallet"]:checked');
@@ -577,14 +588,12 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     /**
-     * ตั้งค่ารหัสส่วนลด
+     * Setup discount code
      */
     function setupDiscountCode() {
-        const discountBtn = document.querySelector('.discount-input button');
-        if (!discountBtn) return;
+        if (!discountBtn || !discountInput) return;
         
         discountBtn.addEventListener('click', function() {
-            const discountInput = document.querySelector('.discount-input input');
             const discountCode = discountInput.value.trim();
             
             if (!discountCode) {
@@ -592,52 +601,52 @@ document.addEventListener('DOMContentLoaded', function() {
                 return;
             }
             
-            // ตรวจสอบรหัสส่วนลด
+            // Check discount code
             if (discountCode.toUpperCase() === 'SKYPROMO') {
-                // คำนวณส่วนลด 10%
+                // Calculate 10% discount
                 if (bookingInfo) {
                     const discount = Math.round(bookingInfo.totalPrice * 0.1);
                     const newTotal = bookingInfo.totalPrice - discount;
                     
-                    // อัพเดทราคารวม
-                    const totalItem = document.querySelector('.price-item.total .price-value');
+                    // Update total price
+                    const totalItem = document.getElementById('totalPrice');
                     if (totalItem) {
                         totalItem.innerHTML = `฿${newTotal.toLocaleString()} <span style="text-decoration: line-through; color: #999; font-size: 0.85em;">฿${bookingInfo.totalPrice.toLocaleString()}</span>`;
                         totalItem.style.color = '#4caf50';
                     }
                     
-                    // เพิ่มรายการส่วนลด
+                    // Add discount item to price breakdown
                     const priceBreakdown = document.querySelector('.price-breakdown');
                     if (priceBreakdown) {
-                        // ตรวจสอบว่ามีรายการส่วนลดอยู่แล้วหรือไม่
+                        // Check if discount item already exists
                         let discountItem = document.querySelector('.price-item.discount');
                         if (!discountItem) {
-                            // สร้างรายการส่วนลดใหม่
+                            // Create new discount item
                             discountItem = document.createElement('div');
                             discountItem.className = 'price-item discount';
                             discountItem.innerHTML = `
-                                <span class="price-label">ส่วนลด (10%):</span>
+                                <span class="price-label">ส่วนลด (10%)</span>
                                 <span class="price-value" style="color: #4caf50;">-฿${discount.toLocaleString()}</span>
                             `;
                             
-                            // แทรกรายการส่วนลดก่อนรายการราคารวม
+                            // Insert discount item before total item
                             const totalItem = document.querySelector('.price-item.total');
                             priceBreakdown.insertBefore(discountItem, totalItem);
                         } else {
-                            // อัพเดทรายการส่วนลดที่มีอยู่แล้ว
+                            // Update existing discount item
                             discountItem.querySelector('.price-value').textContent = `-฿${discount.toLocaleString()}`;
                         }
                     }
                     
-                    // อัพเดทราคารวมในข้อมูลการจอง
+                    // Update booking info
                     bookingInfo.discount = discount;
                     bookingInfo.totalPrice = newTotal;
                 }
                 
-                // แสดงข้อความสำเร็จ
+                // Show success message
                 alert('ใช้รหัสส่วนลดสำเร็จ! คุณได้รับส่วนลด 10%');
                 
-                // ปิดการใช้งานช่องกรอกรหัสส่วนลด
+                // Disable discount input
                 discountInput.disabled = true;
                 discountBtn.disabled = true;
                 discountBtn.innerHTML = 'ใช้แล้ว';
@@ -648,60 +657,34 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     /**
-     * แสดง loading state
+     * Setup back button
      */
-    function showLoadingState() {
-        // เพิ่ม loading overlay
-        const loadingOverlay = document.createElement('div');
-        loadingOverlay.className = 'loading-overlay';
-        loadingOverlay.innerHTML = `
-            <div class="loading-spinner"></div>
-            <p>กำลังโหลดข้อมูล...</p>
-        `;
+    function setupBackButton() {
+        if (!backButton) return;
         
-        // ปรับแต่ง CSS
-        loadingOverlay.style.position = 'fixed';
-        loadingOverlay.style.top = '0';
-        loadingOverlay.style.left = '0';
-        loadingOverlay.style.width = '100%';
-        loadingOverlay.style.height = '100%';
-        loadingOverlay.style.backgroundColor = 'rgba(255, 255, 255, 0.8)';
-        loadingOverlay.style.display = 'flex';
-        loadingOverlay.style.flexDirection = 'column';
-        loadingOverlay.style.justifyContent = 'center';
-        loadingOverlay.style.alignItems = 'center';
-        loadingOverlay.style.zIndex = '9999';
-        
-        const spinner = loadingOverlay.querySelector('.loading-spinner');
-        spinner.style.width = '40px';
-        spinner.style.height = '40px';
-        spinner.style.border = '4px solid #f3f3f3';
-        spinner.style.borderTop = '4px solid var(--primary-color)';
-        spinner.style.borderRadius = '50%';
-        spinner.style.animation = 'spin 1s linear infinite';
-        
-        // เพิ่ม keyframes animation
-        const styleElement = document.createElement('style');
-        styleElement.textContent = `
-            @keyframes spin {
-                0% { transform: rotate(0deg); }
-                100% { transform: rotate(360deg); }
-            }
-        `;
-        document.head.appendChild(styleElement);
-        
-        // เพิ่ม loading overlay ลงใน body
-        document.body.appendChild(loadingOverlay);
+        backButton.addEventListener('click', function() {
+            // Go back to seat selection page
+            window.location.href = 'seat-selection.html';
+        });
     }
     
     /**
-     * ซ่อน loading state
+     * Show loading state
      */
-    function hideLoadingState() {
-        // ลบ loading overlay
+    function showLoadingState() {
         const loadingOverlay = document.querySelector('.loading-overlay');
         if (loadingOverlay) {
-            document.body.removeChild(loadingOverlay);
+            loadingOverlay.style.display = 'flex';
+        }
+    }
+    
+    /**
+     * Hide loading state
+     */
+    function hideLoadingState() {
+        const loadingOverlay = document.querySelector('.loading-overlay');
+        if (loadingOverlay) {
+            loadingOverlay.style.display = 'none';
         }
     }
 });

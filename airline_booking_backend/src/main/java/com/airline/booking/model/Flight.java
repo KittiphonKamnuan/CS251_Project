@@ -1,12 +1,17 @@
 package com.airline.booking.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import javax.persistence.*;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
 @Entity
 @Table(name = "Flight")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Flight {
 
     @Id
@@ -35,10 +40,12 @@ public class Flight {
     private String flightStatus;
 
     // Relationships - ใช้ JsonIgnore เพื่อป้องกัน infinite recursion
-    @OneToMany(mappedBy = "flight", cascade = CascadeType.ALL)
+    @JsonIgnore
+    @OneToMany(mappedBy = "flight", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Set<Booking> bookings = new HashSet<>();
 
-    @OneToMany(mappedBy = "flight", cascade = CascadeType.ALL)
+    @JsonIgnore
+    @OneToMany(mappedBy = "flight", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Set<Seat> seats = new HashSet<>();
 
     // Constructors
@@ -158,6 +165,18 @@ public class Flight {
         this.seats.remove(seat);
         seat.setFlight(null);
     }
+    
+    // เพิ่มเมธอดเพื่อคำนวณราคาเริ่มต้น
+    public BigDecimal getBasePrice() {
+        if (seats == null || seats.isEmpty()) {
+            return new BigDecimal("1290");
+        }
+        
+        return seats.stream()
+                .map(Seat::getPrice)
+                .min(BigDecimal::compareTo)
+                .orElse(new BigDecimal("1290"));
+    }
 
     @Override
     public String toString() {
@@ -171,5 +190,22 @@ public class Flight {
                 ", aircraft='" + aircraft + '\'' +
                 ", flightStatus='" + flightStatus + '\'' +
                 '}';
+    }
+    
+    // เพิ่มเมธอดเพื่อคำนวณระยะเวลาเดินทาง
+    public long getDurationMinutes() {
+        if (departureTime == null || arrivalTime == null) {
+            return 0;
+        }
+        
+        return java.time.Duration.between(departureTime, arrivalTime).toMinutes();
+    }
+    
+    public String getFormattedDuration() {
+        long minutes = getDurationMinutes();
+        long hours = minutes / 60;
+        long remainingMinutes = minutes % 60;
+        
+        return hours + "h " + remainingMinutes + "m";
     }
 }
