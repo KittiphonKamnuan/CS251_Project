@@ -34,6 +34,8 @@ CREATE TABLE Booking (
     BookingDate DATE NOT NULL,
     BookingStatus VARCHAR(20) DEFAULT 'Pending' CHECK (BookingStatus IN ('Pending', 'Confirmed', 'Cancelled')),
     TotalPrice DECIMAL(10,2) NOT NULL,
+    ContactEmail VARCHAR(100),
+    ContactPhone VARCHAR(20),
     FOREIGN KEY (UserID) REFERENCES User(UserID),
     FOREIGN KEY (FlightID) REFERENCES Flight(FlightID)
 );
@@ -71,6 +73,7 @@ CREATE TABLE Payment (
     credit_card VARCHAR(19),
     bank_transfer VARCHAR(20),
     cash BOOLEAN DEFAULT FALSE,
+    PaymentMethod VARCHAR(50),
     PaymentDate DATE NOT NULL,
     FOREIGN KEY (BookingID) REFERENCES Booking(BookingID)
 );

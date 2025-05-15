@@ -1,6 +1,9 @@
 package com.airline.booking.model;
 
 import javax.persistence.*;
+
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
@@ -40,6 +43,7 @@ public class User implements Serializable {
     private String role;
 
     // Relationships
+    @JsonManagedReference
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private Set<Booking> bookings = new HashSet<>();
 

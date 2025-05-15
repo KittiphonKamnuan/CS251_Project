@@ -3,18 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ติดต่อเรา | SkyBooking</title>
+    <title>ติดต่อเรา | Skyways Airlines</title>
     <link rel="stylesheet" href="../assets/css/common.css">
-    <link rel="stylesheet" href="../assets/css/styles.css">
     <link rel="stylesheet" href="../assets/css/contact.css">
+    <link rel="icon" type="image/x-icon" href="../../public/favicon.ico">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script type="module" src="../assets/js/script.js" defer></script>
+    <script type="module" src="../assets/js/contact.js" defer></script>
 </head>
 <body>
+    <!-- Standardized header with consistent navigation -->
     <header class="site-header">
         <div class="container">
             <div class="logo">
                 <a href="index.html">
-                    <img src="../assets/images/ui/logo.svg" alt="Skyways Airlines Logo">
+                    <img src="../../public/images/backgrounds/logo_skyways_airline.png" alt="Skyways Airlines Logo">
                 </a>
             </div>
             <nav class="main-nav">
@@ -25,7 +28,8 @@
                     <li><a href="contact.html" class="active">ติดต่อเรา</a></li>
                 </ul>
             </nav>
-            <div class="user-actions">
+            <div class="user-actions" id="userActionsContainer">
+                <!-- Dynamic content will be inserted here by JavaScript -->
                 <a href="login.html" class="btn btn-outline" id="loginBtn">เข้าสู่ระบบ</a>
                 <a href="register.html" class="btn btn-primary" id="registerBtn">สมัครสมาชิก</a>
             </div>
@@ -37,9 +41,25 @@
         </div>
     </header>
 
+    <!-- Mobile navigation menu -->
+    <div class="mobile-menu" style="display: none;" id="mobileMenuContainer">
+        <ul>
+            <li><a href="index.html">หน้าหลัก</a></li>
+            <li><a href="promotions.html">โปรโมชั่น</a></li>
+            <li><a href="booking-status.html">ตรวจสอบการจอง</a></li>
+            <li><a href="contact.html" class="active">ติดต่อเรา</a></li>
+        </ul>
+        <div class="mobile-menu-user-actions" id="mobileUserActions">
+            <!-- Dynamic content will be inserted here by JavaScript -->
+            <a href="login.html" class="btn btn-outline">เข้าสู่ระบบ</a>
+            <a href="register.html" class="btn btn-primary">สมัครสมาชิก</a>
+        </div>
+    </div>
+
     <main>
-        <!-- Page Header -->
-        <section class="page-header">
+        <section class="page-header contact-header">
+            <div class="decoration-circle circle-1"></div>
+            <div class="decoration-circle circle-2"></div>
             <div class="container">
                 <h1>ติดต่อเรา</h1>
                 <p>มีคำถาม ข้อเสนอแนะ หรือต้องการความช่วยเหลือเกี่ยวกับการจอง? เราพร้อมให้บริการคุณ</p>
@@ -82,8 +102,8 @@
                                 </div>
                                 <div class="contact-details">
                                     <h3>อีเมล</h3>
-                                    <p>ฝ่ายบริการลูกค้า: <a href="mailto:support@skybooking.com">support@skybooking.com</a></p>
-                                    <p>ฝ่ายขาย: <a href="mailto:sales@skybooking.com">sales@skybooking.com</a></p>
+                                    <p>ฝ่ายบริการลูกค้า: <a href="mailto:support@skyways.com">support@skyways.com</a></p>
+                                    <p>ฝ่ายขาย: <a href="mailto:sales@skyways.com">sales@skyways.com</a></p>
                                 </div>
                             </div>
                             
@@ -119,52 +139,74 @@
                             <div class="form-row">
                                 <div class="form-group">
                                     <label for="name">ชื่อ-นามสกุล <span class="required">*</span></label>
-                                    <input type="text" id="name" name="name" required>
+                                    <div class="input-with-icon">
+                                        <i class="fas fa-user input-icon"></i>
+                                        <input type="text" id="name" name="name" required>
+                                    </div>
                                 </div>
                                 
                                 <div class="form-group">
                                     <label for="email">อีเมล <span class="required">*</span></label>
-                                    <input type="email" id="email" name="email" required>
+                                    <div class="input-with-icon">
+                                        <i class="fas fa-envelope input-icon"></i>
+                                        <input type="email" id="email" name="email" required>
+                                    </div>
                                 </div>
                             </div>
                             
                             <div class="form-row">
                                 <div class="form-group">
                                     <label for="phone">เบอร์โทรศัพท์</label>
-                                    <input type="tel" id="phone" name="phone">
+                                    <div class="input-with-icon">
+                                        <i class="fas fa-phone input-icon"></i>
+                                        <input type="tel" id="phone" name="phone" placeholder="0xx-xxx-xxxx">
+                                    </div>
                                 </div>
                                 
                                 <div class="form-group">
                                     <label for="subject">หัวข้อ <span class="required">*</span></label>
-                                    <select id="subject" name="subject" required>
-                                        <option value="">กรุณาเลือก</option>
-                                        <option value="booking">การจองตั๋ว</option>
-                                        <option value="flight-status">สถานะเที่ยวบิน</option>
-                                        <option value="cancellation">การยกเลิกการจอง</option>
-                                        <option value="refund">การขอคืนเงิน</option>
-                                        <option value="baggage">สัมภาระ</option>
-                                        <option value="feedback">ข้อเสนอแนะ</option>
-                                        <option value="other">อื่นๆ</option>
-                                    </select>
+                                    <div class="input-with-icon">
+                                        <i class="fas fa-tag input-icon"></i>
+                                        <select id="subject" name="subject" required>
+                                            <option value="">กรุณาเลือก</option>
+                                            <option value="booking">การจองตั๋ว</option>
+                                            <option value="flight-status">สถานะเที่ยวบิน</option>
+                                            <option value="cancellation">การยกเลิกการจอง</option>
+                                            <option value="refund">การขอคืนเงิน</option>
+                                            <option value="baggage">สัมภาระ</option>
+                                            <option value="feedback">ข้อเสนอแนะ</option>
+                                            <option value="other">อื่นๆ</option>
+                                        </select>
+                                    </div>
                                 </div>
                             </div>
                             
                             <div class="form-group">
                                 <label for="booking-ref">รหัสการจอง (ถ้ามี)</label>
-                                <input type="text" id="booking-ref" name="booking-ref" placeholder="เช่น SKY123456">
+                                <div class="input-with-icon">
+                                    <i class="fas fa-ticket-alt input-icon"></i>
+                                    <input type="text" id="booking-ref" name="booking-ref" placeholder="เช่น SKY123456">
+                                </div>
                             </div>
                             
                             <div class="form-group">
                                 <label for="message">ข้อความ <span class="required">*</span></label>
-                                <textarea id="message" name="message" rows="5" required></textarea>
+                                <div class="input-with-icon textarea-container">
+                                    <i class="fas fa-comment input-icon"></i>
+                                    <textarea id="message" name="message" rows="5" required></textarea>
+                                </div>
                             </div>
                             
-                            <div class="form-group terms">
-                                <input type="checkbox" id="privacy-policy" name="privacy-policy" required>
-                                <label for="privacy-policy">ฉันยินยอมให้ SkyBooking จัดเก็บข้อมูลของฉันตาม <a href="#">นโยบายความเป็นส่วนตัว</a></label>
+                            <div class="form-options">
+                                <div class="form-group privacy-policy">
+                                    <input type="checkbox" id="privacy-policy" name="privacy-policy" required>
+                                    <label for="privacy-policy">ฉันยินยอมให้ Skyways Airlines จัดเก็บข้อมูลของฉันตาม <a href="#">นโยบายความเป็นส่วนตัว</a></label>
+                                </div>
                             </div>
                             
-                            <button type="submit" class="btn btn-primary">ส่งข้อความ</button>
+                            <button type="submit" class="btn btn-primary btn-full">
+                                <i class="fas fa-paper-plane"></i> ส่งข้อความ
+                            </button>
                         </form>
                     </div>
                 </div>
@@ -174,7 +216,7 @@
         <!-- Map Section -->
         <section class="map-section">
             <div class="container">
-                <h2>ตำแหน่งที่ตั้ง</h2>
+                <h2><i class="fas fa-map-marked-alt"></i> ตำแหน่งที่ตั้ง</h2>
                 <div class="map-container">
                     <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3872.288571207357!2d100.66259791464015!3d13.957946890207083!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x30e2834eeda94751%3A0x92c9e939a2cbed35!2sThammasat%20University%20Rangsit%20Campus!5e0!3m2!1sen!2sth!4v1646641561993!5m2!1sen!2sth" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
                 </div>
@@ -184,11 +226,11 @@
         <!-- FAQ Section -->
         <section class="faq-section">
             <div class="container">
-                <h2>คำถามที่พบบ่อย</h2>
+                <h2><i class="fas fa-question-circle"></i> คำถามที่พบบ่อย</h2>
                 <div class="faq-container">
                     <div class="faq-item">
                         <div class="faq-question">
-                            <h3>ฉันจะเปลี่ยนแปลงการจองของฉันได้อย่างไร?</h3>
+                            <h4>ฉันจะเปลี่ยนแปลงการจองของฉันได้อย่างไร?</h4>
                             <span class="faq-toggle"><i class="fas fa-chevron-down"></i></span>
                         </div>
                         <div class="faq-answer">
@@ -198,7 +240,7 @@
                     
                     <div class="faq-item">
                         <div class="faq-question">
-                            <h3>ฉันจะตรวจสอบสถานะการจองได้อย่างไร?</h3>
+                            <h4>ฉันจะตรวจสอบสถานะการจองได้อย่างไร?</h4>
                             <span class="faq-toggle"><i class="fas fa-chevron-down"></i></span>
                         </div>
                         <div class="faq-answer">
@@ -208,7 +250,7 @@
                     
                     <div class="faq-item">
                         <div class="faq-question">
-                            <h3>ฉันสามารถยกเลิกการจองได้หรือไม่?</h3>
+                            <h4>ฉันสามารถยกเลิกการจองได้หรือไม่?</h4>
                             <span class="faq-toggle"><i class="fas fa-chevron-down"></i></span>
                         </div>
                         <div class="faq-answer">
@@ -218,7 +260,7 @@
                     
                     <div class="faq-item">
                         <div class="faq-question">
-                            <h3>ฉันจะได้รับบัตรโดยสารเมื่อไหร่?</h3>
+                            <h4>ฉันจะได้รับบัตรโดยสารเมื่อไหร่?</h4>
                             <span class="faq-toggle"><i class="fas fa-chevron-down"></i></span>
                         </div>
                         <div class="faq-answer">
@@ -228,11 +270,21 @@
                     
                     <div class="faq-item">
                         <div class="faq-question">
-                            <h3>SkyBooking รับชำระเงินผ่านช่องทางใดบ้าง?</h3>
+                            <h4>Skyways Airlines รับชำระเงินผ่านช่องทางใดบ้าง?</h4>
                             <span class="faq-toggle"><i class="fas fa-chevron-down"></i></span>
                         </div>
                         <div class="faq-answer">
                             <p>เรารับชำระเงินผ่านบัตรเครดิต/เดบิต, การโอนเงินผ่านธนาคาร, QR Payment และ E-Wallet ต่างๆ เช่น TrueMoney Wallet, PromptPay, ShopeePay, และ Rabbit LINE Pay</p>
+                        </div>
+                    </div>
+                    
+                    <div class="faq-item">
+                        <div class="faq-question">
+                            <h4>น้ำหนักสัมภาระที่ได้รับอนุญาตมีเท่าไร?</h4>
+                            <span class="faq-toggle"><i class="fas fa-chevron-down"></i></span>
+                        </div>
+                        <div class="faq-answer">
+                            <p>น้ำหนักสัมภาระที่ได้รับอนุญาตขึ้นอยู่กับประเภทของตั๋วและชั้นโดยสารของคุณ โดยทั่วไป ชั้นประหยัดจะได้รับสัมภาระโหลดใต้ท้องเครื่อง 20 กก., ชั้นประหยัดพิเศษ 25 กก., ชั้นธุรกิจ 30 กก. และชั้นหนึ่ง 40 กก. นอกจากนี้ผู้โดยสารทุกคนยังสามารถนำสัมภาระติดตัวขึ้นเครื่องได้ไม่เกิน 7 กก. หากต้องการน้ำหนักสัมภาระเพิ่มเติม สามารถซื้อเพิ่มได้ขณะจองตั๋วหรือหลังจากการจอง</p>
                         </div>
                     </div>
                 </div>
@@ -240,72 +292,8 @@
         </section>
     </main>
 
-    <!-- Login Modal -->
-    <div id="login-modal" class="modal">
-        <div class="modal-content">
-            <span class="close">&times;</span>
-            <h2>เข้าสู่ระบบ</h2>
-            <form id="login-form">
-                <div class="form-group">
-                    <label for="login-email">อีเมล</label>
-                    <input type="email" id="login-email" required>
-                </div>
-                <div class="form-group">
-                    <label for="login-password">รหัสผ่าน</label>
-                    <input type="password" id="login-password" required>
-                </div>
-                <div class="form-group remember-me">
-                    <input type="checkbox" id="remember-me">
-                    <label for="remember-me">จดจำฉัน</label>
-                </div>
-                <button type="submit" class="btn btn-primary">เข้าสู่ระบบ</button>
-                <p class="form-footer">ยังไม่มีบัญชี? <a href="#" id="switch-to-register">สมัครสมาชิก</a></p>
-            </form>
-        </div>
-    </div>
-
-    <!-- Register Modal -->
-    <div id="register-modal" class="modal">
-        <div class="modal-content">
-            <span class="close">&times;</span>
-            <h2>สมัครสมาชิก</h2>
-            <form id="register-form">
-                <div class="form-group">
-                    <label for="first-name">ชื่อ</label>
-                    <input type="text" id="first-name" required>
-                </div>
-                <div class="form-group">
-                    <label for="last-name">นามสกุล</label>
-                    <input type="text" id="last-name" required>
-                </div>
-                <div class="form-group">
-                    <label for="register-email">อีเมล</label>
-                    <input type="email" id="register-email" required>
-                </div>
-                <div class="form-group">
-                    <label for="phone">เบอร์โทรศัพท์</label>
-                    <input type="tel" id="phone" required>
-                </div>
-                <div class="form-group">
-                    <label for="register-password">รหัสผ่าน</label>
-                    <input type="password" id="register-password" required>
-                </div>
-                <div class="form-group">
-                    <label for="confirm-password">ยืนยันรหัสผ่าน</label>
-                    <input type="password" id="confirm-password" required>
-                </div>
-                <div class="form-group terms">
-                    <input type="checkbox" id="terms" required>
-                    <label for="terms">ฉันยอมรับ<a href="#">ข้อกำหนดและเงื่อนไข</a></label>
-                </div>
-                <button type="submit" class="btn btn-primary">สมัครสมาชิก</button>
-                <p class="form-footer">มีบัญชีแล้ว? <a href="#" id="switch-to-login">เข้าสู่ระบบ</a></p>
-            </form>
-        </div>
-    </div>
-
     <!-- Confirmation Modal (Hidden by default) -->
-    <div id="confirmation-modal" class="modal">
+    <div id="confirmation-modal" class="modal" style="display: none;">
         <div class="modal-content confirmation-content">
             <span class="close">&times;</span>
             <div class="confirmation-icon">
@@ -317,49 +305,53 @@
         </div>
     </div>
 
-    <footer>
-        <div class="footer-content">
-            <div class="footer-section">
-                <h3>SkyBooking</h3>
-                <p>ระบบจองตั๋วเครื่องบินออนไลน์ที่ให้คุณจองตั๋วได้ง่าย สะดวก รวดเร็ว และปลอดภัย</p>
-                <div class="social-icons">
-                    <a href="#"><i class="fab fa-facebook"></i></a>
-                    <a href="#"><i class="fab fa-twitter"></i></a>
-                    <a href="#"><i class="fab fa-instagram"></i></a>
-                    <a href="#"><i class="fab fa-youtube"></i></a>
+    <!-- Footer -->
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <img src="../../public/images/backgrounds/logo_skyways_airline.png" alt="Skyways Airlines Logo">
+                    <p>เราให้บริการการเดินทางที่ปลอดภัยและสะดวกสบาย</p>
+                </div>
+                <div class="footer-links">
+                    <div class="footer-column">
+                        <h3>หน้า</h3>
+                        <ul>
+                            <li><a href="index.html">หน้าหลัก</a></li>
+                            <li><a href="promotions.html">โปรโมชั่น</a></li>
+                            <li><a href="booking-status.html">ตรวจสอบการจอง</a></li>
+                            <li><a href="contact.html">ติดต่อเรา</a></li>
+                        </ul>
+                    </div>
+                    <div class="footer-column">
+                        <h3>บริการ</h3>
+                        <ul>
+                            <li><a href="#">จองตั๋ว</a></li>
+                            <li><a href="#">เช็คอิน</a></li>
+                            <li><a href="#">บริการพิเศษ</a></li>
+                            <li><a href="#">สถานะเที่ยวบิน</a></li>
+                        </ul>
+                    </div>
+                    <div class="footer-column">
+                        <h3>ติดต่อเรา</h3>
+                        <ul>
+                            <li><i class="fas fa-phone"></i> 02-123-4567</li>
+                            <li><i class="fas fa-envelope"></i> support@skyways.com</li>
+                            <li><i class="fas fa-map-marker-alt"></i> 123 ถนนสุขุมวิท กรุงเทพฯ</li>
+                        </ul>
+                    </div>
                 </div>
             </div>
-            <div class="footer-section">
-                <h3>ลิงก์ด่วน</h3>
-                <ul class="footer-links">
-                    <li><a href="index.html">หน้าหลัก</a></li>
-                    <li><a href="#">ค้นหาเที่ยวบิน</a></li>
-                    <li><a href="promotions.html">โปรโมชั่นพิเศษ</a></li>
-                    <li><a href="booking-status.html">สถานะการจอง</a></li>
-                    <li><a href="contact.html">ติดต่อเรา</a></li>
-                </ul>
+            <div class="footer-bottom">
+                <p>&copy; 2025 Skyways Airlines. สงวนลิขสิทธิ์</p>
+                <div class="footer-social">
+                    <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                    <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                    <a href="#" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+                </div>
             </div>
-            <div class="footer-section">
-                <h3>ติดต่อเรา</h3>
-                <p><i class="fas fa-map-marker-alt"></i> 99 มหาวิทยาลัยธรรมศาสตร์ ศูนย์รังสิต คลองหลวง ปทุมธานี 12120</p>
-                <p><i class="fas fa-phone"></i> 02-564-4440</p>
-                <p><i class="fas fa-envelope"></i> contact@skybooking.com</p>
-            </div>
-            <div class="footer-section">
-                <h3>รับข่าวสาร</h3>
-                <p>ลงทะเบียนเพื่อรับข้อเสนอพิเศษและอัพเดทล่าสุด</p>
-                <form class="newsletter-form">
-                    <input type="email" placeholder="อีเมลของคุณ" required>
-                    <button type="submit" class="btn btn-primary">ลงทะเบียน</button>
-                </form>
-            </div>
-        </div>
-        <div class="footer-bottom">
-            <p>&copy; 2025 SkyBooking. ขับเคลื่อนโดยนักศึกษา CS251.</p>
         </div>
     </footer>
-
-    <script type="module" src="../assets/js/script.js"></script>
-    <script type="module" src="../assets/js/contact.js"></script>
 </body>
 </html>

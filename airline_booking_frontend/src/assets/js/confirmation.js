@@ -512,7 +512,7 @@ function generateBookingDetailsHTML(booking, paymentInfo, loyaltyPoints) {
                         
                         <div class="flight-details-card">
                             <div class="airline-info">
-                                <img src="../assets/images/icons/airplane.svg" alt="${booking.flight.aircraft}" class="airline-logo">
+                                <img src="../assets/images/icons/airplane.png" alt="${booking.flight.aircraft}" class="airline-logo">
                                 <div>
                                     <div class="airline-name">${booking.flight.aircraft}</div>
                                     <div class="flight-number">${booking.flight.flightNumber}</div>

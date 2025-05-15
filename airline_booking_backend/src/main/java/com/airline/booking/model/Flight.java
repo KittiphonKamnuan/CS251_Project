@@ -2,6 +2,7 @@ package com.airline.booking.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
@@ -40,7 +41,7 @@ public class Flight {
     private String flightStatus;
 
     // Relationships - ใช้ JsonIgnore เพื่อป้องกัน infinite recursion
-    @JsonIgnore
+    @JsonManagedReference
     @OneToMany(mappedBy = "flight", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Set<Booking> bookings = new HashSet<>();
 

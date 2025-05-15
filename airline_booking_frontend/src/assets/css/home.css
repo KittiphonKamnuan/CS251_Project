@@ -1,17 +1,20 @@
 /* Home Page Styles */
 
-/* Hero Section */
+/* แก้ไข CSS สำหรับหน้า index.html - ส่วนค้นหาเที่ยวบิน */
+
+/* ปรับแต่ง Hero Section */
 .hero-section {
     position: relative;
-    height: 70vh; /* Adjust height as needed */
-    background: url('../../../public/images/backgrounds/BigBG.jpg') center/cover no-repeat; /* Replace with your image path */
+    height: 70vh;
+    background: url('../../../public/images/backgrounds/BigBG.jpg') center/cover no-repeat;
     display: flex;
     align-items: center;
     justify-content: center;
     text-align: center;
-    color: #fff; /* Text color */
+    color: #fff;
 }
 
+/* ปรับความเข้มของ overlay ให้น้อยลง */
 .hero-section::before {
     content: '';
     position: absolute;
@@ -19,30 +22,31 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.5); /* Optional: Add a dark overlay */
-    z-index: 1; /* Ensure overlay is above the background but below the text */
+    background-color: rgba(0, 0, 0, 0.4); /* ลดความเข้มลงจาก 0.5 เป็น 0.4 */
+    z-index: 1;
 }
 
 .hero-content {
-    position: relative; /* Ensure content is above the overlay */
-    z-index: 2; /* Ensure content is above the overlay */
+    position: relative;
+    z-index: 2;
+    max-width: 800px;
+    padding: 0 20px;
 }
-
 
 .hero-title {
     font-size: 3rem;
     font-weight: 700;
     margin-bottom: 20px;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    text-shadow: 0 2px 4px rgba(185, 158, 158, 0.5); /* เพิ่มเงาให้ตัวอักษรเพื่อให้อ่านง่ายขึ้น */
 }
 
 .hero-subtitle {
     font-size: 1.2rem;
     margin-bottom: 30px;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5); /* เพิ่มเงาให้ตัวอักษรเพื่อให้อ่านง่ายขึ้น */
 }
 
-/* Search Form Section */
+/* ปรับแต่ง Search Form */
 .search-form-section {
     margin-top: -50px;
     margin-bottom: 50px;
@@ -51,14 +55,15 @@
 }
 
 .search-form-container {
-    background-color: #fff;
+    background-color: #fff; /* เปลี่ยนเป็นสีขาวชัดเจน */
     border-radius: 10px;
-    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15); /* เพิ่มเงาให้ชัดเจนขึ้น */
     padding: 30px;
     max-width: 1000px;
     margin: 0 auto;
 }
 
+/* ปรับแต่ง Search Tabs */
 .search-tabs {
     display: flex;
     margin-bottom: 20px;
@@ -73,6 +78,7 @@
     color: #666;
     cursor: pointer;
     position: relative;
+    transition: color 0.3s ease;
 }
 
 .tab-btn:after {
@@ -94,6 +100,7 @@
     width: 100%;
 }
 
+/* ปรับแต่ง Form Fields */
 .search-form {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -104,10 +111,21 @@
     margin-bottom: 0;
 }
 
+.form-group input,
+.form-group select {
+  padding-left: 40px; /* เว้นที่ซ้ายให้ไอคอนและข้อความไม่ทับกัน */
+}
+
 .form-group label {
     display: block;
     margin-bottom: 8px;
     font-weight: 500;
+    color: #333; /* ข้อความสีเข้มขึ้น */
+}
+
+.form-group label i {
+    margin-right: 5px;
+    color: #007bff; /* ไอคอนสีฟ้าเพื่อให้มองเห็นง่ายขึ้น */
 }
 
 .search-form input,
@@ -117,12 +135,14 @@
     border: 1px solid #ddd;
     border-radius: 6px;
     font-size: 16px;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .search-form input:focus,
 .search-form select:focus {
     border-color: #007bff;
     outline: none;
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.15);
 }
 
 .search-btn {
@@ -130,6 +150,121 @@
     align-self: end;
     padding: 12px;
     font-size: 16px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.search-btn:hover {
+    background-color: #0056b3;
+    transform: translateY(-2px);
+}
+
+.search-btn i {
+    margin-right: 8px;
+}
+
+/* กรณีสำหรับหน้าจอขนาดเล็ก */
+@media (max-width: 991px) {
+    .hero-title {
+        font-size: 2.5rem;
+    }
+    
+    .search-form {
+        grid-template-columns: 1fr;
+    }
+    
+    .search-btn {
+        grid-column: span 1;
+    }
+}
+
+@media (max-width: 767px) {
+    .hero-title {
+        font-size: 2rem;
+    }
+    
+    .hero-section {
+        height: 60vh;
+    }
+    
+    .search-form-container {
+        padding: 20px;
+    }
+}
+
+/* สไตล์เพิ่มเติมสำหรับแท็บเที่ยวเดียว/ไป-กลับ/หลายเมือง */
+.search-tabs {
+    background-color: #f8f9fa;
+    border-radius: 8px 8px 0 0;
+    overflow: hidden;
+    border-bottom: none;
+    margin: -30px -30px 20px -30px;
+}
+
+.tab-btn {
+    padding: 15px 20px;
+    font-weight: 600;
+    font-size: 16px;
+    color: #495057;
+    border-bottom: 2px solid transparent;
+}
+
+.tab-btn.active {
+    background-color: #fff;
+    color: #007bff;
+    border-bottom: 2px solid #007bff;
+}
+
+/* ปรับแต่งสำหรับการแสดงผลช่องค้นหาให้ดูทันสมัยขึ้น */
+.form-group {
+    position: relative;
+}
+
+.form-group i {
+    position: absolute;
+    left: 15px;
+    top: 78%; /* ตั้งให้ตรงกลางแนวตั้งของ container */
+    transform: translateY(-50%); /* เลื่อนให้กึ่งกลางพอดี */
+    color: #007bff;
+    z-index: 1;
+    pointer-events: none; /* ให้คลิกผ่านไปยัง input ได้ */
+  }
+  
+
+.search-form input,
+.search-form select {
+    padding-left: 40px; /* เพิ่มระยะขอบซ้ายให้มีพื้นที่สำหรับไอคอน */
+}
+
+/* ปรับปรุง UI สำหรับช่อง return-date */
+.return-date {
+    display: none; /* จะแสดงเมื่อเลือกแท็บ "ไป-กลับ" */
+}
+
+/* ปรับแต่งสำหรับปุ่มค้นหา */
+.search-btn {
+    background-color: #007bff;
+    color: white;
+    font-weight: 600;
+    padding: 12px 24px;
+    border-radius: 6px;
+    box-shadow: 0 4px 6px rgba(0, 123, 255, 0.2);
+    transition: all 0.3s ease;
+}
+
+.search-btn:hover {
+    background-color: #0056b3;
+    box-shadow: 0 6px 8px rgba(0, 123, 255, 0.3);
+    transform: translateY(-2px);
+}
+
+.search-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(0, 123, 255, 0.2);
 }
 
 /* Popular Destinations */
@@ -332,7 +467,7 @@
 /* Newsletter Section */
 .newsletter-section {
     padding: 70px 0;
-    background: url('../../public/images/backgrounds/promo-3.jpg') center/cover no-repeat;
+    background: url('../../public/images/backgrounds/BigBG.jpg') center/cover no-repeat;
     position: relative;
     color: #fff;
 }

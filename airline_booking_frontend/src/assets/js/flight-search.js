@@ -369,7 +369,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Create card HTML
         card.innerHTML = `
             <div class="airline-info">
-                <img src="../assets/images/icons/airplane.svg" alt="${flight.aircraft}" class="airline-logo">
+                <img src="../assets/images/icons/airplane.png" alt="${flight.aircraft}" class="airline-logo">
                 <div>
                     <div class="airline-name">${flight.aircraft}</div>
                     <div class="flight-number">${flight.flightNumber}</div>

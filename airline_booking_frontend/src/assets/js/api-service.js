@@ -22,18 +22,17 @@ class ApiService {
     return this.token;
   }
 
-  // Helper method for headers
   getHeaders() {
     const headers = {
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json'  // ลบ charset=UTF-8 ออก
     };
-    
+  
     if (this.token) {
       headers['Authorization'] = `Bearer ${this.token}`;
     }
-    
+  
     return headers;
-  }
+  }  
 
 // Generic request method with improved error handling and response parsing
 async request(endpoint, method = 'GET', data = null) {
@@ -300,9 +299,39 @@ async request(endpoint, method = 'GET', data = null) {
     return this.request(`/bookings/flight/${flightId}`);
   }
   
-  // Create new booking
+  // ปรับปรุงฟังก์ชัน createBooking ใน api-service.js
   async createBooking(bookingData, userId, flightId) {
-    return this.request(`/bookings?userId=${userId}&flightId=${flightId}`, 'POST', bookingData);
+    console.log('API Service - Creating booking with data:', JSON.stringify(bookingData));
+    console.log('API Service - UserID:', userId, 'FlightID:', flightId);
+    
+    // ใช้ userId และ flightId จากพารามิเตอร์ หรือจาก bookingData ถ้าไม่มี
+    const effectiveUserId = userId || bookingData.userId;
+    const effectiveFlightId = flightId || bookingData.flightId;
+    
+    // ตรวจสอบข้อมูลที่จำเป็น
+    if (!effectiveUserId) {
+        console.error('API Service - Missing userId');
+        throw new Error('ไม่พบ userId สำหรับการสร้างการจอง');
+    }
+    
+    if (!effectiveFlightId) {
+        console.error('API Service - Missing flightId');
+        throw new Error('ไม่พบ flightId สำหรับการสร้างการจอง');
+    }
+    
+    try {
+        // สร้าง endpoint
+        const endpoint = `/bookings?userId=${effectiveUserId}&flightId=${effectiveFlightId}`;
+        console.log('API Service - Endpoint:', endpoint);
+        
+        // ส่งข้อมูล
+        const response = await this.request(endpoint, 'POST', bookingData);
+        console.log('API Service - Booking created successfully:', response);
+        return response;
+    } catch (error) {
+        console.error('API Service - Error creating booking:', error);
+        throw error;
+    }
   }
   
   // Update booking

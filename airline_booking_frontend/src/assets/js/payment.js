@@ -394,7 +394,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         paymentMethod,
                         amount: bookingInfo.totalPrice,
                         paymentStatus: 'Completed',
-                        paymentDate: new Date().toISOString()
+                        paymentDate: new Date().toISOString().split('T')[0]
                     };
                     
                     // Add additional info based on payment method
@@ -420,12 +420,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 else if (bookingInfo && selectedFlightData && passengerInfo) {
                     // Check if user is logged in
                     const userData = localStorage.getItem('userData');
-                    let userId = null;
+                    let userId = null; // ประกาศตัวแปร userId ที่นี่
                     
                     if (userData) {
                         try {
                             const user = JSON.parse(userData);
                             userId = user.userId;
+                            console.log('User logged in with ID:', userId);
                         } catch (error) {
                             console.error('Error parsing user data:', error);
                         }
@@ -447,68 +448,103 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
                     
                     // Create booking data
+                    const currentDate = new Date();
+                    const formattedDate = currentDate.toISOString().split('T')[0]; // รูปแบบ YYYY-MM-DD
+                    
+                    console.log('Creating booking with formatted date:', formattedDate);
+                    
                     const bookingData = {
-                        userId,
-                        flightId: selectedFlightData.flightId,
-                        bookingDate: new Date().toISOString(),
-                        bookingStatus: 'Confirmed',
+                        bookingDate: formattedDate,
+                        bookingStatus: 'Pending',
                         totalPrice: bookingInfo.totalPrice,
                         baseFare: bookingInfo.baseFare,
                         taxes: bookingInfo.taxes,
                         additionalServices: bookingInfo.additionalServices,
-                        contactEmail: passengerInfo.contact.email,
-                        contactPhone: passengerInfo.contact.phone,
+                        contactEmail: passengerInfo.contact?.email || '',
+                        contactPhone: passengerInfo.contact?.phone || '',
                         passengers: [{
-                            title: passengerInfo.passenger.title,
-                            firstName: passengerInfo.passenger.firstName,
-                            lastName: passengerInfo.passenger.lastName,
-                            dateOfBirth: passengerInfo.passenger.dateOfBirth,
-                            nationality: passengerInfo.passenger.nationality,
-                            documentId: passengerInfo.passenger.documentId,
+                            title: passengerInfo.passenger?.title || '',
+                            firstName: passengerInfo.passenger?.firstName || '',
+                            lastName: passengerInfo.passenger?.lastName || '',
+                            dateOfBirth: formattedDate, // ใช้วันที่ปัจจุบันในรูปแบบ YYYY-MM-DD
+                            nationality: passengerInfo.passenger?.nationality || 'TH',
+                            documentId: passengerInfo.passenger?.documentId || '',
                             seatNumber: selectedSeats.length > 0 ? selectedSeats[0].seatNumber : null,
-                            specialService: passengerInfo.passenger.specialService
+                            specialService: passengerInfo.passenger?.specialService || ''
                         }]
                     };
+                    await apiService.createBooking(bookingData, userId, selectedFlightData.flightId);
                     
-                    // Create booking
-                    const booking = await apiService.createBooking(bookingData, userId, selectedFlightData.flightId);
+                    // Log booking data for debugging
+                    console.log('Booking data to send:', JSON.stringify(bookingData));
                     
-                    // Collect payment data
-                    const paymentData = {
-                        bookingId: booking.bookingId,
-                        paymentMethod,
-                        amount: bookingInfo.totalPrice,
-                        paymentStatus: 'Completed',
-                        paymentDate: new Date().toISOString()
-                    };
-                    
-                    // Add additional info based on payment method
-                    if (paymentMethod === 'credit-card') {
-                        paymentData.cardNumber = cardNumberInput.value.replace(/\s/g, '').slice(-4);
-                        paymentData.cardHolder = cardHolderInput.value;
-                        paymentData.expiryDate = expiryDateInput.value;
-                    } else if (paymentMethod === 'e-wallet') {
-                        paymentData.walletType = document.querySelector('input[name="wallet"]:checked')?.value;
-                        paymentData.walletPhone = document.getElementById('wallet-phone')?.value;
+                    try {
+                        // Create booking
+                        console.log('Calling API to create booking...');
+                        const booking = await apiService.createBooking(
+                            bookingData, 
+                            userId,  // ส่ง userId เป็นพารามิเตอร์ที่ 2
+                            selectedFlightData.flightId  // ส่ง flightId เป็นพารามิเตอร์ที่ 3
+                        );
+                        console.log('Booking created successfully:', booking);
+                        
+                        if (!booking || !booking.bookingId) {
+                            throw new Error('ไม่ได้รับข้อมูลการจองจาก API');
+                        }
+                        
+                        // Collect payment data
+                        const paymentData = {
+                            bookingId: booking.bookingId,
+                            paymentMethod,
+                            amount: bookingInfo.totalPrice || 0,
+                            paymentStatus: 'Completed',
+                            paymentDate: formattedDate
+                        };
+                        
+                        // Add additional info based on payment method
+                        if (paymentMethod === 'credit-card') {
+                            paymentData.cardNumber = cardNumberInput?.value ? cardNumberInput.value.replace(/\s/g, '').slice(-4) : '';
+                            paymentData.cardHolder = cardHolderInput?.value || '';
+                            paymentData.expiryDate = expiryDateInput?.value || '';
+                        } else if (paymentMethod === 'e-wallet') {
+                            paymentData.walletType = document.querySelector('input[name="wallet"]:checked')?.value || '';
+                            paymentData.walletPhone = document.getElementById('wallet-phone')?.value || '';
+                        }
+                        
+                        // Save payment
+                        console.log('Creating payment with data:', paymentData);
+                        await apiService.createPayment(booking.bookingId, paymentData);
+                        
+                        // Update booking status
+                        console.log('Updating booking status to Confirmed');
+                        await apiService.updateBookingStatus(booking.bookingId, 'Confirmed');
+                        
+                        // Clear sessionStorage
+                        sessionStorage.removeItem('selectedFlight');
+                        sessionStorage.removeItem('passengerInfo');
+                        sessionStorage.removeItem('selectedSeats');
+                        sessionStorage.removeItem('additionalSeatPrice');
+                        
+                        // Redirect to confirmation page
+                        window.location.href = `confirmation.html?bookingId=${booking.bookingId}`;
+                    } catch (bookingError) {
+                        console.error('Error during booking process:', bookingError);
+                        throw new Error('เกิดข้อผิดพลาดในการสร้างการจอง: ' + (bookingError.message || 'กรุณาลองใหม่อีกครั้ง'));
                     }
-                    
-                    // Save payment
-                    await apiService.createPayment(booking.bookingId, paymentData);
-                    
-                    // Clear sessionStorage
-                    sessionStorage.removeItem('selectedFlight');
-                    sessionStorage.removeItem('passengerInfo');
-                    sessionStorage.removeItem('selectedSeats');
-                    sessionStorage.removeItem('additionalSeatPrice');
-                    
-                    // Redirect to confirmation page
-                    window.location.href = `confirmation.html?bookingId=${booking.bookingId}`;
                 } else {
-                    throw new Error('ไม่พบข้อมูลการจอง');
+                    throw new Error('ไม่พบข้อมูลการจองที่จำเป็น');
                 }
             } catch (error) {
-                console.error('Payment error:', error);
-                alert('เกิดข้อผิดพลาดในการชำระเงิน: ' + error.message);
+                console.error('Complete error details:', error);
+                console.error('Error message:', error.message);
+                console.error('Error stack:', error.stack);
+                
+                // ถ้ามี response ให้แสดงด้วย
+                if (error.response) {
+                    console.error('Error response:', error.response);
+                }
+                
+                alert('เกิดข้อผิดพลาดในการชำระเงิน: ' + (error.message || 'กรุณาลองใหม่อีกครั้ง'));
                 
                 // Reset button state
                 payNowBtn.innerHTML = originalBtnText;

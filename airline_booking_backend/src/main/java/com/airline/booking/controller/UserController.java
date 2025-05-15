@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/users")
@@ -80,17 +81,52 @@ public class UserController {
     }
     
     // สร้างผู้ใช้ใหม่
-    @PostMapping
-    public ResponseEntity<?> createUser(@RequestBody User user) {
+    @PostMapping(consumes = {"application/json", "application/json;charset=UTF-8"})
+    public ResponseEntity<?> createUser(@RequestBody Map<String, Object> userMap) {
         try {
-            User newUser = userService.createUser(user);
-            return new ResponseEntity<>(newUser, HttpStatus.CREATED);
+            // Create a new User entity
+            User newUser = new User();
+            
+            // Generate a UUID for userId
+            newUser.setUserId(UUID.randomUUID().toString());
+            
+            // Manually map the incoming JSON fields to User entity fields
+            if (userMap.get("username") != null) {
+                newUser.setUsername(userMap.get("username").toString());
+            }
+            if (userMap.get("password") != null) {
+                newUser.setPassword(userMap.get("password").toString());
+            }
+            if (userMap.get("email") != null) {
+                newUser.setEmail(userMap.get("email").toString());
+            }
+            if (userMap.get("firstName") != null) {
+                newUser.setFirstName(userMap.get("firstName").toString());
+            }
+            if (userMap.get("lastName") != null) {
+                newUser.setLastName(userMap.get("lastName").toString());
+            }
+            if (userMap.get("address") != null) {
+                newUser.setAddress(userMap.get("address").toString());
+            }
+            if (userMap.get("phone") != null) {
+                newUser.setPhone(userMap.get("phone").toString());
+            }
+            if (userMap.get("role") != null) {
+                newUser.setRole(userMap.get("role").toString());
+            }
+            
+            // Call service to save the user
+            User createdUser = userService.createUser(newUser);
+            
+            return new ResponseEntity<>(createdUser, HttpStatus.CREATED);
         } catch (Exception e) {
             Map<String, String> error = new HashMap<>();
-            error.put("message", "เกิดข้อผิดพลาดในการสร้างผู้ใช้: " + e.getMessage());
+            error.put("message", "Error creating user: " + e.getMessage());
             return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
     
     // อัปเดตข้อมูลผู้ใช้
     @PutMapping("/{id}")

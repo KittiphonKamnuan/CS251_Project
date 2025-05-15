@@ -1,6 +1,9 @@
 package com.airline.booking.model;
 
 import javax.persistence.*;
+
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import java.time.LocalDate;
 
 @Entity
@@ -23,9 +26,10 @@ public class Passenger {
     @Column(name = "PassportNumber", length = 20)
     private String passportNumber;
 
-    @ManyToOne
-    @JoinColumn(name = "BookingID", referencedColumnName = "BookingID")
-    private Booking booking;
+    @JsonBackReference(value = "booking-passengers")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "BookingID")
+    private Booking booking;    
 
     // Constructors
     public Passenger() {

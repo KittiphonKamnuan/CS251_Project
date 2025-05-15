@@ -39,17 +39,17 @@
     justify-content: center;
     font-weight: 600;
     margin-bottom: 0.5rem;
-    transition: all 0.3s ease; /* Added transition for smoother state changes */
+    transition: all 0.3s ease; /* smoother transitions */
 }
 
 .progress-step.active .step-number {
     background-color: var(--primary-color);
     color: var(--white);
-    box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.2); /* Added subtle glow effect for active step */
+    box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.2); /* subtle glow */
 }
 
 .progress-step.completed .step-number {
-    background-color: var(--success);
+    background-color: var(--success-color); /* แก้ไขเป็น --success-color ให้ตรงกับตัวแปรที่กำหนด */
     color: var(--white);
 }
 
@@ -58,7 +58,7 @@
     font-weight: 500;
     color: var(--dark-gray);
     text-align: center;
-    transition: all 0.3s ease; /* Added transition for smoother state changes */
+    transition: all 0.3s ease; /* smoother transitions */
 }
 
 .progress-step.active .step-label {
@@ -67,7 +67,7 @@
 }
 
 .progress-step.completed .step-label {
-    color: var(--success);
+    color: var(--success-color); /* ใช้ให้ตรงกัน */
     font-weight: 600;
 }
 
@@ -77,11 +77,11 @@
     flex-grow: 1;
     margin: 0 0.5rem;
     margin-bottom: 2rem;
-    transition: all 0.3s ease; /* Added transition for smoother state changes */
+    transition: all 0.3s ease; /* smoother transitions */
 }
 
 .progress-line.completed {
-    background-color: var(--success);
+    background-color: var(--success-color); /* ให้ตรงกัน */
 }
 
 /* Flight Summary - Consistent with other pages */
@@ -107,13 +107,23 @@
 }
 
 .seat-selection-container {
-    background-color: var(--white);
+    background-color: #ffffff; /* เปลี่ยนพื้นหลังเป็นสีขาว */
+    color: var(--dark-gray); /* ตัวหนังสือสีเทาเข้ม */
     border-radius: 8px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
     padding: 1.5rem;
     margin-bottom: 1.5rem;
-    transition: box-shadow 0.3s ease; /* Added transition for hover effect */
 }
+
+.selected-seats-summary {
+    background-color: #f9f9f9; /* พื้นหลังอ่อนกว่าหน่อยสำหรับกล่องแสดงที่นั่งเลือก */
+    color: var(--dark-gray);
+    border-radius: 8px;
+    padding: 1rem;
+    margin-top: 1rem;
+    box-shadow: 0 1px 5px rgba(0,0,0,0.05);
+}
+
 
 .seat-selection-container:hover {
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15); /* Enhanced shadow on hover */
@@ -581,7 +591,7 @@
 @media (prefers-color-scheme: dark) {
     .seat-selection-container,
     .selected-seats-summary {
-        background-color: #2a2a2a;
+        background-color: #ffffff;
         box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
     }
     
