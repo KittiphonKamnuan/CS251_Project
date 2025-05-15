@@ -1,3 +1,4 @@
+/Users/cyberninja/Library/CloudStorage/OneDrive-ThammasatUniversity/year2/CS251/project/airline_booking_backend/src/main/java/com/airline/booking/service/PassengerService.java
 /Users/cyberninja/Library/CloudStorage/OneDrive-ThammasatUniversity/year2/CS251/project/airline_booking_backend/src/main/java/com/airline/booking/repository/DiscountRepository.java
 /Users/cyberninja/Library/CloudStorage/OneDrive-ThammasatUniversity/year2/CS251/project/airline_booking_backend/src/main/java/com/airline/booking/controller/FlightController.java
 /Users/cyberninja/Library/CloudStorage/OneDrive-ThammasatUniversity/year2/CS251/project/airline_booking_backend/src/main/java/com/airline/booking/dto/BookingDTO.java
@@ -11,6 +12,7 @@
 /Users/cyberninja/Library/CloudStorage/OneDrive-ThammasatUniversity/year2/CS251/project/airline_booking_backend/src/main/java/com/airline/booking/repository/PassengerRepository.java
 /Users/cyberninja/Library/CloudStorage/OneDrive-ThammasatUniversity/year2/CS251/project/airline_booking_backend/src/main/java/com/airline/booking/dto/PaymentDTO.java
 /Users/cyberninja/Library/CloudStorage/OneDrive-ThammasatUniversity/year2/CS251/project/airline_booking_backend/src/main/java/com/airline/booking/model/Passenger.java
+/Users/cyberninja/Library/CloudStorage/OneDrive-ThammasatUniversity/year2/CS251/project/airline_booking_backend/src/main/java/com/airline/booking/controller/PassengerController.java
 /Users/cyberninja/Library/CloudStorage/OneDrive-ThammasatUniversity/year2/CS251/project/airline_booking_backend/src/main/java/com/airline/booking/model/Discount.java
 /Users/cyberninja/Library/CloudStorage/OneDrive-ThammasatUniversity/year2/CS251/project/airline_booking_backend/src/main/java/com/airline/booking/controller/BookingController.java
 /Users/cyberninja/Library/CloudStorage/OneDrive-ThammasatUniversity/year2/CS251/project/airline_booking_backend/src/main/java/com/airline/booking/service/SeatService.java

@@ -2,6 +2,8 @@ package com.airline.booking.model;
 
 import javax.persistence.*;
 
+import org.hibernate.annotations.GenericGenerator;
+
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
 import java.time.LocalDate;
@@ -11,7 +13,9 @@ import java.time.LocalDate;
 public class Passenger {
 
     @Id
-    @Column(name = "PassengerID", length = 10)
+    @GeneratedValue(generator = "uuid")
+    @GenericGenerator(name = "uuid", strategy = "uuid2")
+    @Column(name = "PassengerID", length = 36)
     private String passengerId;
 
     @Column(name = "FirstName", length = 50)
@@ -29,20 +33,26 @@ public class Passenger {
     @JsonBackReference(value = "booking-passengers")
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "BookingID")
-    private Booking booking;    
+    private Booking booking;
+
+    @JsonBackReference(value = "seat-passengers")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "SeatID")
+    private Seat seat;   // ความสัมพันธ์ไปยัง Seat
 
     // Constructors
     public Passenger() {
     }
 
-    public Passenger(String passengerId, String firstName, String lastName, 
-                    LocalDate dateOfBirth, String passportNumber, Booking booking) {
+    public Passenger(String passengerId, String firstName, String lastName,
+                     LocalDate dateOfBirth, String passportNumber, Booking booking, Seat seat) {
         this.passengerId = passengerId;
         this.firstName = firstName;
         this.lastName = lastName;
         this.dateOfBirth = dateOfBirth;
         this.passportNumber = passportNumber;
         this.booking = booking;
+        this.seat = seat;
     }
 
     // Getters and Setters
@@ -94,6 +104,14 @@ public class Passenger {
         this.booking = booking;
     }
 
+    public Seat getSeat() {
+        return seat;
+    }
+
+    public void setSeat(Seat seat) {
+        this.seat = seat;
+    }
+
     @Override
     public String toString() {
         return "Passenger{" +
@@ -103,6 +121,7 @@ public class Passenger {
                 ", dateOfBirth=" + dateOfBirth +
                 ", passportNumber='" + passportNumber + '\'' +
                 ", bookingId='" + (booking != null ? booking.getBookingId() : "null") + '\'' +
+                ", seatId='" + (seat != null ? seat.getSeatId() : "null") + '\'' +
                 '}';
     }
 }

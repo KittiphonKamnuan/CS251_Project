@@ -1,11 +1,13 @@
 com/airline/booking/model/LoyaltyPoints.class
 com/airline/booking/service/SeatService.class
+com/airline/booking/service/PassengerService.class
 com/airline/booking/repository/UserRepository.class
 com/airline/booking/controller/BookingController.class
 com/airline/booking/model/Flight.class
 com/airline/booking/service/UserService.class
 com/airline/booking/controller/PaymentController.class
 com/airline/booking/repository/PaymentRepository.class
+com/airline/booking/controller/PassengerController.class
 com/airline/booking/repository/PassengerRepository.class
 com/airline/booking/model/Payment.class
 com/airline/booking/exception/GlobalExceptionHandler.class

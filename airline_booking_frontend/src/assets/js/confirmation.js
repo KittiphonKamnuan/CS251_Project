@@ -1,22 +1,30 @@
 import { apiService } from './api-service.js';
 
-// ตัวแปรสถานะระดับ global
-let isLoading = false;
-let hasError = false;
-let mockData = null; // สำหรับข้อมูลจำลองในกรณีที่โหลดข้อมูลไม่ได้
-
 document.addEventListener('DOMContentLoaded', async function() {
     console.log("Page loaded, starting initialization...");
     
     // ตั้งเวลาตรวจสอบการโหลดที่นานเกินไป
     const loadingTimeout = setTimeout(() => {
-        if (isLoading) {
-            console.warn("Loading timeout - Creating fallback UI");
-            // สร้างข้อมูลจำลองและแสดงหน้าการจอง
-            createMockData();
-            displayBookingData(mockData);
+        const loadingElements = document.querySelectorAll('.loading-spinner');
+        if (loadingElements.length > 0) {
+            console.warn("Loading timeout occurred - Creating fallback UI");
+            
+            // สร้าง UI สำรอง
+            const mainContent = document.querySelector('main');
+            if (mainContent) {
+                mainContent.innerHTML = `
+                    <div class="container text-center" style="padding: 2rem;">
+                        <h2>ข้อมูลการจองของคุณ</h2>
+                        <p>ไม่สามารถโหลดข้อมูลการจองได้ในขณะนี้</p>
+                        <div class="error-actions" style="margin-top: 2rem;">
+                            <button class="btn btn-primary" onclick="window.location.reload()">ลองอีกครั้ง</button>
+                            <a href="index.html" class="btn btn-outline">กลับหน้าหลัก</a>
+                        </div>
+                    </div>
+                `;
+            }
         }
-    }, 8000); // 8 วินาที
+    }, 10000); // 10 วินาที
     
     // รับ booking ID จาก URL query parameters
     const urlParams = new URLSearchParams(window.location.search);
@@ -33,7 +41,6 @@ document.addEventListener('DOMContentLoaded', async function() {
     
     try {
         // แสดง loading state
-        isLoading = true;
         showLoadingState();
         
         // เรียกข้อมูลการจองจาก API
@@ -43,6 +50,7 @@ document.addEventListener('DOMContentLoaded', async function() {
             booking = await apiService.getBookingById(bookingId);
             console.log("Booking data received:", booking);
         } catch (error) {
+            // If booking not found, show error message and return
             console.error("Error fetching booking:", error);
             if (error.message && error.message.includes('ไม่พบการจอง')) {
                 showErrorMessage(`ไม่พบข้อมูลการจอง "${bookingId}" กรุณาตรวจสอบรหัสการจองอีกครั้ง`);
@@ -61,16 +69,10 @@ document.addEventListener('DOMContentLoaded', async function() {
                     actionBtns.appendChild(checkBookingBtn);
                 }
                 
-                isLoading = false;
-                hasError = true;
                 clearTimeout(loadingTimeout);
                 return;
             }
-            
-            // หากไม่สามารถเรียกข้อมูลได้ ให้ใช้ข้อมูลจำลอง
-            console.warn("Creating mock data due to booking fetch error");
-            createMockData();
-            booking = mockData;
+            throw error;
         }
         
         // เรียกข้อมูลการชำระเงิน
@@ -85,38 +87,68 @@ document.addEventListener('DOMContentLoaded', async function() {
             paymentInfo = {
                 paymentMethod: booking.paymentMethod || 'credit-card',
                 paymentDate: new Date().toISOString(),
-                amount: booking.totalPrice || 8500,
+                amount: booking.totalPrice || 0,
                 paymentStatus: 'completed'
             };
             console.log("Created default payment info:", paymentInfo);
         }
         
-        // สร้างข้อมูลคะแนนสะสมเริ่มต้น (ไม่พยายามเรียกจาก API)
-        const loyaltyPoints = {
-            userId: "U0001",
-            totalPoints: 250,
-            pointsExpiryDate: new Date(new Date().getFullYear() + 1, 11, 31).toISOString()
-        };
-        console.log("Using default loyalty points:", loyaltyPoints);
+        // เรียกข้อมูลคะแนนสะสม (ถ้ามีการเข้าสู่ระบบ)
+        const userData = localStorage.getItem('userData');
+        let loyaltyPoints = null;
         
-        // แสดงข้อมูลการจอง
-        isLoading = false;
-        displayBookingData(booking, paymentInfo, loyaltyPoints);
+        if (userData) {
+            try {
+                const user = JSON.parse(userData);
+                console.log("User data found:", user);
+                
+                try {
+                    // ป้องกันการเกิด SQL Error จากการเรียก API
+                    // โดยใช้ try-catch ในการดักจับข้อผิดพลาด
+                    console.log(`Fetching loyalty points for user ID: ${user.userId}`);
+                    loyaltyPoints = await apiService.getUserLoyaltyPoints(user.userId);
+                    console.log("Loyalty points data received:", loyaltyPoints);
+                } catch (pointsError) {
+                    console.warn('ไม่สามารถดึงข้อมูลคะแนนสะสม:', pointsError);
+                    
+                    // สร้างข้อมูลคะแนนสะสมเริ่มต้น
+                    loyaltyPoints = {
+                        userId: user.userId,
+                        totalPoints: 0,
+                        pointsExpiryDate: new Date(new Date().getFullYear() + 1, 11, 31).toISOString()
+                    };
+                    console.log("Created default loyalty points:", loyaltyPoints);
+                }
+            } catch (error) {
+                console.warn('ไม่สามารถอ่านข้อมูลผู้ใช้งาน:', error);
+            }
+        } else {
+            console.log("No user data found in localStorage");
+            // สร้างข้อมูลคะแนนสะสมเริ่มต้น
+            loyaltyPoints = {
+                userId: "guest",
+                totalPoints: 0,
+                pointsExpiryDate: new Date(new Date().getFullYear() + 1, 11, 31).toISOString()
+            };
+        }
+        
+        // อัพเดตข้อมูลเที่ยวบินและรายละเอียดการจอง
+        console.log("Updating flight summary...");
+        updateFlightSummary(booking);
+        
+        console.log("Updating booking details...");
+        updateBookingDetails(booking, paymentInfo, loyaltyPoints);
+        
+        // สร้าง countdown ถึงวันเดินทาง
+        console.log("Creating flight countdown...");
+        createFlightCountdown(booking);
         
         console.log("All data loaded and displayed successfully");
         
     } catch (error) {
         console.error('Error details:', error);
         console.error('Error stack:', error.stack);
-        
-        // ถ้ามีข้อผิดพลาด และยังไม่ได้สร้างข้อมูลจำลอง ให้สร้างและแสดง
-        if (!mockData) {
-            createMockData();
-        }
-        
-        // แสดงข้อมูลจำลองแทน
-        isLoading = false;
-        displayBookingData(mockData);
+        showErrorMessage('ไม่สามารถโหลดข้อมูลการจองได้ กรุณาลองใหม่อีกครั้ง');
     } finally {
         // ล้างตัวจับเวลาเมื่อโหลดเสร็จหรือมีข้อผิดพลาด
         clearTimeout(loadingTimeout);
@@ -126,7 +158,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     const emailBtn = document.getElementById('email-btn');
     if (emailBtn) {
         emailBtn.addEventListener('click', async function() {
-            await sendBoardingPassEmail(mockData ? mockData.bookingId : bookingId);
+            await sendBoardingPassEmail(bookingId);
         });
     }
     
@@ -134,12 +166,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     setTimeout(function() {
         if (document.querySelector('.loading-spinner')) {
             console.warn("Loading spinner still visible after timeout - fixing display");
-            if (mockData) {
-                displayBookingData(mockData);
-            } else {
-                createMockData();
-                displayBookingData(mockData);
-            }
+            repairUI();
         }
         
         // ตรวจสอบว่าส่วนแสดงคะแนนสะสมทำงานถูกต้อง
@@ -147,75 +174,100 @@ document.addEventListener('DOMContentLoaded', async function() {
     }, 5000);
 });
 
-// สร้างข้อมูลจำลองสำหรับกรณีที่ไม่สามารถโหลดจาก API ได้
-function createMockData() {
-    const now = new Date();
-    const departureDate = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000); // 7 วันจากวันนี้
-    const arrivalDate = new Date(departureDate.getTime() + 2 * 60 * 60 * 1000); // 2 ชั่วโมงหลังจากออกเดินทาง
-    
-    mockData = {
-        bookingId: "BK48533750",
-        userId: "U0001",
-        flightId: "FL102",
-        bookingDate: now.toISOString(),
-        bookingStatus: "Confirmed",
-        totalPrice: 8500,
-        baseFare: 7000,
-        taxes: 500,
-        additionalServices: 1000,
-        contactEmail: "user@example.com",
-        contactPhone: "0812345678",
-        flight: {
-            flightId: "FL102",
-            flightNumber: "SK102",
-            departureCity: "กรุงเทพ",
-            arrivalCity: "เชียงใหม่",
-            departureTime: departureDate.toISOString(),
-            arrivalTime: arrivalDate.toISOString(),
-            aircraft: "Boeing 737-800",
-            flightStatus: "Scheduled",
-            seatClass: "economy"
-        },
-        passengers: [
-            {
-                passengerId: "P001",
-                firstName: "สมชาย",
-                lastName: "ใจดี",
-                seatNumber: "15A",
-                specialService: "ไม่มี"
-            }
-        ]
-    };
-    
-    console.log("Mock data created:", mockData);
-    return mockData;
-}
-
-// แสดงข้อมูลการจอง
-function displayBookingData(booking, paymentInfo, loyaltyPoints) {
-    if (!booking) {
-        console.error("Cannot display booking data - no data provided");
-        return;
-    }
-    
-    console.log("Displaying booking data");
-    
-    // ตรวจสอบโครงสร้าง HTML ที่จำเป็น
+// ซ่อมแซมหน้า UI กรณีมีปัญหา
+function repairUI() {
+    // ตรวจสอบและซ่อมแซมโครงสร้าง HTML
     ensureHTMLStructure();
     
-    // อัพเดตข้อมูลเที่ยวบินและรายละเอียดการจอง
-    console.log("Updating flight summary...");
-    updateFlightSummary(booking);
+    // ดึงข้อมูลจาก URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const bookingId = urlParams.get('bookingId') || 'BK0000000';
     
-    console.log("Updating booking details...");
-    updateBookingDetails(booking, paymentInfo, loyaltyPoints);
+    // สร้างข้อมูลพื้นฐาน
+    const basicBooking = {
+        bookingId: bookingId,
+        contactEmail: "user@example.com",
+        contactPhone: "081-234-5678",
+        totalPrice: 0,
+        flight: {
+            flightNumber: "SK000",
+            departureCity: "กรุงเทพ",
+            arrivalCity: "เชียงใหม่",
+            departureTime: new Date(new Date().getTime() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+            arrivalTime: new Date(new Date().getTime() + 7 * 24 * 60 * 60 * 1000 + 2 * 60 * 60 * 1000).toISOString(),
+            aircraft: "Boeing 737-800"
+        },
+        passengers: [{
+            firstName: "ผู้โดยสาร",
+            lastName: "",
+            seatNumber: "-"
+        }]
+    };
     
-    // สร้าง countdown ถึงวันเดินทาง
-    console.log("Creating flight countdown...");
-    createFlightCountdown(booking);
+    // อัพเดตหน้า UI
+    updateFlightSummary(basicBooking);
+    updateBookingDetails(basicBooking, null, { totalPoints: 0 });
+    createFlightCountdown(basicBooking);
     
-    // แน่ใจว่าส่วนคะแนนสะสมแสดงออกมา
-    ensureLoyaltyPointsVisible();
+    // แสดงข้อความแจ้งเตือน
+    showNotification('ไม่สามารถโหลดข้อมูลได้ แสดงข้อมูลพื้นฐาน');
+}
+
+// แสดงการแจ้งเตือน
+function showNotification(message) {
+    const notification = document.createElement('div');
+    notification.className = 'notification';
+    notification.innerHTML = `
+        <div class="notification-content">
+            <i class="fas fa-info-circle"></i>
+            <span>${message}</span>
+        </div>
+        <button class="notification-close">&times;</button>
+    `;
+    
+    // สไตล์สำหรับการแจ้งเตือน
+    notification.style.position = 'fixed';
+    notification.style.bottom = '20px';
+    notification.style.right = '20px';
+    notification.style.backgroundColor = '#f8f9fa';
+    notification.style.border = '1px solid #ddd';
+    notification.style.borderRadius = '8px';
+    notification.style.padding = '10px 15px';
+    notification.style.boxShadow = '0 2px 10px rgba(0,0,0,0.1)';
+    notification.style.zIndex = '1000';
+    notification.style.display = 'flex';
+    notification.style.alignItems = 'center';
+    notification.style.justifyContent = 'space-between';
+    notification.style.maxWidth = '300px';
+    
+    // สไตล์สำหรับเนื้อหา
+    const content = notification.querySelector('.notification-content');
+    content.style.display = 'flex';
+    content.style.alignItems = 'center';
+    content.style.gap = '10px';
+    
+    // สไตล์สำหรับปุ่มปิด
+    const closeBtn = notification.querySelector('.notification-close');
+    closeBtn.style.background = 'none';
+    closeBtn.style.border = 'none';
+    closeBtn.style.cursor = 'pointer';
+    closeBtn.style.fontSize = '20px';
+    closeBtn.style.color = '#aaa';
+    
+    // เพิ่มการทำงานของปุ่มปิด
+    closeBtn.addEventListener('click', function() {
+        document.body.removeChild(notification);
+    });
+    
+    // เพิ่มเข้าไปในหน้าเว็บ
+    document.body.appendChild(notification);
+    
+    // ซ่อนหลังจาก 5 วินาที
+    setTimeout(function() {
+        if (document.body.contains(notification)) {
+            document.body.removeChild(notification);
+        }
+    }, 5000);
 }
 
 // ตรวจสอบโครงสร้าง HTML ที่จำเป็น
@@ -256,10 +308,10 @@ function ensureHTMLStructure() {
                         </div>
                     </div>
                     <h1>การจองสำเร็จ!</h1>
-                    <p>ขอบคุณที่ใช้บริการ SkyBooking</p>
+                    <p>ขอบคุณที่ใช้บริการ Skyways Airlines</p>
                     <div class="booking-reference">
                         <span>รหัสการจอง:</span>
-                        <strong id="bookingReference">BK48533750</strong>
+                        <strong id="bookingReference">กำลังโหลด...</strong>
                     </div>
                 </div>
             `
@@ -291,23 +343,23 @@ function ensureHTMLStructure() {
                             
                             <div class="flight-details-card">
                                 <div class="airline-info">
-                                    <img src="../assets/images/icons/airplane.png" alt="SkyBooking" class="airline-logo">
+                                    <img src="../assets/images/icons/airplane.png" alt="Skyways Airlines" class="airline-logo">
                                     <div>
-                                        <div class="airline-name" id="airlineName">SkyBooking</div>
-                                        <div class="flight-number" id="flightNumber">SK102</div>
+                                        <div class="airline-name" id="airlineName">Skyways Airlines</div>
+                                        <div class="flight-number" id="flightNumber">กำลังโหลด...</div>
                                     </div>
                                 </div>
                                 
                                 <div class="flight-route">
                                     <div class="route-point departure">
-                                        <div class="city" id="departureAirport">กรุงเทพ (BKK)</div>
-                                        <div class="time" id="departureTime">08:30</div>
-                                        <div class="date" id="departureDate">22 พฤษภาคม 2025</div>
-                                        <div class="terminal" id="departureTerminal">เทอร์มินัล 2</div>
+                                        <div class="city" id="departureAirport">กำลังโหลด...</div>
+                                        <div class="time" id="departureTime">--:--</div>
+                                        <div class="date" id="departureDate">--/--/----</div>
+                                        <div class="terminal" id="departureTerminal">เทอร์มินัล</div>
                                     </div>
                                     
                                     <div class="route-line">
-                                        <div class="duration" id="flightDuration">1h 20m</div>
+                                        <div class="duration" id="flightDuration">--h --m</div>
                                         <div class="line"></div>
                                         <div class="airplane-icon">
                                             <i class="fas fa-plane"></i>
@@ -315,10 +367,10 @@ function ensureHTMLStructure() {
                                     </div>
                                     
                                     <div class="route-point arrival">
-                                        <div class="city" id="arrivalAirport">เชียงใหม่ (CNX)</div>
-                                        <div class="time" id="arrivalTime">09:50</div>
-                                        <div class="date" id="arrivalDate">22 พฤษภาคม 2025</div>
-                                        <div class="terminal" id="arrivalTerminal">เทอร์มินัล 1</div>
+                                        <div class="city" id="arrivalAirport">กำลังโหลด...</div>
+                                        <div class="time" id="arrivalTime">--:--</div>
+                                        <div class="date" id="arrivalDate">--/--/----</div>
+                                        <div class="terminal" id="arrivalTerminal">เทอร์มินัล</div>
                                     </div>
                                 </div>
                                 
@@ -333,7 +385,7 @@ function ensureHTMLStructure() {
                                     </div>
                                     <div class="service-item">
                                         <i class="fas fa-plane-departure"></i>
-                                        <span id="aircraftInfo">Boeing 737-800</span>
+                                        <span id="aircraftInfo">กำลังโหลด...</span>
                                     </div>
                                 </div>
                             </div>
@@ -347,11 +399,11 @@ function ensureHTMLStructure() {
                             </div>
                             
                             <div class="passenger-card" id="passengerInfoCard">
-                                <div class="passenger-name" id="passengerName">คุณ สมชาย ใจดี</div>
+                                <div class="passenger-name" id="passengerName">กำลังโหลด...</div>
                                 <div class="passenger-details">
                                     <div class="detail-item">
                                         <span class="detail-label">ที่นั่ง:</span>
-                                        <span class="detail-value" id="seatNumber">15A</span>
+                                        <span class="detail-value" id="seatNumber">กำลังโหลด...</span>
                                     </div>
                                     <div class="detail-item">
                                         <span class="detail-label">ประเภทผู้โดยสาร:</span>
@@ -375,11 +427,11 @@ function ensureHTMLStructure() {
                             <div class="contact-details">
                                 <div class="detail-item">
                                     <span class="detail-label">อีเมล:</span>
-                                    <span class="detail-value" id="contactEmail">user@example.com</span>
+                                    <span class="detail-value" id="contactEmail">กำลังโหลด...</span>
                                 </div>
                                 <div class="detail-item">
                                     <span class="detail-label">เบอร์โทรศัพท์:</span>
-                                    <span class="detail-value" id="contactPhone">081-234-5678</span>
+                                    <span class="detail-value" id="contactPhone">กำลังโหลด...</span>
                                 </div>
                             </div>
                         </div>
@@ -394,11 +446,11 @@ function ensureHTMLStructure() {
                             <div class="payment-details">
                                 <div class="detail-item">
                                     <span class="detail-label">วิธีการชำระเงิน:</span>
-                                    <span class="detail-value" id="paymentMethod">บัตรเครดิต</span>
+                                    <span class="detail-value" id="paymentMethod">กำลังโหลด...</span>
                                 </div>
                                 <div class="detail-item">
                                     <span class="detail-label">วันที่ชำระเงิน:</span>
-                                    <span class="detail-value" id="paymentDate">15 พ.ค. 2025 10:30</span>
+                                    <span class="detail-value" id="paymentDate">กำลังโหลด...</span>
                                 </div>
                                 <div class="detail-item">
                                     <span class="detail-label">สถานะการชำระเงิน:</span>
@@ -408,20 +460,20 @@ function ensureHTMLStructure() {
                                 <div class="price-breakdown">
                                     <div class="price-item">
                                         <span class="price-label">ค่าโดยสาร:</span>
-                                        <span class="price-value" id="baseFare">฿7,000</span>
+                                        <span class="price-value" id="baseFare">฿0</span>
                                     </div>
                                     <div class="price-item">
                                         <span class="price-label">ภาษีและค่าธรรมเนียม:</span>
-                                        <span class="price-value" id="taxesAndFees">฿500</span>
+                                        <span class="price-value" id="taxesAndFees">฿0</span>
                                     </div>
                                     <div class="price-item">
                                         <span class="price-label">บริการเสริม:</span>
-                                        <span class="price-value" id="additionalServices">฿1,000</span>
+                                        <span class="price-value" id="additionalServices">฿0</span>
                                     </div>
                                     <div class="price-divider"></div>
                                     <div class="price-item total">
                                         <span class="price-label">ยอดรวมทั้งสิ้น:</span>
-                                        <span class="price-value" id="totalPrice">฿8,500</span>
+                                        <span class="price-value" id="totalPrice">฿0</span>
                                     </div>
                                 </div>
                             </div>
@@ -437,11 +489,11 @@ function ensureHTMLStructure() {
                             <div class="loyalty-points-details">
                                 <div class="detail-item">
                                     <span class="detail-label">คะแนนที่ได้รับจากการจองครั้งนี้:</span>
-                                    <span class="detail-value" id="pointsEarned">850 คะแนน</span>
+                                    <span class="detail-value" id="pointsEarned">0 คะแนน</span>
                                 </div>
                                 <div class="detail-item">
                                     <span class="detail-label">คะแนนสะสมทั้งหมด:</span>
-                                    <span class="detail-value" id="totalPoints">1,100 คะแนน</span>
+                                    <span class="detail-value" id="totalPoints">0 คะแนน</span>
                                 </div>
                             </div>
                         </div>
@@ -570,8 +622,6 @@ function showErrorMessage(message) {
     }
     mainContent.appendChild(errorElement);
     console.log("Error message displayed");
-    
-    hasError = true;
 }
 
 // สร้าง countdown ถึงวันเดินทาง
@@ -603,7 +653,6 @@ function createFlightCountdown(booking) {
             console.warn("Confirmation message container not found");
             return;
         }
-        
         // ลบ countdown เดิมถ้ามี
         const existingCountdown = confirmationMessage.querySelector('.countdown');
         if (existingCountdown) {
@@ -680,7 +729,7 @@ function updateFlightSummary(booking) {
         
         // อัพเดตข้อมูลรหัสการจอง
         if (bookingReference) {
-            bookingReference.textContent = booking.bookingId || 'BK48533750';
+            bookingReference.textContent = booking.bookingId || 'ไม่พบรหัสการจอง';
             console.log(`Updated booking reference: ${bookingReference.textContent}`);
         } else {
             console.warn("Booking reference element not found");
@@ -703,8 +752,7 @@ function updateFlightSummary(booking) {
                 routeTitle.textContent = `${flight.departureCity} (${departureCode}) → ${flight.arrivalCity} (${arrivalCode})`;
                 console.log(`Updated route title: ${routeTitle.textContent}`);
             } else {
-                routeTitle.textContent = 'กรุงเทพ (BKK) → เชียงใหม่ (CNX)';
-                console.warn("Missing departure or arrival city - using default");
+                console.warn("Missing departure or arrival city");
             }
             
             // สร้างรายละเอียดเส้นทาง
@@ -717,7 +765,7 @@ function updateFlightSummary(booking) {
                     formattedDate = departureDate.toLocaleDateString('th-TH', options);
                 } catch (e) {
                     console.warn("Error formatting date:", e);
-                    formattedDate = "22 พฤษภาคม 2025"; // ค่าเริ่มต้น
+                    formattedDate = departureDate.toDateString(); // ใช้รูปแบบอื่นถ้า th-TH ไม่ทำงาน
                 }
                 
                 const passengers = booking.passengers?.length || 1;
@@ -742,8 +790,7 @@ function updateFlightSummary(booking) {
                 routeInfo.textContent = routeDetails;
                 console.log(`Updated route info: ${routeInfo.textContent}`);
             } else {
-                routeInfo.textContent = 'วันพฤหัสบดีที่ 22 พฤษภาคม 2025 | ผู้โดยสาร 1 คน | ชั้นประหยัด | SK102';
-                console.warn("Missing departure time - using default");
+                console.warn("Missing departure time");
             }
         } else {
             console.warn("Route title or info elements not found");
@@ -782,13 +829,8 @@ function updateBookingDetails(booking, paymentInfo, loyaltyPoints) {
         
         // ตรวจสอบว่าเที่ยวบินมีข้อมูล timestamps ที่ถูกต้อง
         if (!booking.flight.departureTime || !booking.flight.arrivalTime) {
-            console.warn("Missing departure or arrival time - using default");
-            const now = new Date();
-            const departure = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000); // 7 วันจากวันนี้
-            const arrival = new Date(departure.getTime() + 2 * 60 * 60 * 1000); // 2 ชั่วโมงหลังจากออกเดินทาง
-            
-            booking.flight.departureTime = departure.toISOString();
-            booking.flight.arrivalTime = arrival.toISOString();
+            console.warn("Missing departure or arrival time");
+            return;
         }
         
         // แปลง timestamps เป็น Date objects
@@ -801,18 +843,16 @@ function updateBookingDetails(booking, paymentInfo, loyaltyPoints) {
         const durationMinutes = Math.floor(duration % 60);
         
         // อัพเดตข้อมูลเที่ยวบิน
-        if (flightNumber) flightNumber.textContent = booking.flight.flightNumber || 'SK102';
+        if (flightNumber) flightNumber.textContent = booking.flight.flightNumber || 'N/A';
         
         if (departureAirport) {
-            const depCity = booking.flight.departureCity || 'กรุงเทพ';
-            const depCode = depCity.substring(0, 3).toUpperCase();
-            departureAirport.textContent = `${depCity} (${depCode})`;
+            const depCode = booking.flight.departureCity.substring(0, 3).toUpperCase();
+            departureAirport.textContent = `${booking.flight.departureCity} (${depCode})`;
         }
         
         if (arrivalAirport) {
-            const arrCity = booking.flight.arrivalCity || 'เชียงใหม่';
-            const arrCode = arrCity.substring(0, 3).toUpperCase();
-            arrivalAirport.textContent = `${arrCity} (${arrCode})`;
+            const arrCode = booking.flight.arrivalCity.substring(0, 3).toUpperCase();
+            arrivalAirport.textContent = `${booking.flight.arrivalCity} (${arrCode})`;
         }
         
         if (departureTime) {
@@ -823,7 +863,7 @@ function updateBookingDetails(booking, paymentInfo, loyaltyPoints) {
                 });
             } catch (e) {
                 console.warn("Error formatting departure time:", e);
-                departureTime.textContent = '08:30'; // ค่าเริ่มต้น
+                departureTime.textContent = depTime.toTimeString().substring(0, 5); // Fallback
             }
         }
         
@@ -835,7 +875,7 @@ function updateBookingDetails(booking, paymentInfo, loyaltyPoints) {
                 });
             } catch (e) {
                 console.warn("Error formatting arrival time:", e);
-                arrivalTime.textContent = '09:50'; // ค่าเริ่มต้น
+                arrivalTime.textContent = arrTime.toTimeString().substring(0, 5); // Fallback
             }
         }
         
@@ -848,7 +888,7 @@ function updateBookingDetails(booking, paymentInfo, loyaltyPoints) {
                 });
             } catch (e) {
                 console.warn("Error formatting departure date:", e);
-                departureDate.textContent = '22 พฤษภาคม 2025'; // ค่าเริ่มต้น
+                departureDate.textContent = depTime.toDateString(); // Fallback
             }
         }
         
@@ -861,7 +901,7 @@ function updateBookingDetails(booking, paymentInfo, loyaltyPoints) {
                 });
             } catch (e) {
                 console.warn("Error formatting arrival date:", e);
-                arrivalDate.textContent = '22 พฤษภาคม 2025'; // ค่าเริ่มต้น
+                arrivalDate.textContent = arrTime.toDateString(); // Fallback
             }
         }
         
@@ -881,30 +921,26 @@ function updateBookingDetails(booking, paymentInfo, loyaltyPoints) {
             const specialService = document.getElementById('specialService');
             
             if (passengerName) {
-                passengerName.textContent = `${passenger.title || 'คุณ'} ${passenger.firstName} ${passenger.lastName}`;
+                passengerName.textContent = `${passenger.title || ''} ${passenger.firstName} ${passenger.lastName}`;
             }
             
             if (seatNumber) {
-                seatNumber.textContent = passenger.seatNumber || '15A';
+                seatNumber.textContent = passenger.seatNumber || 'ยังไม่ได้เลือก';
             }
             
             if (specialService) {
                 specialService.textContent = passenger.specialService || 'ไม่มี';
             }
         } else {
-            console.warn("No passenger data available - using default");
-            const passengerName = document.getElementById('passengerName');
-            const seatNumber = document.getElementById('seatNumber');
-            if (passengerName) passengerName.textContent = 'คุณ สมชาย ใจดี';
-            if (seatNumber) seatNumber.textContent = '15A';
+            console.warn("No passenger data available");
         }
         
         // ข้อมูลการติดต่อ
         const contactEmail = document.getElementById('contactEmail');
         const contactPhone = document.getElementById('contactPhone');
         
-        if (contactEmail) contactEmail.textContent = booking.contactEmail || 'user@example.com';
-        if (contactPhone) contactPhone.textContent = booking.contactPhone || '081-234-5678';
+        if (contactEmail) contactEmail.textContent = booking.contactEmail || 'ไม่ระบุ';
+        if (contactPhone) contactPhone.textContent = booking.contactPhone || 'ไม่ระบุ';
         
         // ข้อมูลการชำระเงิน
         const paymentMethod = document.getElementById('paymentMethod');
@@ -916,7 +952,7 @@ function updateBookingDetails(booking, paymentInfo, loyaltyPoints) {
         
         if (paymentInfo) {
             if (paymentMethod) {
-                const method = paymentInfo.paymentMethod || 'credit-card';
+                const method = paymentInfo.paymentMethod || 'ไม่ระบุ';
                 
                 // แปลงชื่อวิธีการชำระเงิน
                 let methodText = method;
@@ -940,22 +976,18 @@ function updateBookingDetails(booking, paymentInfo, loyaltyPoints) {
                     });
                 } catch (e) {
                     console.warn("Error formatting payment date:", e);
-                    paymentDate.textContent = '15 พ.ค. 2025 10:30'; // ค่าเริ่มต้น
+                    paymentDate.textContent = new Date(paymentInfo.paymentDate).toLocaleString(); // Fallback
                 }
             }
         } else {
-            if (paymentMethod) paymentMethod.textContent = 'บัตรเครดิต';
-            if (paymentDate) paymentDate.textContent = '15 พ.ค. 2025 10:30';
-            console.warn("No payment info available - using default");
+            console.warn("No payment info available");
         }
         
         // อัพเดตข้อมูลราคา
-        const priceFormatter = new Intl.NumberFormat('th-TH');
-        
-        if (baseFare) baseFare.textContent = `฿${priceFormatter.format(booking.baseFare || 7000)}`;
-        if (taxesAndFees) taxesAndFees.textContent = `฿${priceFormatter.format(booking.taxes || 500)}`;
-        if (additionalServices) additionalServices.textContent = `฿${priceFormatter.format(booking.additionalServices || 1000)}`;
-        if (totalPrice) totalPrice.textContent = `฿${priceFormatter.format(booking.totalPrice || 8500)}`;
+        if (baseFare) baseFare.textContent = `฿${(booking.baseFare || 0).toLocaleString()}`;
+        if (taxesAndFees) taxesAndFees.textContent = `฿${(booking.taxes || 0).toLocaleString()}`;
+        if (additionalServices) additionalServices.textContent = `฿${(booking.additionalServices || 0).toLocaleString()}`;
+        if (totalPrice) totalPrice.textContent = `฿${(booking.totalPrice || 0).toLocaleString()}`;
         
         // อัพเดตข้อมูลคะแนนสะสม
         updateLoyaltyPoints(booking, loyaltyPoints);
@@ -972,44 +1004,61 @@ function updateLoyaltyPoints(booking, loyaltyPoints) {
         console.log("Updating loyalty points section with:", loyaltyPoints);
         
         const loyaltyPointsSection = document.getElementById('loyaltyPointsSection');
-        const pointsEarned = document.getElementById('pointsEarned');
-        const totalPoints = document.getElementById('totalPoints');
         
-        if (!loyaltyPointsSection || !pointsEarned || !totalPoints) {
-            console.warn("Loyalty points elements not found - will create");
+        // ถ้าไม่พบส่วนคะแนนสะสม ให้สร้างใหม่
+        if (!loyaltyPointsSection) {
+            console.warn("Loyalty points section not found");
             ensureLoyaltyPointsVisible();
             return;
         }
         
+        const pointsEarned = document.getElementById('pointsEarned');
+        const totalPoints = document.getElementById('totalPoints');
+        
+        if (!pointsEarned || !totalPoints) {
+            console.warn("Points elements not found");
+            return;
+        }
+        
         // คำนวณคะแนนที่ได้รับจากการจอง (1 คะแนนต่อ 10 บาท)
-        const bookingPrice = booking?.totalPrice || 8500;
+        const bookingPrice = booking?.totalPrice || 0;
         const earnedPoints = Math.floor(bookingPrice / 10);
         
         // คะแนนสะสมทั้งหมด
-        const existingPoints = loyaltyPoints?.totalPoints || 250;
+        let existingPoints = 0;
         
-        // ตรวจสอบว่าคะแนนเป็นตัวเลข
-        const pointsNum = parseInt(existingPoints, 10) || 250;
-        const earnedNum = parseInt(earnedPoints, 10) || 850;
+        // ตรวจสอบข้อมูลคะแนนสะสม
+        if (loyaltyPoints) {
+            console.log("Full loyalty points data:", loyaltyPoints);
+            
+            // ตรวจสอบทุกรูปแบบของข้อมูลคะแนนสะสม
+            if (typeof loyaltyPoints.totalPoints !== 'undefined') {
+                existingPoints = loyaltyPoints.totalPoints;
+            } else if (typeof loyaltyPoints.pointsBalance !== 'undefined') {
+                existingPoints = loyaltyPoints.pointsBalance;
+            } else if (typeof loyaltyPoints.points !== 'undefined') {
+                existingPoints = loyaltyPoints.points;
+            }
+        }
+        
+        // แปลงเป็นตัวเลข
+        existingPoints = parseInt(existingPoints, 10) || 0;
         
         // อัพเดตการแสดงผล
-        const formatter = new Intl.NumberFormat('th-TH');
-        pointsEarned.textContent = `${formatter.format(earnedNum)} คะแนน`;
-        totalPoints.textContent = `${formatter.format(pointsNum + earnedNum)} คะแนน`;
+        pointsEarned.textContent = `${earnedPoints.toLocaleString()} คะแนน`;
+        totalPoints.textContent = `${(existingPoints + earnedPoints).toLocaleString()} คะแนน`;
         
         // แสดงส่วนคะแนนสะสม
         loyaltyPointsSection.style.display = 'block';
         
-        // เพิ่ม styles ถ้าจำเป็น
-        if (!loyaltyPointsSection.style.padding) {
-            loyaltyPointsSection.style.padding = '1.5rem';
-            loyaltyPointsSection.style.marginTop = '1.5rem';
-            loyaltyPointsSection.style.backgroundColor = '#f8f8ff';
-            loyaltyPointsSection.style.borderRadius = '8px';
-            loyaltyPointsSection.style.border = '1px solid #e0e0ff';
-        }
+        // เพิ่ม styles
+        loyaltyPointsSection.style.padding = '1.5rem';
+        loyaltyPointsSection.style.marginTop = '1.5rem';
+        loyaltyPointsSection.style.backgroundColor = '#f8f8ff';
+        loyaltyPointsSection.style.borderRadius = '8px';
+        loyaltyPointsSection.style.border = '1px solid #e0e0ff';
         
-        console.log(`Loyalty points updated: earned=${earnedNum}, total=${pointsNum + earnedNum}`);
+        console.log(`Loyalty points updated: earned=${earnedPoints}, total=${existingPoints + earnedPoints}`);
     } catch (error) {
         console.error("Error updating loyalty points:", error);
     }
@@ -1034,11 +1083,11 @@ function ensureLoyaltyPointsVisible() {
             <div class="loyalty-points-details">
                 <div class="detail-item">
                     <span class="detail-label">คะแนนที่ได้รับจากการจองครั้งนี้:</span>
-                    <span class="detail-value" id="pointsEarned">850 คะแนน</span>
+                    <span class="detail-value" id="pointsEarned">0 คะแนน</span>
                 </div>
                 <div class="detail-item">
                     <span class="detail-label">คะแนนสะสมทั้งหมด:</span>
-                    <span class="detail-value" id="totalPoints">1,100 คะแนน</span>
+                    <span class="detail-value" id="totalPoints">0 คะแนน</span>
                 </div>
             </div>
         `;
@@ -1055,29 +1104,21 @@ function ensureLoyaltyPointsVisible() {
         bookingCard.appendChild(loyaltySection);
         return true;
     } else if (loyaltyPointsSection) {
-        // อัพเดตการแสดงผล
-        console.log("Updating existing loyalty points section");
-        loyaltyPointsSection.style.display = 'block';
+        // ตรวจสอบว่าแสดงผลอยู่หรือไม่
+        if (loyaltyPointsSection.style.display === 'none') {
+            loyaltyPointsSection.style.display = 'block';
+        }
         
-        // ดูว่าข้อมูลคะแนนสะสมถูกอัพเดตแล้วหรือยัง
+        // ตรวจสอบค่าคะแนน
         const pointsEarned = document.getElementById('pointsEarned');
         const totalPoints = document.getElementById('totalPoints');
         
         if (pointsEarned && !pointsEarned.textContent.includes('คะแนน')) {
-            pointsEarned.textContent = '850 คะแนน';
+            pointsEarned.textContent = '0 คะแนน';
         }
         
         if (totalPoints && !totalPoints.textContent.includes('คะแนน')) {
-            totalPoints.textContent = '1,100 คะแนน';
-        }
-        
-        // ตรวจสอบและเพิ่ม styles
-        if (!loyaltyPointsSection.style.padding) {
-            loyaltyPointsSection.style.padding = '1.5rem';
-            loyaltyPointsSection.style.marginTop = '1.5rem';
-            loyaltyPointsSection.style.backgroundColor = '#f8f8ff';
-            loyaltyPointsSection.style.borderRadius = '8px';
-            loyaltyPointsSection.style.border = '1px solid #e0e0ff';
+            totalPoints.textContent = '0 คะแนน';
         }
         
         return true;
@@ -1101,12 +1142,18 @@ async function sendBoardingPassEmail(bookingId) {
     emailBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> กำลังส่ง...';
     
     try {
-        // จำลองการส่งอีเมล
-        console.log("Simulating email sending...");
-        await new Promise(resolve => setTimeout(resolve, 1500));
+        // ดึงข้อมูลการจองเพื่อหาอีเมลที่จะส่งไป
+        let booking;
+        try {
+            booking = await apiService.getBookingById(bookingId);
+        } catch (error) {
+            throw new Error('ไม่สามารถดึงข้อมูลการจองได้: ' + error.message);
+        }
         
-        // ใช้ข้อมูลจำลองหรือข้อมูลจริง
-        const email = mockData?.contactEmail || 'user@example.com';
+        const email = booking.contactEmail || 'อีเมลของคุณ';
+        
+        // จำลองการส่งอีเมล
+        await new Promise(resolve => setTimeout(resolve, 1500));
         
         // แสดงข้อความสำเร็จ
         console.log(`Email sent successfully to: ${email}`);
@@ -1278,10 +1325,7 @@ window.addEventListener('load', function() {
         const loadingSpinner = document.querySelector('.loading-spinner');
         if (loadingSpinner) {
             console.warn("Loading spinner still visible after page load - fixing display");
-            if (!mockData) {
-                createMockData();
-            }
-            displayBookingData(mockData);
+            repairUI();
         }
         
         // ตรวจสอบส่วนคะแนนสะสมอีกครั้ง

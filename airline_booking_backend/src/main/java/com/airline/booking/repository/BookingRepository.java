@@ -34,6 +34,9 @@ public interface BookingRepository extends JpaRepository<Booking, String> {
     
     // ค้นหาการจองตามผู้ใช้และสถานะการจอง
     List<Booking> findByUserUserIdAndBookingStatus(String userId, String bookingStatus);
+
+    List<Booking> findByUserUserIdAndFlightFlightIdAndBookingDateOrderByBookingIdDesc(
+        String userId, String flightId, LocalDate bookingDate);    
     
     // นับจำนวนการจองตามเที่ยวบิน
     @Query("SELECT COUNT(b) FROM Booking b WHERE b.flight.flightId = :flightId")

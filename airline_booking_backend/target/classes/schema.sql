@@ -54,12 +54,14 @@ CREATE TABLE Seat (
 
 -- สร้างตาราง Passenger (ข้อมูลผู้โดยสาร)
 CREATE TABLE Passenger (
-    PassengerID VARCHAR(10) PRIMARY KEY,
+    PassengerID VARCHAR(36) PRIMARY KEY,
     BookingID VARCHAR(10) NOT NULL,
     FirstName VARCHAR(50) NOT NULL,
     LastName VARCHAR(50) NOT NULL,
     DateOfBirth DATE NOT NULL,
     PassportNumber VARCHAR(20),
+    SeatID VARCHAR(255),
+    FOREIGN KEY (SeatID) REFERENCES Seat(SeatID),
     FOREIGN KEY (BookingID) REFERENCES Booking(BookingID)
 );
 

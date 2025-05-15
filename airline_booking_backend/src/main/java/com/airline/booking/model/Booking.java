@@ -43,7 +43,6 @@ public class Booking {
     @Column(name = "ContactPhone", length = 20)
     private String contactPhone;
 
-    // Use the Redeems join table for discounts
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
         name = "Redeems",
@@ -53,13 +52,14 @@ public class Booking {
     private Set<Discount> discounts = new HashSet<>();
 
     @JsonManagedReference(value = "booking-passengers")
-    @OneToMany(mappedBy = "booking", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "booking", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private Set<Passenger> passengers = new HashSet<>();
     
     @JsonManagedReference(value = "booking-payment")
-    @OneToOne(mappedBy = "booking", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToOne(mappedBy = "booking", cascade = CascadeType.ALL, fetch = FetchType.LAZY, optional = true)
     private Payment payment;
 
+    // Transient fields (not persisted)
     @Transient
     private Set<LoyaltyPoints> loyaltyPoints = new HashSet<>();
 
@@ -70,15 +70,15 @@ public class Booking {
     public Booking() {
     }
 
-    public Booking(String bookingId, LocalDate bookingDate, 
-                  String bookingStatus, BigDecimal totalPrice) {
+    public Booking(String bookingId, LocalDate bookingDate, String bookingStatus, BigDecimal totalPrice) {
         this.bookingId = bookingId;
         this.bookingDate = bookingDate;
         this.bookingStatus = bookingStatus;
         this.totalPrice = totalPrice;
     }
 
-    // Getters and Setters
+    // Getters and setters
+
     public String getBookingId() {
         return bookingId;
     }
@@ -87,46 +87,20 @@ public class Booking {
         this.bookingId = bookingId;
     }
 
-    // Compatibility method for userId
-    public String getUserId() {
-        return user != null ? user.getUserId() : null;
+    public User getUser() {
+        return user;
     }
 
-    // Compatibility method for setUserId
-    public void setUserId(String userId) {
-        if (userId == null || userId.isEmpty()) {
-            this.user = null;
-            return;
-        }
-        
-        if (this.user == null) {
-            User newUser = new User();
-            newUser.setUserId(userId);
-            this.user = newUser;
-        } else {
-            this.user.setUserId(userId);
-        }
+    public void setUser(User user) {
+        this.user = user;
     }
 
-    // Compatibility method for flightId
-    public String getFlightId() {
-        return flight != null ? flight.getFlightId() : null;
+    public Flight getFlight() {
+        return flight;
     }
 
-    // Compatibility method for setFlightId
-    public void setFlightId(String flightId) {
-        if (flightId == null || flightId.isEmpty()) {
-            this.flight = null;
-            return;
-        }
-        
-        if (this.flight == null) {
-            Flight newFlight = new Flight();
-            newFlight.setFlightId(flightId);
-            this.flight = newFlight;
-        } else {
-            this.flight.setFlightId(flightId);
-        }
+    public void setFlight(Flight flight) {
+        this.flight = flight;
     }
 
     public LocalDate getBookingDate() {
@@ -152,12 +126,11 @@ public class Booking {
     public void setTotalPrice(BigDecimal totalPrice) {
         this.totalPrice = totalPrice;
     }
-    
-    // Method for accepting double totalPrice
+
     public void setTotalPrice(double totalPrice) {
         this.totalPrice = BigDecimal.valueOf(totalPrice);
     }
-    
+
     public String getContactEmail() {
         return contactEmail;
     }
@@ -174,23 +147,6 @@ public class Booking {
         this.contactPhone = contactPhone;
     }
 
-    // Entity relationship getters and setters
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
-    }
-
-    public Flight getFlight() {
-        return flight;
-    }
-
-    public void setFlight(Flight flight) {
-        this.flight = flight;
-    }
-    
     public Set<Discount> getDiscounts() {
         return discounts;
     }
@@ -206,14 +162,14 @@ public class Booking {
     public void setPassengers(Set<Passenger> passengers) {
         this.passengers = passengers;
     }
-    
+
     public List<Passenger> getPassengerList() {
         if (passengerList == null) {
             passengerList = new ArrayList<>(passengers);
         }
         return passengerList;
     }
-    
+
     public void setPassengerList(List<Passenger> passengerList) {
         this.passengerList = passengerList;
         this.passengers = new HashSet<>(passengerList);
@@ -235,29 +191,66 @@ public class Booking {
         this.loyaltyPoints = loyaltyPoints;
     }
 
-    // Helper methods
+    // Helper methods to maintain bidirectional consistency
     public void addPassenger(Passenger passenger) {
-        this.passengers.add(passenger);
+        passengers.add(passenger);
         passenger.setBooking(this);
     }
 
     public void removePassenger(Passenger passenger) {
-        this.passengers.remove(passenger);
+        passengers.remove(passenger);
         passenger.setBooking(null);
     }
-    
+
     public void addDiscount(Discount discount) {
-        this.discounts.add(discount);
+        discounts.add(discount);
     }
-    
+
     public void removeDiscount(Discount discount) {
-        this.discounts.remove(discount);
+        discounts.remove(discount);
     }
-    
+
+    // Convenience methods for IDs
+    public String getUserId() {
+        return user != null ? user.getUserId() : null;
+    }
+
+    public void setUserId(String userId) {
+        if (userId == null || userId.isEmpty()) {
+            this.user = null;
+            return;
+        }
+        if (this.user == null) {
+            User newUser = new User();
+            newUser.setUserId(userId);
+            this.user = newUser;
+        } else {
+            this.user.setUserId(userId);
+        }
+    }
+
+    public String getFlightId() {
+        return flight != null ? flight.getFlightId() : null;
+    }
+
+    public void setFlightId(String flightId) {
+        if (flightId == null || flightId.isEmpty()) {
+            this.flight = null;
+            return;
+        }
+        if (this.flight == null) {
+            Flight newFlight = new Flight();
+            newFlight.setFlightId(flightId);
+            this.flight = newFlight;
+        } else {
+            this.flight.setFlightId(flightId);
+        }
+    }
+
     public double getTotalPriceAsDouble() {
         return totalPrice != null ? totalPrice.doubleValue() : 0.0;
     }
-    
+
     public List<Passenger> getPassengersAsList() {
         return new ArrayList<>(this.passengers);
     }

@@ -5,12 +5,14 @@ import com.airline.booking.model.Discount;
 import com.airline.booking.model.Flight;
 import com.airline.booking.model.Passenger;
 import com.airline.booking.model.Payment;
+import com.airline.booking.model.Seat;
 import com.airline.booking.model.User;
 import com.airline.booking.repository.BookingRepository;
 import com.airline.booking.repository.DiscountRepository;
 import com.airline.booking.repository.FlightRepository;
 import com.airline.booking.repository.PassengerRepository;
 import com.airline.booking.repository.PaymentRepository;
+import com.airline.booking.repository.SeatRepository;
 import com.airline.booking.repository.UserRepository;
 import com.airline.booking.exception.ResourceNotFoundException;
 
@@ -22,12 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 public class BookingService {
@@ -51,7 +48,10 @@ public class BookingService {
     
     @Autowired
     private DiscountRepository discountRepository;
-    
+
+    @Autowired
+    private SeatRepository seatRepository;  // เพิ่ม SeatRepository เพื่อใช้งาน
+
     // ดึงข้อมูลการจองทั้งหมด
     public List<Booking> getAllBookings() {
         logger.debug("เรียกดูการจองทั้งหมด");
@@ -68,28 +68,16 @@ public class BookingService {
     // ดึงข้อมูลการจองตามผู้ใช้
     public List<Booking> getBookingsByUserId(String userId) {
         logger.debug("เรียกดูการจองตามผู้ใช้ ID: {}", userId);
-        
-        // หาผู้ใช้ก่อน
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("ไม่พบผู้ใช้ด้วย ID: " + userId));
-        
-        // ค้นหาการจองที่มี user นี้
-        List<Booking> bookings = bookingRepository.findByUser(user);
-        
-        // ไม่ throw exception ถ้าไม่มี booking แต่ return list ว่างแทน
-        return bookings;
+        return bookingRepository.findByUser(user);
     }
-    
     
     // ดึงข้อมูลการจองตามเที่ยวบิน
     public List<Booking> getBookingsByFlightId(String flightId) {
         logger.debug("เรียกดูการจองตามเที่ยวบิน ID: {}", flightId);
-        
-        // หาเที่ยวบินก่อน
         Flight flight = flightRepository.findById(flightId)
                 .orElseThrow(() -> new ResourceNotFoundException("ไม่พบเที่ยวบินด้วย ID: " + flightId));
-        
-        // ค้นหาการจองที่มี flight นี้
         List<Booking> bookings = bookingRepository.findByFlight(flight);
         if (bookings.isEmpty()) {
             logger.warn("ไม่พบการจองสำหรับเที่ยวบิน ID: {}", flightId);
@@ -118,12 +106,11 @@ public class BookingService {
         return bookings;
     }
     
-    // สร้างการจองใหม่ - ปรับปรุงเพื่อแก้ไขปัญหา
+    // สร้างการจองใหม่ พร้อมอัปเดตสถานะที่นั่ง
     @Transactional
     public Booking createBooking(Booking booking, String userId, String flightId) {
         logger.debug("สร้างการจองใหม่ด้วย userId: {} และ flightId: {}", userId, flightId);
         
-        // ตรวจสอบข้อมูลที่จำเป็น
         if (userId == null || userId.isEmpty()) {
             throw new IllegalArgumentException("ต้องระบุ userId");
         }
@@ -133,46 +120,46 @@ public class BookingService {
         }
         
         try {
-            // ดึงข้อมูล User และ Flight จากฐานข้อมูล
             User user = userRepository.findById(userId)
                     .orElseThrow(() -> new ResourceNotFoundException("ไม่พบผู้ใช้ด้วย ID: " + userId));
             
             Flight flight = flightRepository.findById(flightId)
                     .orElseThrow(() -> new ResourceNotFoundException("ไม่พบเที่ยวบินด้วย ID: " + flightId));
             
-            // กำหนดความสัมพันธ์กับ User และ Flight
             booking.setUser(user);
             booking.setFlight(flight);
             
-            // สร้างรหัสการจองถ้ายังไม่มี
             if (booking.getBookingId() == null || booking.getBookingId().isEmpty()) {
                 booking.setBookingId("BK" + generateUniqueId());
             }
             
-            // กำหนดวันที่จองถ้ายังไม่มี
             if (booking.getBookingDate() == null) {
                 booking.setBookingDate(LocalDate.now());
             }
             
-            // กำหนดสถานะการจองถ้ายังไม่มี
             if (booking.getBookingStatus() == null || booking.getBookingStatus().isEmpty()) {
                 booking.setBookingStatus("Pending");
             }
             
-            // ตรวจสอบและกำหนดค่าให้กับผู้โดยสาร
-            if (booking.getPassengers() != null && !booking.getPassengers().isEmpty()) {
+            // *** ตัวอย่างการอัปเดตสถานะที่นั่ง (สมมติ Booking มีความสัมพันธ์กับ Seat) ***
+            if (booking.getPassengers() != null) {
                 for (Passenger passenger : booking.getPassengers()) {
-                    if (passenger.getPassengerId() == null || passenger.getPassengerId().isEmpty()) {
-                        passenger.setPassengerId("P" + generateUniqueId());
+                    Seat seat = passenger.getSeat();  // สมมติ Passenger มี getSeat()
+                    if (seat != null) {
+                        Seat managedSeat = seatRepository.findById(seat.getSeatId())
+                                .orElseThrow(() -> new ResourceNotFoundException("ไม่พบที่นั่งด้วย ID: " + seat.getSeatId()));
+                        if ("Available".equals(managedSeat.getSeatStatus())) {
+                            managedSeat.setSeatStatus("Booked");
+                            seatRepository.save(managedSeat);
+                        } else {
+                            throw new IllegalStateException("ที่นั่ง " + managedSeat.getSeatNumber() + " ถูกจองแล้ว");
+                        }
                     }
-                    passenger.setBooking(booking);
                 }
             }
             
-            // บันทึกข้อมูลการจอง
             Booking savedBooking = bookingRepository.save(booking);
             logger.debug("สร้างการจองสำเร็จ: {}", savedBooking);
-            
             return savedBooking;
             
         } catch (Exception e) {
@@ -180,23 +167,20 @@ public class BookingService {
             throw e;
         }
     }
-    
+
     // อัปเดตข้อมูลการจอง
     @Transactional
     public Booking updateBooking(String bookingId, Booking bookingDetails) {
         logger.debug("อัปเดตการจอง ID: {}", bookingId);
         Booking booking = getBookingById(bookingId);
         
-        // อัปเดตข้อมูลพื้นฐาน
         if (bookingDetails.getUserId() != null) {
-            // หา User จากฐานข้อมูล
             User user = userRepository.findById(bookingDetails.getUserId())
                     .orElseThrow(() -> new ResourceNotFoundException("ไม่พบผู้ใช้ด้วย ID: " + bookingDetails.getUserId()));
             booking.setUser(user);
         }
         
         if (bookingDetails.getFlightId() != null) {
-            // หา Flight จากฐานข้อมูล
             Flight flight = flightRepository.findById(bookingDetails.getFlightId())
                     .orElseThrow(() -> new ResourceNotFoundException("ไม่พบเที่ยวบินด้วย ID: " + bookingDetails.getFlightId()));
             booking.setFlight(flight);
@@ -214,7 +198,6 @@ public class BookingService {
             booking.setTotalPrice(bookingDetails.getTotalPrice());
         }
         
-        // อัปเดตข้อมูลการติดต่อ
         if (bookingDetails.getContactEmail() != null) {
             booking.setContactEmail(bookingDetails.getContactEmail());
         }
@@ -223,12 +206,8 @@ public class BookingService {
             booking.setContactPhone(bookingDetails.getContactPhone());
         }
         
-        // อัปเดตข้อมูลผู้โดยสาร
         if (bookingDetails.getPassengers() != null && !bookingDetails.getPassengers().isEmpty()) {
-            // ลบผู้โดยสารเดิมทั้งหมด
             booking.getPassengers().clear();
-            
-            // เพิ่มผู้โดยสารใหม่
             for (Passenger passenger : bookingDetails.getPassengers()) {
                 passenger.setBooking(booking);
                 booking.addPassenger(passenger);
@@ -245,7 +224,6 @@ public class BookingService {
         logger.debug("อัปเดตสถานะการจอง ID: {} เป็น: {}", bookingId, status);
         Booking booking = getBookingById(bookingId);
         
-        // ตรวจสอบสถานะที่ถูกต้อง
         if (!status.equals("Pending") && !status.equals("Confirmed") && !status.equals("Cancelled")) {
             logger.warn("สถานะการจองไม่ถูกต้อง: {}", status);
             throw new IllegalArgumentException("สถานะการจองไม่ถูกต้อง: " + status);
@@ -262,7 +240,6 @@ public class BookingService {
         logger.debug("ยกเลิกการจอง ID: {}", bookingId);
         Booking booking = getBookingById(bookingId);
         
-        // ตรวจสอบว่าการจองอยู่ในสถานะที่สามารถยกเลิกได้หรือไม่
         if ("Cancelled".equals(booking.getBookingStatus())) {
             throw new IllegalStateException("การจองนี้ถูกยกเลิกไปแล้ว");
         }
@@ -286,15 +263,11 @@ public class BookingService {
         logger.debug("เพิ่มผู้โดยสารในการจอง ID: {}", bookingId);
         Booking booking = getBookingById(bookingId);
         
-        // กำหนดรหัสผู้โดยสารถ้ายังไม่มี
         if (passenger.getPassengerId() == null || passenger.getPassengerId().isEmpty()) {
             passenger.setPassengerId("P" + generateUniqueId());
         }
         
-        // กำหนดความสัมพันธ์กับการจอง
         passenger.setBooking(booking);
-        
-        // เพิ่มผู้โดยสาร
         booking.addPassenger(passenger);
         
         return bookingRepository.save(booking);
@@ -310,7 +283,6 @@ public class BookingService {
             throw new ResourceNotFoundException("ไม่พบข้อมูลผู้โดยสารในการจอง");
         }
         
-        // ค้นหาผู้โดยสารที่ต้องการลบ
         Passenger passengerToRemove = null;
         for (Passenger p : booking.getPassengers()) {
             if (p.getPassengerId().equals(passengerId)) {
@@ -323,9 +295,7 @@ public class BookingService {
             throw new ResourceNotFoundException("ไม่พบผู้โดยสารด้วย ID: " + passengerId + " ในการจอง");
         }
         
-        // ลบผู้โดยสาร
         booking.removePassenger(passengerToRemove);
-        
         return bookingRepository.save(booking);
     }
     
@@ -335,26 +305,18 @@ public class BookingService {
         logger.debug("เพิ่มส่วนลดในการจอง bookingId: {}, discountId: {}", bookingId, discountId);
         Booking booking = getBookingById(bookingId);
         
-        // ตรวจสอบส่วนลด
         Discount discount = discountRepository.findById(discountId)
                 .orElseThrow(() -> new ResourceNotFoundException("ไม่พบส่วนลดด้วย ID: " + discountId));
         
-        // คำนวณราคาใหม่
         BigDecimal originalPrice = booking.getTotalPrice();
-        
-        // แก้ไขจาก getValue() เป็น getDiscountValue() ตามที่มีในคลาส Discount
         BigDecimal discountValue = discount.getDiscountValue();
         
         BigDecimal newPrice = originalPrice.subtract(discountValue);
-        
-        // ตรวจสอบว่าราคาใหม่ไม่ติดลบ
         if (newPrice.compareTo(BigDecimal.ZERO) < 0) {
             newPrice = BigDecimal.ZERO;
         }
         
         booking.setTotalPrice(newPrice);
-        
-        // เพิ่มส่วนลดลงในการจอง
         booking.getDiscounts().add(discount);
         
         return bookingRepository.save(booking);
@@ -365,20 +327,19 @@ public class BookingService {
         logger.debug("ดึงข้อมูลผู้โดยสารในการจอง ID: {}", bookingId);
         Booking booking = getBookingById(bookingId);
         
-        // ใช้ passengerRepository เพื่อหลีกเลี่ยงคำเตือน "not used"
-        if (passengerRepository != null) {
-            // อาจจะใช้ passengerRepository.findByBookingId(bookingId) ถ้ามีเมธอดนี้
-            logger.debug("ใช้ passengerRepository เพื่อดึงผู้โดยสารจากการจอง");
-        }
-        
         if (booking.getPassengers() == null || booking.getPassengers().isEmpty()) {
             logger.warn("ไม่พบข้อมูลผู้โดยสารในการจอง ID: {}", bookingId);
             return new ArrayList<>();
         }
         
-        // แปลง Set<Passenger> เป็น List<Passenger>
         return new ArrayList<>(booking.getPassengers());
     }
+
+    // ค้นหาการจองล่าสุดโดยผู้ใช้และเที่ยวบิน
+    public List<Booking> findRecentBookings(String userId, String flightId, LocalDate bookingDate) {
+        return bookingRepository.findByUserUserIdAndFlightFlightIdAndBookingDateOrderByBookingIdDesc(
+            userId, flightId, bookingDate);
+    }    
     
     // ตรวจสอบสถานะการชำระเงิน
     public Map<String, Object> getBookingPaymentStatus(String bookingId) {
@@ -390,25 +351,17 @@ public class BookingService {
         result.put("totalPrice", booking.getTotalPrice());
         result.put("bookingStatus", booking.getBookingStatus());
         
-        // ดึงข้อมูลการชำระเงินจากระบบ Payment
         List<Payment> payments = new ArrayList<>();
         if (booking.getPayment() != null) {
             payments.add(booking.getPayment());
         } else {
-            // แก้ไขตรงนี้: เพิ่มการ import java.util.Optional
             try {
-                // ถ้า findByBooking คืนค่าเป็น Optional<Payment>
                 Optional<Payment> paymentOptional = paymentRepository.findByBooking(booking);
                 if (paymentOptional.isPresent()) {
                     payments.add(paymentOptional.get());
                 }
-                
-                // หรือถ้าคุณมีเมธอดที่คืนค่าเป็น List<Payment> โดยตรง ใช้แบบนี้:
-                // payments = paymentRepository.findAllByBooking(booking);
-                
             } catch (Exception e) {
                 logger.error("เกิดข้อผิดพลาดในการดึงข้อมูลการชำระเงิน: {}", e.getMessage());
-                // ใช้รายการว่างถ้าเกิดข้อผิดพลาด
             }
         }
         
@@ -416,7 +369,6 @@ public class BookingService {
             result.put("isPaid", false);
             result.put("payments", new ArrayList<>());
         } else {
-            // คำนวณยอดชำระเงินทั้งหมด
             BigDecimal totalPaid = BigDecimal.ZERO;
             for (Payment payment : payments) {
                 if ("Completed".equals(payment.getPaymentStatus())) {
@@ -424,9 +376,7 @@ public class BookingService {
                 }
             }
             
-            // ตรวจสอบว่าชำระเงินครบหรือไม่
             boolean isPaid = totalPaid.compareTo(booking.getTotalPrice()) >= 0;
-            
             result.put("isPaid", isPaid);
             result.put("totalPaid", totalPaid);
             result.put("payments", payments);
@@ -439,8 +389,6 @@ public class BookingService {
     public BigDecimal calculateTotalPrice(String bookingId) {
         logger.debug("คำนวณราคารวมสำหรับการจอง ID: {}", bookingId);
         Booking booking = getBookingById(bookingId);
-        
-        // ตรงนี้อาจจะมีการคำนวณราคาที่ซับซ้อนขึ้น เช่น ดึงข้อมูลที่นั่ง ส่วนลด ฯลฯ
         return booking.getTotalPrice();
     }
     

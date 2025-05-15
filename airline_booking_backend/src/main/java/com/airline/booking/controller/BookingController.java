@@ -4,6 +4,8 @@ import com.airline.booking.dto.BookingDTO;
 import com.airline.booking.model.Booking;
 import com.airline.booking.model.Passenger;
 import com.airline.booking.model.Payment;
+import com.airline.booking.model.Seat;
+import com.airline.booking.repository.SeatRepository;
 import com.airline.booking.service.BookingService;
 import com.airline.booking.exception.ResourceNotFoundException;
 
@@ -15,12 +17,15 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @RestController
@@ -155,46 +160,67 @@ public class BookingController {
 
     @PostMapping
     public ResponseEntity<?> createBooking(
-            @RequestBody BookingDTO bookingDTO,
-            @RequestParam(required = false) String userId,
-            @RequestParam(required = false) String flightId) {
-        try {
-            logger.debug("เริ่มการสร้างการจองใหม่");
+        @RequestBody BookingDTO bookingDTO,
+        @RequestParam(required = false) String userId,
+        @RequestParam(required = false) String flightId) {
+    try {
+        logger.debug("เริ่มการสร้างการจองใหม่");
+        
+        if (bookingDTO == null) {
+            Map<String, String> error = new HashMap<>();
+            error.put("message", "ข้อมูลการจองไม่ถูกต้อง");
+            return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+        }
+        
+        // Set userId and flightId from query parameters if provided
+        if (userId != null && !userId.isEmpty()) {
+            bookingDTO.setUserId(userId);
+            logger.debug("กำหนด userId จาก query parameter: {}", userId);
+        }
+        
+        if (flightId != null && !flightId.isEmpty()) {
+            bookingDTO.setFlightId(flightId);
+            logger.debug("กำหนด flightId จาก query parameter: {}", flightId);
+        }
+        
+        // เพิ่มการตรวจสอบการจองซ้ำ - ตรวจสอบว่ามีการจองเที่ยวบินนี้โดยผู้ใช้นี้ในเวลาใกล้เคียงกันหรือไม่
+        String actualUserId = bookingDTO.getUserId();
+        String actualFlightId = bookingDTO.getFlightId();
+        
+        if (actualUserId != null && actualFlightId != null) {
+            // ตรวจสอบการจองในช่วง 5 นาทีที่ผ่านมา
+            LocalDateTime fiveMinutesAgo = LocalDateTime.now().minusMinutes(5);
+            List<Booking> recentBookings = bookingService.findRecentBookings(
+                actualUserId, actualFlightId, fiveMinutesAgo.toLocalDate());
             
-            if (bookingDTO == null) {
-                Map<String, String> error = new HashMap<>();
-                error.put("message", "ข้อมูลการจองไม่ถูกต้อง");
-                return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+            if (!recentBookings.isEmpty()) {
+                logger.warn("พบการจองซ้ำสำหรับ userId: {} และ flightId: {}", actualUserId, actualFlightId);
+                
+                // ส่งคืนข้อมูลการจองที่มีอยู่แล้ว
+                BookingDTO existingBookingDTO = convertToDTO(recentBookings.get(0));
+                Map<String, Object> response = new HashMap<>();
+                response.put("message", "คุณได้ทำการจองเที่ยวบินนี้ไปแล้ว");
+                response.put("booking", existingBookingDTO);
+                return new ResponseEntity<>(existingBookingDTO, HttpStatus.OK);
             }
-            
-            // Set userId and flightId from query parameters if provided
-            if (userId != null && !userId.isEmpty()) {
-                bookingDTO.setUserId(userId);
-                logger.debug("กำหนด userId จาก query parameter: {}", userId);
-            }
-            
-            if (flightId != null && !flightId.isEmpty()) {
-                bookingDTO.setFlightId(flightId);
-                logger.debug("กำหนด flightId จาก query parameter: {}", flightId);
-            }
-            
-            // Convert DTO to entity
-            Booking booking = convertDTOToBooking(bookingDTO);
-            
-            // Get actual values for userId and flightId
-            String actualUserId = bookingDTO.getUserId();
-            String actualFlightId = bookingDTO.getFlightId();
-            
-            logger.debug("สร้างการจองด้วย userId: {} และ flightId: {}", actualUserId, actualFlightId);
-            
-            // Create booking through service
-            Booking newBooking = bookingService.createBooking(booking, actualUserId, actualFlightId);
-            
-            // Convert back to DTO for response
-            BookingDTO responseDTO = convertToDTO(newBooking);
-            
-            logger.debug("สร้างการจองใหม่สำเร็จ: {}", newBooking);
-            return new ResponseEntity<>(responseDTO, HttpStatus.CREATED);
+        }
+        
+        // ตั้งค่าสถานะเป็น "Confirmed" ทันที
+        bookingDTO.setBookingStatus("Confirmed");
+        
+        // Convert DTO to entity
+        Booking booking = convertDTOToBooking(bookingDTO);
+        
+        logger.debug("สร้างการจองด้วย userId: {} และ flightId: {}", actualUserId, actualFlightId);
+        
+        // Create booking through service
+        Booking newBooking = bookingService.createBooking(booking, actualUserId, actualFlightId);
+        
+        // Convert back to DTO for response
+        BookingDTO responseDTO = convertToDTO(newBooking);
+        
+        logger.debug("สร้างการจองใหม่สำเร็จ: {}", newBooking);
+        return new ResponseEntity<>(responseDTO, HttpStatus.CREATED);
         } catch (ResourceNotFoundException e) {
             logger.error("ไม่พบทรัพยากรที่จำเป็น: {}", e.getMessage(), e);
             Map<String, String> error = new HashMap<>();
@@ -262,35 +288,39 @@ public class BookingController {
         return booking;
     }
     
+    @Autowired
+    private SeatRepository seatRepository;
+
     private Passenger convertPassengerDTOToEntity(BookingDTO.PassengerDTO dto) {
         if (dto == null) return null;
-        
+
         Passenger passenger = new Passenger();
         passenger.setPassengerId(dto.getPassengerId());
         passenger.setFirstName(dto.getFirstName());
         passenger.setLastName(dto.getLastName());
-        
-        // Convert date of birth
+
         if (dto.getDateOfBirth() != null && !dto.getDateOfBirth().isEmpty()) {
             try {
                 passenger.setDateOfBirth(LocalDate.parse(dto.getDateOfBirth()));
             } catch (Exception e) {
-                logger.warn("Invalid date format for date of birth: {}", dto.getDateOfBirth());
-                // Use a default date or set to null
+                // handle exception
             }
         }
-        
-        // Use passport number for document ID
         passenger.setPassportNumber(dto.getDocumentId());
-        
-        // Additional fields (if they exist in your Passenger entity)
-        // passenger.setTitle(dto.getTitle());
-        // passenger.setNationality(dto.getNationality());
-        // passenger.setSeatNumber(dto.getSeatNumber());
-        // passenger.setSpecialService(dto.getSpecialService());
-        
+
+        // --- เพิ่มโค้ดนี้ ---
+        if (dto.getSeatId() != null && !dto.getSeatId().isEmpty()) {
+            Seat seat = seatRepository.findById(dto.getSeatId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Seat not found with ID: " + dto.getSeatId()));
+            passenger.setSeat(seat);
+        } else {
+            passenger.setSeat(null);
+        }
+        // -----------------
+
         return passenger;
     }
+
     
     private Payment convertPaymentDTOToEntity(BookingDTO.PaymentDTO dto) {
         if (dto == null) return null;
@@ -569,8 +599,9 @@ public class BookingController {
        
        return dto;
    }
-   
-   private BookingDTO.PassengerDTO convertPassengerToDTO(Passenger passenger) {
+
+// แก้ไขให้มี method นี้แค่ครั้งเดียว
+private BookingDTO.PassengerDTO convertPassengerToDTO(Passenger passenger) {
     if (passenger == null) {
         return null;
     }
@@ -580,24 +611,28 @@ public class BookingController {
     dto.setFirstName(passenger.getFirstName());
     dto.setLastName(passenger.getLastName());
     
-    // Convert date of birth to string format
     if (passenger.getDateOfBirth() != null) {
         dto.setDateOfBirth(passenger.getDateOfBirth().toString());
     }
     
-    // Use passport number instead of document ID
     dto.setDocumentId(passenger.getPassportNumber());
     
-    // These fields don't exist in your Passenger entity
-    // Let's set them to null or default values
+    if (passenger.getSeat() != null) {
+        dto.setSeatNumber(passenger.getSeat().getSeatNumber());
+        dto.setSeatId(passenger.getSeat().getSeatId());
+    } else {
+        dto.setSeatNumber(null);
+        dto.setSeatId(null);
+    }
+    
     dto.setTitle(null);
     dto.setNationality(null);
-    dto.setSeatNumber(null);
     dto.setSpecialService(null);
     
     return dto;
 }
 
+// เพิ่ม method convertPaymentToDTO ให้มีอยู่ในคลาส BookingController
 private BookingDTO.PaymentDTO convertPaymentToDTO(Payment payment) {
     if (payment == null) {
         return null;
@@ -607,16 +642,13 @@ private BookingDTO.PaymentDTO convertPaymentToDTO(Payment payment) {
     dto.setPaymentId(payment.getPaymentId());
     dto.setAmount(payment.getAmount());
     dto.setPaymentStatus(payment.getPaymentStatus());
+    dto.setPaymentMethod(payment.getPaymentMethod() != null ? payment.getPaymentMethod() : "Online Payment");
     
-    // Set payment method
-    dto.setPaymentMethod(payment.getPaymentMethod() != null ? 
-        payment.getPaymentMethod() : "Online Payment");
-    
-    // Convert payment date to string format
     if (payment.getPaymentDate() != null) {
         dto.setPaymentDate(payment.getPaymentDate().toString());
     }
     
     return dto;
 }
+
 }

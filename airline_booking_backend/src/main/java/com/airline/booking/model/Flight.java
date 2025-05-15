@@ -8,6 +8,7 @@ import javax.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 @Entity
@@ -40,7 +41,6 @@ public class Flight {
     @Column(name = "FlightStatus", length = 20)
     private String flightStatus;
 
-    // Relationships - ใช้ JsonIgnore เพื่อป้องกัน infinite recursion
     @JsonManagedReference
     @OneToMany(mappedBy = "flight", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Set<Booking> bookings = new HashSet<>();
@@ -49,12 +49,11 @@ public class Flight {
     @OneToMany(mappedBy = "flight", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Set<Seat> seats = new HashSet<>();
 
-    // Constructors
     public Flight() {
     }
 
     public Flight(String flightId, String flightNumber, String departureCity, String arrivalCity,
-                 LocalDateTime departureTime, LocalDateTime arrivalTime, String aircraft, String flightStatus) {
+                  LocalDateTime departureTime, LocalDateTime arrivalTime, String aircraft, String flightStatus) {
         this.flightId = flightId;
         this.flightNumber = flightNumber;
         this.departureCity = departureCity;
@@ -65,7 +64,8 @@ public class Flight {
         this.flightStatus = flightStatus;
     }
 
-    // Getters and Setters
+    // Getters and setters
+
     public String getFlightId() {
         return flightId;
     }
@@ -146,37 +146,52 @@ public class Flight {
         this.seats = seats;
     }
 
-    // Helper methods
+    // Helper methods to manage bi-directional relationships
+
     public void addBooking(Booking booking) {
-        this.bookings.add(booking);
+        bookings.add(booking);
         booking.setFlight(this);
     }
 
     public void removeBooking(Booking booking) {
-        this.bookings.remove(booking);
+        bookings.remove(booking);
         booking.setFlight(null);
     }
 
     public void addSeat(Seat seat) {
-        this.seats.add(seat);
+        seats.add(seat);
         seat.setFlight(this);
     }
 
     public void removeSeat(Seat seat) {
-        this.seats.remove(seat);
+        seats.remove(seat);
         seat.setFlight(null);
     }
-    
-    // เพิ่มเมธอดเพื่อคำนวณราคาเริ่มต้น
+
+    // Business methods
+
     public BigDecimal getBasePrice() {
         if (seats == null || seats.isEmpty()) {
             return new BigDecimal("1290");
         }
-        
         return seats.stream()
                 .map(Seat::getPrice)
                 .min(BigDecimal::compareTo)
                 .orElse(new BigDecimal("1290"));
+    }
+
+    public long getDurationMinutes() {
+        if (departureTime == null || arrivalTime == null) {
+            return 0;
+        }
+        return java.time.Duration.between(departureTime, arrivalTime).toMinutes();
+    }
+
+    public String getFormattedDuration() {
+        long minutes = getDurationMinutes();
+        long hours = minutes / 60;
+        long remainingMinutes = minutes % 60;
+        return hours + "h " + remainingMinutes + "m";
     }
 
     @Override
@@ -192,21 +207,19 @@ public class Flight {
                 ", flightStatus='" + flightStatus + '\'' +
                 '}';
     }
-    
-    // เพิ่มเมธอดเพื่อคำนวณระยะเวลาเดินทาง
-    public long getDurationMinutes() {
-        if (departureTime == null || arrivalTime == null) {
-            return 0;
-        }
-        
-        return java.time.Duration.between(departureTime, arrivalTime).toMinutes();
+
+    // equals and hashCode based on flightId
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Flight)) return false;
+        Flight flight = (Flight) o;
+        return Objects.equals(flightId, flight.flightId);
     }
-    
-    public String getFormattedDuration() {
-        long minutes = getDurationMinutes();
-        long hours = minutes / 60;
-        long remainingMinutes = minutes % 60;
-        
-        return hours + "h " + remainingMinutes + "m";
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(flightId);
     }
 }

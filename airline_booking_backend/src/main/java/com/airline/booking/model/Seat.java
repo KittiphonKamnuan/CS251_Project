@@ -1,5 +1,7 @@
 package com.airline.booking.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import javax.persistence.*;
 import java.math.BigDecimal;
 
@@ -11,8 +13,9 @@ public class Seat {
     @Column(name = "SeatID", length = 10)
     private String seatId;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "FlightID", referencedColumnName = "FlightID")
+    @JsonBackReference
     private Flight flight;
 
     @Column(name = "SeatNumber", length = 5)
@@ -31,8 +34,8 @@ public class Seat {
     public Seat() {
     }
 
-    public Seat(String seatId, Flight flight, String seatNumber, String seatClass, 
-               String seatStatus, BigDecimal price) {
+    public Seat(String seatId, Flight flight, String seatNumber, String seatClass,
+                String seatStatus, BigDecimal price) {
         this.seatId = seatId;
         this.flight = flight;
         this.seatNumber = seatNumber;
@@ -94,7 +97,7 @@ public class Seat {
     public String getFlightId() {
         return flight != null ? flight.getFlightId() : null;
     }
-    
+
     public String getFlightNumber() {
         return flight != null ? flight.getFlightNumber() : null;
     }

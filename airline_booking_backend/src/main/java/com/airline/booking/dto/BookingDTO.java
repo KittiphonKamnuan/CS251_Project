@@ -132,6 +132,7 @@ public class BookingDTO {
         private String nationality;
         private String documentId;
         private String seatNumber;
+        private String seatId;       // <-- เพิ่มฟิลด์ seatId
         private String specialService;
 
         public PassengerDTO() {}
@@ -205,6 +206,14 @@ public class BookingDTO {
 
         public void setSeatNumber(String seatNumber) {
             this.seatNumber = seatNumber;
+        }
+
+        public String getSeatId() {
+            return seatId;
+        }
+
+        public void setSeatId(String seatId) {
+            this.seatId = seatId;
         }
 
         public String getSpecialService() {

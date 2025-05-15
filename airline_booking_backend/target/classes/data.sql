@@ -111,28 +111,6 @@ INSERT INTO Booking (BookingID, UserID, FlightID, BookingDate, BookingStatus, To
 ('BK10003', 'U0004', 'F0013', '2025-05-03', 'Pending', 1290.00),
 ('BK10004', 'U0005', 'F0021', '2025-05-04', 'Confirmed', 7000.00);
 
--- เพิ่มข้อมูลผู้โดยสาร (Passengers)
-INSERT INTO Passenger (PassengerID, BookingID, FirstName, LastName, DateOfBirth, PassportNumber) VALUES
-('P10001', 'BK10001', 'สมศักดิ์', 'สมบูรณ์', '1980-05-15', 'AB1234567'),
-('P10002', 'BK10002', 'สมชาย', 'รักเดินทาง', '1985-07-22', 'CD7654321'),
-('P10003', 'BK10002', 'สมหญิง', 'รักเดินทาง', '1987-03-12', 'EF9876543'),
-('P10004', 'BK10003', 'วนิดา', 'ใจดี', '1990-11-08', 'GH6543210'),
-('P10005', 'BK10004', 'ปราณี', 'มีสุข', '1978-01-30', 'IJ2468135'),
-('P10006', 'BK10004', 'สมชาติ', 'มีสุข', '1975-09-25', 'KL1357924');
-
--- เพิ่มข้อมูลการชำระเงิน (Payments)
-INSERT INTO Payment (PaymentID, BookingID, Amount, PaymentStatus, PaymentDate) VALUES
-('PAY10001', 'BK10001', 1290.00, 'Completed', '2025-05-01'),
-('PAY10002', 'BK10002', 3580.00, 'Completed', '2025-05-02'),
-('PAY10003', 'BK10004', 7000.00, 'Completed', '2025-05-04');
-
--- เพิ่มข้อมูล LoyaltyPoints
-INSERT INTO LoyaltyPoints (LoyaltyID, UserID, PointsBalance, PointsExpiryDate) VALUES
-('LP10001', 'U0002', 500, '2026-05-01'),
-('LP10002', 'U0003', 1000, '2026-05-02'),
-('LP10003', 'U0004', 200, '2026-05-03'),
-('LP10004', 'U0005', 1500, '2026-05-04');
-
 -- เพิ่มข้อมูลส่วนลด (Discounts)
 INSERT INTO Discount (DiscountID, PointRequired, DiscountValue, ExpiryDate) VALUES
 ('DIS10001', 500, 300.00, '2025-12-31'),
