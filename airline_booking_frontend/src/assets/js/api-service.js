@@ -417,6 +417,40 @@ async request(endpoint, method = 'GET', data = null) {
     return this.request(`/loyalty-points/user/${userId}`);
   }
   
+  // Add loyalty points to user
+  async addLoyaltyPoints(userId, points, bookingId) {
+    console.log('API Service - Adding loyalty points:', points, 'for user:', userId, 'booking:', bookingId);
+    return this.request('/loyalty-points', 'POST', {
+      userId,
+      points,
+      bookingId,
+      earnedDate: new Date().toISOString().split('T')[0],
+      description: `Points earned from booking #${bookingId}`
+    });
+  }
+  
+  // Use loyalty points for a discount
+  async useLoyaltyPoints(userId, points, bookingId) {
+    console.log('API Service - Using loyalty points:', points, 'for user:', userId, 'booking:', bookingId);
+    return this.request('/loyalty-points/use', 'POST', {
+      userId,
+      points,
+      bookingId,
+      usedDate: new Date().toISOString().split('T')[0],
+      description: `Points used for discount on booking #${bookingId}`
+    });
+  }
+  
+  // Get loyalty points history for user
+  async getLoyaltyPointsHistory(userId) {
+    return this.request(`/loyalty-points/history/${userId}`);
+  }
+  
+  // Get loyalty points balance for user
+  async getLoyaltyPointsBalance(userId) {
+    return this.request(`/loyalty-points/balance/${userId}`);
+  }
+  
   // Get available discounts for points
   async getAvailableDiscounts(points) {
     return this.request(`/discounts/available?points=${points}`);

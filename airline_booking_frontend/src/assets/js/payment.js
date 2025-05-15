@@ -28,6 +28,8 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Booking info
     let bookingInfo = null;
+    // Loyalty points ที่จะได้รับ
+    let loyaltyPointsEarned = 0;
     
     // Setup payment tabs
     setupPaymentTabs();
@@ -105,6 +107,10 @@ document.addEventListener('DOMContentLoaded', function() {
             showLoadingState();
             const booking = await apiService.getBookingById(bookingId);
             bookingInfo = booking;
+            // คำนวณ loyalty points
+            if (bookingInfo && bookingInfo.totalPrice) {
+                loyaltyPointsEarned = Math.floor(bookingInfo.totalPrice / 10);
+            }
             updateBookingSummary(booking);
             hideLoadingState();
         } catch (error) {
@@ -137,6 +143,12 @@ document.addEventListener('DOMContentLoaded', function() {
                         (passengerInfo.additionalCost || 0)
         };
         bookingInfo = summaryData;
+        
+        // คำนวณ loyalty points
+        if (bookingInfo.totalPrice) {
+            loyaltyPointsEarned = Math.floor(bookingInfo.totalPrice / 10);
+        }
+        
         updateBookingSummary(summaryData);
     }
     
@@ -213,12 +225,13 @@ document.addEventListener('DOMContentLoaded', function() {
         if (userData && data.totalPrice) {
             try {
                 const user = JSON.parse(userData);
-                const pointsEarned = Math.floor(data.totalPrice / 10);
+                // คำนวณคะแนนสะสม
+                loyaltyPointsEarned = Math.floor(data.totalPrice / 10);
                 const loyaltyPointsSection = document.getElementById('loyaltyPointsSection');
                 const loyaltyPointsInfo = document.getElementById('loyaltyPointsInfo');
                 if (loyaltyPointsSection && loyaltyPointsInfo) {
                     loyaltyPointsSection.style.display = 'block';
-                    loyaltyPointsInfo.textContent = `คุณจะได้รับ ${pointsEarned} คะแนนเมื่อการจองเสร็จสมบูรณ์`;
+                    loyaltyPointsInfo.textContent = `คุณจะได้รับ ${loyaltyPointsEarned} คะแนนเมื่อการจองเสร็จสมบูรณ์`;
                 }
             } catch (error) {
                 console.error('Error parsing user data:', error);
@@ -279,6 +292,20 @@ document.addEventListener('DOMContentLoaded', function() {
             showLoadingState();
             
             try {
+                // เตรียมข้อมูลผู้ใช้
+                let userId = null;
+                const userData = localStorage.getItem('userData');
+                
+                if (userData) {
+                    try {
+                        const user = JSON.parse(userData);
+                        userId = user.userId;
+                        console.log('User logged in with ID:', userId);
+                    } catch (error) {
+                        console.error('Error parsing user data:', error);
+                    }
+                }
+                
                 if (bookingId) {
                     // Update payment for existing booking
                     const paymentData = {
@@ -286,7 +313,9 @@ document.addEventListener('DOMContentLoaded', function() {
                         paymentMethod,
                         amount: bookingInfo.totalPrice,
                         paymentStatus: 'Completed',
-                        paymentDate: new Date().toISOString().split('T')[0]
+                        paymentDate: new Date().toISOString().split('T')[0],
+                        // เพิ่มข้อมูล loyalty points
+                        loyaltyPointsEarned: loyaltyPointsEarned
                     };
                     
                     if (paymentMethod === 'credit-card') {
@@ -299,23 +328,22 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
                     
                     await apiService.createPayment(bookingId, paymentData);
+                    
+                    // เพิ่มคะแนนสะสมให้ผู้ใช้
+                    if (userId && loyaltyPointsEarned > 0) {
+                        try {
+                            await apiService.addLoyaltyPoints(userId, loyaltyPointsEarned, bookingId);
+                            console.log('Loyalty points added successfully:', loyaltyPointsEarned);
+                        } catch (loyaltyError) {
+                            console.error('Error adding loyalty points:', loyaltyError);
+                            // ไม่หยุดการทำงานเมื่อมีปัญหากับการเพิ่มคะแนนสะสม
+                        }
+                    }
+                    
                     await apiService.updateBookingStatus(bookingId, 'Confirmed');
                     window.location.href = `confirmation.html?bookingId=${bookingId}`;
                 } else if (bookingInfo && selectedFlightData && passengerInfo) {
                     // Check logged-in user
-                    const userData = localStorage.getItem('userData');
-                    let userId = null;
-                    if (userData) {
-                        try {
-                            const user = JSON.parse(userData);
-                            userId = user.userId;
-                            console.log('User logged in with ID:', userId);
-                        } catch (error) {
-                            console.error('Error parsing user data:', error);
-                        }
-                    }
-                    
-                    // Redirect login if not logged in
                     if (!userId) {
                         sessionStorage.setItem('pendingBooking', JSON.stringify({
                             flight: selectedFlightData,
@@ -340,7 +368,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         nationality: p.nationality || 'TH',
                         documentId: p.documentId || '',
                         seatNumber: selectedSeats[index]?.seatNumber || null,
-                        seatId: selectedSeats[index]?.seatId || null,     // ✅ สำคัญ ต้องเพิ่มตรงนี้
+                        seatId: selectedSeats[index]?.seatId || null,
                         specialService: p.specialService || ''
                     }));                    
 
@@ -353,7 +381,9 @@ document.addEventListener('DOMContentLoaded', function() {
                         additionalServices: bookingInfo.additionalServices,
                         contactEmail: passengerInfo.contact?.email || '',
                         contactPhone: passengerInfo.contact?.phone || '',
-                        passengers: passengersData
+                        passengers: passengersData,
+                        // เพิ่มข้อมูล loyalty points
+                        loyaltyPointsEarned: loyaltyPointsEarned
                     };
 
                     
@@ -373,7 +403,9 @@ document.addEventListener('DOMContentLoaded', function() {
                         paymentMethod,
                         amount: bookingInfo.totalPrice || 0,
                         paymentStatus: 'Completed',
-                        paymentDate: formattedDate
+                        paymentDate: formattedDate,
+                        // เพิ่มข้อมูล loyalty points
+                        loyaltyPointsEarned: loyaltyPointsEarned
                     };
                     
                     if (paymentMethod === 'credit-card') {
@@ -387,6 +419,17 @@ document.addEventListener('DOMContentLoaded', function() {
                     
                     console.log('Creating payment with data:', paymentData);
                     await apiService.createPayment(booking.bookingId, paymentData);
+                    
+                    // เพิ่มคะแนนสะสมให้ผู้ใช้
+                    if (userId && loyaltyPointsEarned > 0) {
+                        try {
+                            await apiService.addLoyaltyPoints(userId, loyaltyPointsEarned, booking.bookingId);
+                            console.log('Loyalty points added successfully:', loyaltyPointsEarned);
+                        } catch (loyaltyError) {
+                            console.error('Error adding loyalty points:', loyaltyError);
+                            // ไม่หยุดการทำงานเมื่อมีปัญหากับการเพิ่มคะแนนสะสม
+                        }
+                    }
                     
                     console.log('Updating booking status to Confirmed');
                     await apiService.updateBookingStatus(booking.bookingId, 'Confirmed');
@@ -518,6 +561,15 @@ document.addEventListener('DOMContentLoaded', function() {
                     
                     bookingInfo.discount = discount;
                     bookingInfo.totalPrice = newTotal;
+                    
+                    // อัพเดทคะแนนสะสมตามราคาใหม่
+                    loyaltyPointsEarned = Math.floor(newTotal / 10);
+                    
+                    // อัพเดทข้อความแสดงคะแนนสะสม
+                    const loyaltyPointsInfo = document.getElementById('loyaltyPointsInfo');
+                    if (loyaltyPointsInfo) {
+                        loyaltyPointsInfo.textContent = `คุณจะได้รับ ${loyaltyPointsEarned} คะแนนเมื่อการจองเสร็จสมบูรณ์`;
+                    }
                 }
                 alert('ใช้รหัสส่วนลดสำเร็จ! คุณได้รับส่วนลด 10%');
                 discountInput.disabled = true;
