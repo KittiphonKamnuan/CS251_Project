@@ -381,7 +381,7 @@ function enhanceFormFields() {
         .form-group input,
         .form-group select,
         .form-group textarea {
-            padding: 1rem;
+            padding: 2;
         }
         
         .required-field label:after {

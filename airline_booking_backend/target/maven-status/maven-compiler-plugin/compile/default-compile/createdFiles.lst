@@ -20,6 +20,7 @@ com/airline/booking/model/Booking.class
 com/airline/booking/controller/SeatController.class
 com/airline/booking/model/Passenger.class
 com/airline/booking/repository/BookingRepository.class
+com/airline/booking/controller/LoyaltyPointsController.class
 com/airline/booking/Application.class
 com/airline/booking/repository/FlightRepository.class
 com/airline/booking/controller/FlightController.class

@@ -12,8 +12,13 @@ public class LoyaltyPoints {
     private String loyaltyId;
 
     @ManyToOne
-    @JoinColumn(name = "BookingID", referencedColumnName = "BookingID")
-    private Booking booking;
+    @JoinColumn(name = "UserID", referencedColumnName = "UserID", nullable = false)
+    private User user;
+
+    // This should match your actual database schema
+    // Note: There is no BookingID in your actual database schema
+    @Column(name = "UserID", insertable = false, updatable = false)
+    private String userId;
 
     @Column(name = "PointsBalance")
     private Integer pointsBalance;
@@ -25,11 +30,14 @@ public class LoyaltyPoints {
     public LoyaltyPoints() {
     }
 
-    public LoyaltyPoints(String loyaltyId, Booking booking, Integer pointsBalance, LocalDate pointsExpiryDate) {
+    public LoyaltyPoints(String loyaltyId, User user, Integer pointsBalance, LocalDate pointsExpiryDate) {
         this.loyaltyId = loyaltyId;
-        this.booking = booking;
+        this.user = user;
         this.pointsBalance = pointsBalance;
         this.pointsExpiryDate = pointsExpiryDate;
+        if (user != null) {
+            this.userId = user.getUserId();
+        }
     }
 
     // Getters and Setters
@@ -41,12 +49,23 @@ public class LoyaltyPoints {
         this.loyaltyId = loyaltyId;
     }
 
-    public Booking getBooking() {
-        return booking;
+    public User getUser() {
+        return user;
     }
 
-    public void setBooking(Booking booking) {
-        this.booking = booking;
+    public void setUser(User user) {
+        this.user = user;
+        if (user != null) {
+            this.userId = user.getUserId();
+        }
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 
     public Integer getPointsBalance() {
@@ -65,11 +84,28 @@ public class LoyaltyPoints {
         this.pointsExpiryDate = pointsExpiryDate;
     }
 
+    // Helper method to add points
+    public void addPoints(Integer points) {
+        if (this.pointsBalance == null) {
+            this.pointsBalance = 0;
+        }
+        this.pointsBalance += points;
+    }
+
+    // Helper method to use points
+    public boolean usePoints(Integer points) {
+        if (this.pointsBalance == null || this.pointsBalance < points) {
+            return false;
+        }
+        this.pointsBalance -= points;
+        return true;
+    }
+
     @Override
     public String toString() {
         return "LoyaltyPoints{" +
                 "loyaltyId='" + loyaltyId + '\'' +
-                ", bookingId='" + (booking != null ? booking.getBookingId() : "null") + '\'' +
+                ", userId='" + userId + '\'' +
                 ", pointsBalance=" + pointsBalance +
                 ", pointsExpiryDate=" + pointsExpiryDate +
                 '}';
