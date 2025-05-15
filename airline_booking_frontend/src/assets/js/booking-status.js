@@ -247,7 +247,8 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
     }
-    
+    JSON.parse(localStorage.getItem('userData'));
+
     /**
      * Load user bookings from API
      */
