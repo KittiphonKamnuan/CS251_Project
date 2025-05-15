@@ -355,7 +355,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             
             if (!acceptPolicy?.checked) {
-                alert('กรุณายอมรับนโยบายความเป็นส่วนตัวของ Skyways Airlines');
+                alert('กรุณายอมรับนโยบายความเป็นส่วนตัวของ SkyBooking');
                 return;
             }
             

@@ -256,7 +256,7 @@ function ensureHTMLStructure() {
                         </div>
                     </div>
                     <h1>การจองสำเร็จ!</h1>
-                    <p>ขอบคุณที่ใช้บริการ Skyways Airlines</p>
+                    <p>ขอบคุณที่ใช้บริการ SkyBooking</p>
                     <div class="booking-reference">
                         <span>รหัสการจอง:</span>
                         <strong id="bookingReference">BK48533750</strong>
@@ -291,9 +291,9 @@ function ensureHTMLStructure() {
                             
                             <div class="flight-details-card">
                                 <div class="airline-info">
-                                    <img src="../assets/images/icons/airplane.png" alt="Skyways Airlines" class="airline-logo">
+                                    <img src="../assets/images/icons/airplane.png" alt="SkyBooking" class="airline-logo">
                                     <div>
-                                        <div class="airline-name" id="airlineName">Skyways Airlines</div>
+                                        <div class="airline-name" id="airlineName">SkyBooking</div>
                                         <div class="flight-number" id="flightNumber">SK102</div>
                                     </div>
                                 </div>
