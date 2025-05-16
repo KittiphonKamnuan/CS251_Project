@@ -7,12 +7,20 @@ import com.airline.booking.exception.ResourceNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 @Service
 public class UserService {
@@ -21,7 +29,28 @@ public class UserService {
 
     @Autowired
     private UserRepository userRepository;
-    
+
+    public long countUsers() {
+        return userRepository.count();
+    }
+
+    public List<User> getRecentUsersByUserID() {
+        return userRepository.findTop5ByOrderByUserIdDesc();
+    }
+
+    public List<User> getUsersByRole(String role) {
+        return userRepository.findByRole(role); // Assuming you have a UserRepository with this method
+    }
+
+    public List<User> searchUsers(String term) {
+        return userRepository.findByUsernameContainingIgnoreCaseOrEmailContainingIgnoreCase(term, term);
+    }
+
+    public List<User> getUsersWithPagination(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return userRepository.findAll(pageable).getContent();
+    }
+
     // เพิ่ม Map เพื่อติดตามความพยายามเข้าสู่ระบบ
     private Map<String, Integer> loginAttempts = new HashMap<>();
     private Map<String, Long> lockoutTime = new HashMap<>();

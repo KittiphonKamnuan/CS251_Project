@@ -1,5 +1,6 @@
 com/airline/booking/model/LoyaltyPoints.class
 com/airline/booking/controller/BookingController.class
+com/airline/booking/service/Pageable.class
 com/airline/booking/controller/PaymentController.class
 com/airline/booking/controller/PassengerController.class
 com/airline/booking/repository/DiscountRepository.class
@@ -21,6 +22,7 @@ com/airline/booking/controller/UtilityController.class
 com/airline/booking/controller/DiscountController.class
 com/airline/booking/dto/BookingDTO$PaymentDTO.class
 com/airline/booking/repository/SeatRepository.class
+com/airline/booking/config/CorsConfig.class
 com/airline/booking/service/SeatService.class
 com/airline/booking/service/PassengerService.class
 com/airline/booking/repository/UserRepository.class
@@ -41,5 +43,8 @@ com/airline/booking/dto/FlightSearchResponse.class
 com/airline/booking/service/BookingService.class
 com/airline/booking/service/FlightService.class
 com/airline/booking/config/WebMvcConfig.class
+com/airline/booking/service/PaymentService.class
+com/airline/booking/controller/AdminController.class
 com/airline/booking/dto/DiscountDTO.class
+com/airline/booking/dto/AdminDTO.class
 com/airline/booking/config/DatabaseInitializer.class

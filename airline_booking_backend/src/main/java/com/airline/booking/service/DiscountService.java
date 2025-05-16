@@ -27,6 +27,10 @@ public class DiscountService {
     @Autowired
     private DiscountRepository discountRepository;
     
+    public long countAllDiscounts() {
+        return discountRepository.count();
+    }    
+    
     @Autowired
     private BookingRepository bookingRepository;
 

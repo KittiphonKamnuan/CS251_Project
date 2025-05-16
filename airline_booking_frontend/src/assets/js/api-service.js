@@ -15,6 +15,8 @@ class ApiService {
   clearToken() {
     this.token = null;
     localStorage.removeItem('authToken');
+    localStorage.removeItem('userData');
+    window.location.href = 'login.html';
   }
 
   // Get token from local storage
@@ -22,9 +24,16 @@ class ApiService {
     return this.token;
   }
 
+  // Logout method
+  logout() {
+    this.clearToken();
+  }
+
+  // Get headers with proper content type
   getHeaders() {
     const headers = {
-      'Content-Type': 'application/json'  // ลบ charset=UTF-8 ออก
+      'Content-Type': 'application/json',
+      'Accept': 'application/json'
     };
   
     if (this.token) {
@@ -34,144 +43,68 @@ class ApiService {
     return headers;
   }  
 
-// Generic request method with improved error handling and response parsing
-async request(endpoint, method = 'GET', data = null) {
-  const url = `${this.baseUrl}${endpoint}`;
-  
-  const options = {
+  // Generic request method with improved error handling and response parsing
+  async request(endpoint, method = 'GET', data = null) {
+    const url = `${this.baseUrl}${endpoint}`;
+    
+    const options = {
       method,
       headers: this.getHeaders()
-  };
-  
-  if (data && (method === 'POST' || method === 'PUT' || method === 'PATCH')) {
+    };
+    
+    if (data && (method === 'POST' || method === 'PUT' || method === 'PATCH')) {
       options.body = JSON.stringify(data);
-  }
-  
-  try {
-      console.log(`Making ${method} request to ${url}`, options);
+    }
+    
+    console.log(`Making ${method} request to ${url}`, options);
+    
+    try {
       const response = await fetch(url, options);
-      
-      console.log('Response status:', response.status);
-      
-      // ตรวจสอบว่า response เป็น JSON หรือไม่
-      const contentType = response.headers.get('content-type');
+      console.log(`Response from ${url}:`, response.status, response.statusText);
       
       if (!response.ok) {
-          // กรณีมี error ให้พยายามอ่านข้อความ error ก่อน
-          let errorMessage;
-          try {
-              if (contentType && contentType.includes('application/json')) {
-                  const errorData = await response.json();
-                  errorMessage = errorData.message || errorData.error || `Error: ${response.status}`;
-              } else {
-                  errorMessage = await response.text() || `Error: ${response.status}`;
-              }
-          } catch (parseError) {
-              errorMessage = `Error ${response.status}: Could not parse error response`;
-          }
-          throw new Error(errorMessage);
+        let errorText = "";
+        try {
+          const errorJson = await response.json();
+          errorText = errorJson.message || errorJson.error || response.statusText;
+        } catch (e) {
+          errorText = await response.text();
+        }
+        throw new Error(`API error (${response.status}): ${errorText}`);
       }
       
-      // กรณีไม่มีข้อมูลส่งกลับ (204 No Content)
-      if (response.status === 204) {
-          return null;
-      }
+      const text = await response.text();
+      console.log(`Response text from ${url}:`, text ? text.substring(0, 100) + "..." : "(empty)");
       
-      // ถ้าเป็น JSON ให้แปลงเป็น object
-      if (contentType && contentType.includes('application/json')) {
-          try {
-              // ในกรณีที่มีข้อมูลแต่ไม่ใช่ JSON ที่ถูกต้อง
-              const responseText = await response.text();
-              
-              // ตรวจสอบว่ามีข้อมูลหรือไม่
-              if (!responseText.trim()) {
-                  return null;
-              }
-              
-              try {
-                  // พยายามหาจุดจบของ JSON ที่ถูกต้องก่อน
-                  // ในกรณีที่มีอักขระแปลกๆ ต่อท้าย
-                  let validJson = responseText;
-                  
-                  // ตรวจหาเครื่องหมายปิดวงเล็บจาก index สุดท้าย
-                  const lastBraceIndex = responseText.lastIndexOf(']');
-                  const lastCurlyIndex = responseText.lastIndexOf('}');
-                  
-                  // ใช้ index ที่มากกว่า
-                  if (lastBraceIndex > 0 || lastCurlyIndex > 0) {
-                      const lastValidIndex = Math.max(lastBraceIndex, lastCurlyIndex);
-                      // ตัดข้อมูลจนถึง index ที่หา
-                      validJson = responseText.substring(0, lastValidIndex + 1);
-                      console.log('Trimmed JSON to valid ending. Original length:', responseText.length, 'New length:', validJson.length);
-                  }
-                  
-                  try {
-                      // ทดลอง parse JSON ที่ตัดแล้ว
-                      return JSON.parse(validJson);
-                  } catch (jsonError) {
-                      console.warn('Error parsing trimmed JSON:', jsonError);
-                      
-                      // หากยังไม่สามารถ parse ได้ ลองใช้วิธีทำความสะอาดอักขระ
-                      // ที่เข้มงวดมากขึ้น
-                      const cleanedJson = validJson
-                          .replace(/[\u0000-\u001F\u007F-\u009F]/g, '') // ตัดอักขระควบคุม
-                          .replace(/[^\x20-\x7E\s]/g, '') // ตัดอักขระที่ไม่ใช่ ASCII
-                          .replace(/[^\[\]{},:\"\'0-9a-zA-Z_\-\.\s]/g, ''); // เก็บเฉพาะอักขระที่ใช้ใน JSON
-                      
-                      try {
-                          return JSON.parse(cleanedJson);
-                      } catch (secondParseError) {
-                          console.error('Failed to parse cleaned JSON:', secondParseError);
-                          
-                          // ถ้ายังไม่สามารถ parse ได้ ให้ลองใช้วิธีสุดท้าย
-                          try {
-                              // ใช้ regex เพื่อหา JSON pattern ที่ถูกต้อง
-                              const jsonPattern = /\[.*\]|\{.*\}/s;
-                              const match = cleanedJson.match(jsonPattern);
-                              
-                              if (match && match[0]) {
-                                  console.log('Found valid JSON pattern, attempting to parse');
-                                  return JSON.parse(match[0]);
-                              } else {
-                                  throw new Error('No valid JSON pattern found');
-                              }
-                          } catch (finalError) {
-                              console.error('All JSON parsing attempts failed:', finalError);
-                              
-                              // รองรับกรณีที่ response เป็น array
-                              if (responseText.includes('[') && responseText.includes(']')) {
-                                  console.log('Response appears to be an array, returning empty array');
-                                  return [];
-                              }
-                              
-                              // รองรับกรณีที่ response เป็น object
-                              if (responseText.includes('{') && responseText.includes('}')) {
-                                  console.log('Response appears to be an object, returning empty object');
-                                  return {};
-                              }
-                              
-                              throw new Error('Invalid JSON response from server');
-                          }
-                      }
-                  }
-              } catch (error) {
-                  console.error('Error processing response:', error);
-                  throw error;
-              }
-          } catch (error) {
-              console.error('Error reading response text:', error);
-              throw error;
-          }
-      } else {
-          // ถ้าไม่ใช่ JSON ให้คืนค่าเป็น text
-          const textResult = await response.text();
-          return { success: true, message: textResult };
+      if (!text) return null;
+      
+      try {
+        return JSON.parse(text);
+      } catch (e) {
+        console.error("Failed to parse JSON:", e);
+        return text;
       }
-  } catch (error) {
-      console.error('Request error:', error);
+    } catch (error) {
+      console.error(`Error in API request to ${url}:`, error);
       throw error;
+    }
   }
-}
+
+  // Utility function to trim JSON to a valid ending
+  trimToValidJson(jsonString) {
+    // Find the index of the last closing bracket or brace
+    const lastBraceIndex = jsonString.lastIndexOf('}');
+    const lastBracketIndex = jsonString.lastIndexOf(']');
+    
+    // Use the greater of the two indices
+    const lastIndex = Math.max(lastBraceIndex, lastBracketIndex);
+    
+    if (lastIndex > 0) {
+      return jsonString.substring(0, lastIndex + 1);
+    }
+    
+    return jsonString;
+  }
 
   // ======== USER ENDPOINTS ========
   
@@ -182,7 +115,7 @@ async request(endpoint, method = 'GET', data = null) {
   
   // Register new user
   async register(userData) {
-      // ถ้าไม่มี username ให้สร้างจากอีเมล
+      // Generate username from email if not provided
       if (!userData.username && userData.email) {
           userData.username = userData.email.split('@')[0] + Math.floor(Math.random() * 1000);
       }
@@ -237,39 +170,37 @@ async request(endpoint, method = 'GET', data = null) {
   
   // Advanced flight search (with date range)
   async searchFlights(departureCity, arrivalCity, departureFrom, departureTo) {
-      try {
-          const endpoint = `/flights/search/advanced?from=${encodeURIComponent(departureCity)}&to=${encodeURIComponent(arrivalCity)}&departureFrom=${encodeURIComponent(departureFrom)}&departureTo=${encodeURIComponent(departureTo)}`;
-          
-          console.log('Searching flights with endpoint:', endpoint);
-          
-          const result = await this.request(endpoint);
-          
-          // ถ้าไม่มีข้อมูลให้คืนค่าเป็น array ว่าง
-          if (!result) {
-              return [];
-          }
-          
-          // ตรวจสอบว่า result เป็น array หรือไม่
-          if (Array.isArray(result)) {
-              return result;
-          } else if (result && typeof result === 'object') {
-              // กรณีที่ result เป็น object ที่มี array อยู่ภายใน
-              if (Array.isArray(result.flights)) {
-                  return result.flights;
-              } else if (Array.isArray(result.content)) {
-                  return result.content;
-              } else if (Array.isArray(result.data)) {
-                  return result.data;
-              }
-          }
-          
-          // กรณีที่ไม่ตรงกับเงื่อนไขข้างต้น ให้คืนค่าเป็น array ว่าง
-          console.warn('Search result is not an array or does not contain flight data:', result);
+    try {
+      const endpoint = `/flights/search/advanced?from=${encodeURIComponent(departureCity)}&to=${encodeURIComponent(arrivalCity)}&departureFrom=${encodeURIComponent(departureFrom)}&departureTo=${encodeURIComponent(departureTo)}`;
+      
+      console.log('Searching flights with endpoint:', endpoint);
+      
+      const result = await this.request(endpoint);
+      
+      // Return empty array if no results
+      if (!result) {
           return [];
-      } catch (error) {
-          console.error('Error searching flights:', error);
-          throw error;
       }
+      
+      // Handle different response formats
+      if (Array.isArray(result)) {
+          return result;
+      } else if (result && typeof result === 'object') {
+          if (Array.isArray(result.flights)) {
+              return result.flights;
+          } else if (Array.isArray(result.content)) {
+              return result.content;
+          } else if (Array.isArray(result.data)) {
+              return result.data;
+          }
+      }
+      
+      console.warn('Search result is not an array or does not contain flight data:', result);
+      return [];
+    } catch (error) {
+      console.error('Error searching flights:', error);
+      throw error;
+    }
   }
   
   // Get flights by status
@@ -299,16 +230,16 @@ async request(endpoint, method = 'GET', data = null) {
     return this.request(`/bookings/flight/${flightId}`);
   }
   
-  // ปรับปรุงฟังก์ชัน createBooking ใน api-service.js
+  // Create a new booking
   async createBooking(bookingData, userId, flightId) {
     console.log('API Service - Creating booking with data:', JSON.stringify(bookingData));
     console.log('API Service - UserID:', userId, 'FlightID:', flightId);
     
-    // ใช้ userId และ flightId จากพารามิเตอร์ หรือจาก bookingData ถ้าไม่มี
+    // Use provided IDs or from bookingData
     const effectiveUserId = userId || bookingData.userId;
     const effectiveFlightId = flightId || bookingData.flightId;
     
-    // ตรวจสอบข้อมูลที่จำเป็น
+    // Validate required fields
     if (!effectiveUserId) {
         console.error('API Service - Missing userId');
         throw new Error('ไม่พบ userId สำหรับการสร้างการจอง');
@@ -320,11 +251,11 @@ async request(endpoint, method = 'GET', data = null) {
     }
     
     try {
-        // สร้าง endpoint
+        // Build endpoint with query params
         const endpoint = `/bookings?userId=${effectiveUserId}&flightId=${effectiveFlightId}`;
         console.log('API Service - Endpoint:', endpoint);
         
-        // ส่งข้อมูล
+        // Send request
         const response = await this.request(endpoint, 'POST', bookingData);
         console.log('API Service - Booking created successfully:', response);
         return response;
@@ -462,7 +393,7 @@ async request(endpoint, method = 'GET', data = null) {
   }
 
   // ======== DISCOUNT ENDPOINTS ========
-  // ตรวจสอบโค้ดส่วนลด
+  // Validate discount code
   async validateDiscountCode(code) {
     try {
       const response = await this.request(`/discounts/validate/${code}`);
@@ -473,7 +404,7 @@ async request(endpoint, method = 'GET', data = null) {
     }
   }
 
-  // ใช้โค้ดส่วนลดกับการจอง
+  // Apply discount code to booking
   async applyDiscountToBooking(bookingId, discountCode) {
     try {
       const response = await this.request(`/discounts/apply?bookingId=${bookingId}&discountCode=${discountCode}`, 'POST');
@@ -484,39 +415,38 @@ async request(endpoint, method = 'GET', data = null) {
     }
   }
 
-  // ดึงส่วนลดที่ใช้กับการจอง
+  // Get discounts for booking
   async getDiscountsByBookingId(bookingId) {
     try {
       const response = await this.request(`/discounts/booking/${bookingId}`);
       return response;
     } catch (error) {
       console.error('Error getting discounts for booking:', error);
-      // ถ้าไม่พบส่วนลด ให้คืนค่าเป็น array ว่าง
       return [];
     }
   }
 
-  // ดึงส่วนลดทั้งหมด
+  // Get all discounts
   async getAllDiscounts() {
     return this.request('/discounts');
   }
 
-  // ดึงส่วนลดตาม ID
+  // Get discount by ID
   async getDiscountById(discountId) {
     return this.request(`/discounts/${discountId}`);
   }
 
-  // สร้างส่วนลดใหม่
+  // Create new discount
   async createDiscount(discountData) {
     return this.request('/discounts', 'POST', discountData);
   }
 
-  // อัปเดตส่วนลด
+  // Update discount
   async updateDiscount(discountId, discountData) {
     return this.request(`/discounts/${discountId}`, 'PUT', discountData);
   }
 
-  // ลบส่วนลด
+  // Delete discount
   async deleteDiscount(discountId) {
     return this.request(`/discounts/${discountId}`, 'DELETE');
   }
@@ -541,6 +471,43 @@ async request(endpoint, method = 'GET', data = null) {
   // Subscribe to newsletter
   async subscribeToNewsletter(email) {
     return this.request('/newsletter/subscribe', 'POST', { email });
+  }
+
+  // ======== ADMIN ENDPOINTS ========
+  async getDashboardStats() {
+    return this.request('/admin/dashboard/stats');
+  }
+
+  async getRecentUsers() {
+    return this.request('/admin/dashboard/recent-users');
+  }
+
+  async getRecentBookings() {
+    return this.request('/admin/dashboard/recent-bookings');
+  }
+
+  async getRevenueChart() {
+    return this.request('/admin/dashboard/revenue-chart');
+  }
+
+  async countUsers() {
+    return this.request('/admin/users/count');
+  }
+
+  async countFlights() {
+    return this.request('/admin/flights/count');
+  }
+
+  async countBookings() {
+    return this.request('/admin/bookings/count');
+  }
+
+  async countDiscounts() {
+    return this.request('/admin/discounts/count');
+  }
+
+  async countAvailableSeats() {
+    return this.request('/admin/seats/count');
   }
 }
 

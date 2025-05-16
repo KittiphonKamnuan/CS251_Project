@@ -25,77 +25,95 @@ document.addEventListener('DOMContentLoaded', function() {
         setupDateInputs();
     }
     
-    /**
-     * อัปเดต UI ตามสถานะการเข้าสู่ระบบ
-     */
-    function updateAuthUI() {
-        const token = localStorage.getItem('authToken');
-        const userData = localStorage.getItem('userData');
-        
-        const userActionsContainer = document.getElementById('userActionsContainer');
-        const mobileUserActions = document.getElementById('mobileUserActions');
-        
-        if (token && userData) {
-            try {
-                const user = JSON.parse(userData);
-                
-                // อัปเดต UI สำหรับผู้ใช้ที่เข้าสู่ระบบแล้ว
-                if (userActionsContainer) {
-                    userActionsContainer.innerHTML = `
-                        <div class="user-welcome">ยินดีต้อนรับ, ${user.firstName || user.username || 'คุณ'}</div>
-                        <div class="user-dropdown">
-                            <button class="user-dropdown-btn">
-                                <i class="fas fa-user-circle"></i>
-                                <i class="fas fa-caret-down"></i>
-                            </button>
-                            <div class="user-dropdown-content">
-                                <a href="profile.html">
-                                    <i class="fas fa-user"></i> โปรไฟล์
-                                </a>
-                                <a href="booking-status.html">
-                                    <i class="fas fa-ticket-alt"></i> การจองของฉัน
-                                </a>
-                                <a href="#" id="logoutBtn">
-                                    <i class="fas fa-sign-out-alt"></i> ออกจากระบบ
-                                </a>
-                            </div>
-                        </div>
-                    `;
-                    
-                    // ตั้งค่า dropdown ผู้ใช้
-                    setupUserDropdown();
+    // แก้ไขฟังก์ชัน updateAuthUI() ใน script.js
+
+/**
+ * อัปเดต UI ตามสถานะการเข้าสู่ระบบและ Role ของผู้ใช้
+ */
+function updateAuthUI() {
+    const token = localStorage.getItem('authToken');
+    const userData = localStorage.getItem('userData');
+    
+    const userActionsContainer = document.getElementById('userActionsContainer');
+    const mobileUserActions = document.getElementById('mobileUserActions');
+    
+    if (token && userData) {
+        try {
+            const user = JSON.parse(userData);
+            
+            // ตรวจสอบ Role ของผู้ใช้และนำทางไปยังหน้า admin ถ้าเป็น Admin หรือ Staff
+            if (user.role === 'Admin' || user.role === 'Staff') {
+                // ตรวจสอบว่าผู้ใช้ยังไม่ได้อยู่ในหน้า admin แล้ว
+                if (!window.location.pathname.includes('admin.html')) {
+                    console.log('Redirecting to admin panel...');
+                    window.location.href = 'admin.html';
+                    return; // หยุดการทำงานของฟังก์ชันหลังจากนำทางผู้ใช้
                 }
-                
-                // อัปเดตเมนูมือถือ
-                if (mobileUserActions) {
-                    mobileUserActions.innerHTML = `
-                        <div class="user-welcome-mobile">ยินดีต้อนรับ, ${user.firstName || user.username || 'คุณ'}</div>
-                        <a href="profile.html" class="btn btn-outline">โปรไฟล์</a>
-                        <a href="booking-status.html" class="btn btn-outline">การจองของฉัน</a>
-                        <a href="#" id="mobileLogoutBtn" class="btn btn-primary">ออกจากระบบ</a>
-                    `;
-                    
-                    // เพิ่ม event listener สำหรับปุ่มออกจากระบบบนมือถือ
-                    const mobileLogoutBtn = document.getElementById('mobileLogoutBtn');
-                    if (mobileLogoutBtn) {
-                        mobileLogoutBtn.addEventListener('click', handleLogout);
-                    }
-                }
-                
-                // เพิ่ม event listener สำหรับปุ่มออกจากระบบ
-                const logoutBtn = document.getElementById('logoutBtn');
-                if (logoutBtn) {
-                    logoutBtn.addEventListener('click', handleLogout);
-                }
-            } catch (error) {
-                console.error('Error parsing user data:', error);
-                // ถ้าข้อมูลผู้ใช้ไม่ถูกต้อง ให้ล้างข้อมูลและโหลดหน้าใหม่
-                localStorage.removeItem('authToken');
-                localStorage.removeItem('userData');
-                window.location.reload();
             }
+            
+            // อัปเดต UI สำหรับผู้ใช้ที่เข้าสู่ระบบแล้ว
+            if (userActionsContainer) {
+                userActionsContainer.innerHTML = `
+                    <div class="user-welcome">ยินดีต้อนรับ, ${user.firstName || user.username || 'คุณ'}</div>
+                    <div class="user-dropdown">
+                        <button class="user-dropdown-btn">
+                            <i class="fas fa-user-circle"></i>
+                            <i class="fas fa-caret-down"></i>
+                        </button>
+                        <div class="user-dropdown-content">
+                            <a href="profile.html">
+                                <i class="fas fa-user"></i> โปรไฟล์
+                            </a>
+                            <a href="booking-status.html">
+                                <i class="fas fa-ticket-alt"></i> การจองของฉัน
+                            </a>
+                            ${user.role === 'Admin' || user.role === 'Staff' ? 
+                            `<a href="admin.html">
+                                <i class="fas fa-cogs"></i> หน้าจัดการระบบ
+                            </a>` : ''}
+                            <a href="#" id="logoutBtn">
+                                <i class="fas fa-sign-out-alt"></i> ออกจากระบบ
+                            </a>
+                        </div>
+                    </div>
+                `;
+                
+                // ตั้งค่า dropdown ผู้ใช้
+                setupUserDropdown();
+            }
+            
+            // อัปเดตเมนูมือถือ
+            if (mobileUserActions) {
+                mobileUserActions.innerHTML = `
+                    <div class="user-welcome-mobile">ยินดีต้อนรับ, ${user.firstName || user.username || 'คุณ'}</div>
+                    <a href="profile.html" class="btn btn-outline">โปรไฟล์</a>
+                    <a href="booking-status.html" class="btn btn-outline">การจองของฉัน</a>
+                    ${user.role === 'Admin' || user.role === 'Staff' ? 
+                    `<a href="admin.html" class="btn btn-outline">หน้าจัดการระบบ</a>` : ''}
+                    <a href="#" id="mobileLogoutBtn" class="btn btn-primary">ออกจากระบบ</a>
+                `;
+                
+                // เพิ่ม event listener สำหรับปุ่มออกจากระบบบนมือถือ
+                const mobileLogoutBtn = document.getElementById('mobileLogoutBtn');
+                if (mobileLogoutBtn) {
+                    mobileLogoutBtn.addEventListener('click', handleLogout);
+                }
+            }
+            
+            // เพิ่ม event listener สำหรับปุ่มออกจากระบบ
+            const logoutBtn = document.getElementById('logoutBtn');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', handleLogout);
+            }
+        } catch (error) {
+            console.error('Error parsing user data:', error);
+            // ถ้าข้อมูลผู้ใช้ไม่ถูกต้อง ให้ล้างข้อมูลและโหลดหน้าใหม่
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('userData');
+            window.location.reload();
         }
     }
+}
     
     /**
      * จัดการ dropdown ของเมนูผู้ใช้

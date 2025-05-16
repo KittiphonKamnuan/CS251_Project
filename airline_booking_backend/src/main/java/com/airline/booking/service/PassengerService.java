@@ -19,6 +19,10 @@ public class PassengerService {
 
     @Autowired
     private PassengerRepository passengerRepository;
+    
+    public long countPassengers() {
+        return passengerRepository.count();
+    }    
 
     @Autowired
     private BookingRepository bookingRepository;

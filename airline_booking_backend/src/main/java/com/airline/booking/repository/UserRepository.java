@@ -4,17 +4,23 @@ import com.airline.booking.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 public interface UserRepository extends JpaRepository<User, String> {
-    // ค้นหาผู้ใช้ตามชื่อผู้ใช้
     User findByUsername(String username);
     
-    // ค้นหาผู้ใช้ตามอีเมล
-    User findByEmail(String email);
-    
-    // ตรวจสอบว่ามีชื่อผู้ใช้นี้ในระบบแล้วหรือไม่
     boolean existsByUsername(String username);
     
-    // ตรวจสอบว่ามีอีเมลนี้ในระบบแล้วหรือไม่
     boolean existsByEmail(String email);
+    
+    List<User> findByRole(String role);
+    
+    List<User> findTop5ByOrderByUserIdDesc();
+    
+    List<User> findByUsernameContainingIgnoreCaseOrEmailContainingIgnoreCase(String username, String email);
+    
+    // OR use positional parameters like this:
+    // @Query(value = "SELECT * FROM users LIMIT ?2 OFFSET ?1", nativeQuery = true)
+    // List<User> findWithPagination(int offset, Integer limit);
 }

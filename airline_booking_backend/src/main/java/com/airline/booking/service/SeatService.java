@@ -1,6 +1,8 @@
 package com.airline.booking.service;
 
+import com.airline.booking.model.Flight;
 import com.airline.booking.model.Seat;
+import com.airline.booking.repository.FlightRepository;
 import com.airline.booking.repository.SeatRepository;
 import com.airline.booking.exception.ResourceNotFoundException;
 
@@ -18,6 +20,16 @@ public class SeatService {
 
     @Autowired
     private SeatRepository seatRepository;
+    
+    // เพิ่ม FlightRepository
+    @Autowired
+    private FlightRepository flightRepository;
+
+    public int countAvailableSeats() {
+        return (int) seatRepository.countBySeatStatus("Available");
+    }
+
+
     
     public List<Seat> getAllSeats() {
         logger.debug("เรียกดูที่นั่งทั้งหมด");
@@ -61,6 +73,16 @@ public class SeatService {
         }
         logger.debug("พบที่นั่งสำหรับเที่ยวบิน ID: {} และชั้นโดยสาร: {} จำนวน: {}", flightId, seatClass, seats.size());
         return seats;
+    }
+
+    public Seat createSeat(Seat seat, String flightId) {
+        logger.debug("สร้างที่นั่งใหม่สำหรับเที่ยวบิน ID: {}", flightId);
+        
+        Flight flight = flightRepository.findById(flightId)
+                .orElseThrow(() -> new ResourceNotFoundException("ไม่พบเที่ยวบินด้วย ID: " + flightId));
+        
+        seat.setFlight(flight);
+        return createSeat(seat);
     }
     
     public Seat createSeat(Seat seat) {

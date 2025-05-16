@@ -25,14 +25,145 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class BookingService {
 
     private static final Logger logger = LoggerFactory.getLogger(BookingService.class);
 
+    public List<Booking> getBookingsWithPagination(int page, int size) {
+        // Get all bookings and do pagination manually in memory
+        List<Booking> allBookings = bookingRepository.findAll();
+        
+        int startIndex = page * size;
+        int endIndex = Math.min(startIndex + size, allBookings.size());
+        
+        if (startIndex >= allBookings.size()) {
+            return new ArrayList<>();
+        }
+        
+        return allBookings.subList(startIndex, endIndex);
+    }
+
+    // Add these methods to BookingService
+    public Map<String, Object> getRevenueReportByDateRange(LocalDate fromDate, LocalDate toDate) {
+        Map<String, Object> report = new HashMap<>();
+        // Implementation logic
+        report.put("fromDate", fromDate);
+        report.put("toDate", toDate);
+        report.put("totalRevenue", calculateTotalRevenueByDateRange(fromDate, toDate));
+        // Add other data
+        return report;
+    }
+
+    public Map<String, Object> getRevenueReport() {
+        Map<String, Object> report = new HashMap<>();
+        // Implementation logic - maybe with default date range
+        report.put("totalRevenue", calculateTotalRevenue());
+        // Add other data
+        return report;
+    }
+
+    private BigDecimal calculateTotalRevenueByDateRange(LocalDate fromDate, LocalDate toDate) {
+        // Implementation
+        List<Booking> bookings = bookingRepository.findByBookingDateBetween(fromDate, toDate);
+        return bookings.stream()
+                .map(Booking::getTotalPrice)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    private BigDecimal calculateTotalRevenue() {
+        // Implementation
+        List<Booking> bookings = bookingRepository.findAll();
+        return bookings.stream()
+                .map(Booking::getTotalPrice)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    public Map<String, Object> getBookingReportByDateRange(LocalDate fromDate, LocalDate toDate) {
+        Map<String, Object> report = new HashMap<>();
+        // Implementation logic
+        List<Booking> bookings = bookingRepository.findByBookingDateBetween(fromDate, toDate);
+        report.put("fromDate", fromDate);
+        report.put("toDate", toDate);
+        report.put("totalBookings", bookings.size());
+        // Add other booking statistics
+        return report;
+    }
+
+    public Map<String, Object> getBookingReport() {
+        Map<String, Object> report = new HashMap<>();
+        // Implementation logic
+        report.put("totalBookings", bookingRepository.count());
+        // Add other booking statistics
+        return report;
+    }
+
     @Autowired
     private BookingRepository bookingRepository;
+
+    public long countBookings() {
+        return bookingRepository.count();
+    }
+
+    public List<Booking> getRecentBookingsByBookingID() {
+        return bookingRepository.findTop5ByOrderByBookingIdDesc();
+    }    
+
+    public List<Booking> searchBookings(String term) {
+        logger.debug("ค้นหาการจองด้วยคำค้น: {}", term);
+        
+        // ค้นหาการจองจากหลายเงื่อนไข
+        List<Booking> results = new ArrayList<>();
+        
+        // 1. ค้นหาจาก Booking ID
+        try {
+            Booking booking = getBookingById(term);
+            results.add(booking);
+        } catch (ResourceNotFoundException e) {
+            // ไม่พบจาก Booking ID - ข้ามไป
+            logger.debug("ไม่พบการจองด้วย ID: {}", term);
+        }
+        
+        // 2. ค้นหาจากชื่อผู้โดยสาร
+        try {
+            // แก้ไขจาก findBookingsByPassengerName เป็น searchBookings หรือ findByPassengers_...
+            List<Booking> bookingsByPassenger = bookingRepository.searchBookings(term);
+            // หรือใช้
+            // List<Booking> bookingsByPassenger = bookingRepository.findByPassengers_FirstNameContainingOrPassengers_LastNameContaining(term, term);
+            results.addAll(bookingsByPassenger);
+        } catch (Exception e) {
+            logger.warn("เกิดข้อผิดพลาดในการค้นหาจากชื่อผู้โดยสาร: {}", e.getMessage());
+        }
+        
+        // 3. ค้นหาจากอีเมลที่ติดต่อ
+        try {
+            List<Booking> bookingsByEmail = bookingRepository.findByContactEmailContaining(term);
+            results.addAll(bookingsByEmail);
+        } catch (Exception e) {
+            logger.warn("เกิดข้อผิดพลาดในการค้นหาจากอีเมล: {}", e.getMessage());
+        }
+        
+        // 4. ค้นหาจากเบอร์โทรที่ติดต่อ
+        try {
+            List<Booking> bookingsByPhone = bookingRepository.findByContactPhoneContaining(term);
+            results.addAll(bookingsByPhone);
+        } catch (Exception e) {
+            logger.warn("เกิดข้อผิดพลาดในการค้นหาจากเบอร์โทร: {}", e.getMessage());
+        }
+        
+        // กรองเอาเฉพาะที่ไม่ซ้ำกัน
+        return results.stream().distinct().collect(Collectors.toList());
+    }
+
+    public Map<String, Object> getRevenueChart() {
+        // Mock data (คุณสามารถแก้ให้ดึงจริงจาก DB ได้)
+        Map<String, Object> chart = new HashMap<>();
+        chart.put("labels", List.of("ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค."));
+        chart.put("data", List.of(12000, 15000, 18000, 22000, 20000));
+        return chart;
+    }
     
     @Autowired
     private UserRepository userRepository;

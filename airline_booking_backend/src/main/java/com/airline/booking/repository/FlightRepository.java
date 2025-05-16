@@ -13,14 +13,14 @@ import java.util.List;
 
 @Repository
 public interface FlightRepository extends JpaRepository<Flight, String> {
-    
-    // ค้นหาเที่ยวบินตามรหัสเที่ยวบิน
+
+    // คงเมธอดอื่นๆ ไว้...
     Flight findByFlightNumber(String flightNumber);
     
-    // ค้นหาเที่ยวบินตามเมืองต้นทางและปลายทาง
+    List<Flight> findByDepartureTimeBetween(LocalDateTime start, LocalDateTime end);
+    
     List<Flight> findByDepartureCityAndArrivalCity(String departureCity, String arrivalCity);
     
-    // ค้นหาเที่ยวบินตามเมืองต้นทาง ปลายทาง และช่วงเวลาเดินทาง
     @Query("SELECT f FROM Flight f WHERE f.departureCity = :departureCity " +
            "AND f.arrivalCity = :arrivalCity " +
            "AND f.departureTime BETWEEN :startDate AND :endDate")
@@ -30,7 +30,6 @@ public interface FlightRepository extends JpaRepository<Flight, String> {
             @Param("startDate") LocalDateTime startDate,
             @Param("endDate") LocalDateTime endDate);
     
-    // เพิ่มเมธอดที่รองรับ Pagination
     @Query("SELECT f FROM Flight f WHERE f.departureCity = :departureCity " +
            "AND f.arrivalCity = :arrivalCity " +
            "AND f.departureTime BETWEEN :startDate AND :endDate")
@@ -41,9 +40,7 @@ public interface FlightRepository extends JpaRepository<Flight, String> {
             @Param("endDate") LocalDateTime endDate,
             Pageable pageable);
     
-    // ค้นหาเที่ยวบินตามสถานะ
     List<Flight> findByFlightStatus(String flightStatus);
     
-    // ค้นหาเที่ยวบินตามประเภทเครื่องบิน
     List<Flight> findByAircraft(String aircraft);
 }

@@ -12,6 +12,8 @@ import java.util.Optional;  // เพิ่ม import นี้
 @Repository
 public interface SeatRepository extends JpaRepository<Seat, String> {
     
+    long countBySeatStatus(String status);
+
     // ดึงที่นั่งทั้งหมดตาม flightId
     @Query("SELECT s FROM Seat s WHERE s.flight.flightId = :flightId")
     List<Seat> findByFlightId(@Param("flightId") String flightId);
