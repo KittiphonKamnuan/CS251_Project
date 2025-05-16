@@ -8,9 +8,16 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface DiscountRepository extends JpaRepository<Discount, String> {
+    
+    // ค้นหาส่วนลดตามรหัส (discountId)
+    Optional<Discount> findByDiscountId(String discountId);
+    
+    // ค้นหาส่วนลดที่ยังไม่หมดอายุตามรหัส
+    Optional<Discount> findByDiscountIdAndExpiryDateGreaterThanEqual(String discountId, LocalDate currentDate);
     
     // ค้นหาส่วนลดที่ยังไม่หมดอายุ
     List<Discount> findByExpiryDateAfter(LocalDate currentDate);

@@ -325,6 +325,81 @@
     color: var(--dark-gray);
 }
 
+/* ส่วนของรหัสส่วนลด */
+.discount-code {
+    margin: 20px 0;
+    padding: 15px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.discount-input {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.discount-input input {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 16px;
+}
+
+.discount-applied {
+    background-color: #d4edda;
+    color: #155724;
+    padding: 12px;
+    border-radius: 4px;
+    margin-top: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.discount-info {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.discount-value {
+    color: #28a745;
+    font-weight: bold;
+}
+
+.remove-discount {
+    color: #721c24;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    padding: 5px 10px;
+    border-radius: 4px;
+}
+
+.remove-discount:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+.discount-loading {
+    margin-top: 10px;
+    text-align: center;
+    color: #666;
+    font-style: italic;
+}
+
+/* แถวส่วนลดในส่วนสรุปราคา */
+.price-item.discount .price-value {
+    color: #28a745;
+}
+
+.price-item.total .price-value {
+    transition: color 0.3s ease;
+}
+
 /* QR Code */
 .qr-container {
     display: flex;

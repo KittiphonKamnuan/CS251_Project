@@ -262,12 +262,12 @@ document.addEventListener('DOMContentLoaded', function() {
             const acceptPolicy = document.getElementById('accept-policy');
             if (!acceptTerms?.checked) {
                 alert('กรุณายอมรับเงื่อนไขและข้อตกลงในการจองตั๋วเครื่องบิน');
-                resetButton();
+                resetButton(this, originalText);
                 return;
             }
             if (!acceptPolicy?.checked) {
                 alert('กรุณายอมรับนโยบายความเป็นส่วนตัวของ SkyBooking');
-                resetButton();
+                resetButton(this, originalText);
                 return;
             }
             
@@ -275,17 +275,17 @@ document.addEventListener('DOMContentLoaded', function() {
             const activeTab = document.querySelector('.payment-tab.active');
             if (!activeTab) {
                 alert('กรุณาเลือกวิธีการชำระเงิน');
-                resetButton();
+                resetButton(this, originalText);
                 return;
             }
             const paymentMethod = activeTab.dataset.tab;
             
             // Validate forms
             if (paymentMethod === 'credit-card' && !validateCreditCardForm()) {
-                resetButton();
+                resetButton(this, originalText);
                 return;
             } else if (paymentMethod === 'e-wallet' && !validateEWalletForm()) {
-                resetButton();
+                resetButton(this, originalText);
                 return;
             }
             
@@ -303,6 +303,17 @@ document.addEventListener('DOMContentLoaded', function() {
                         console.log('User logged in with ID:', userId);
                     } catch (error) {
                         console.error('Error parsing user data:', error);
+                    }
+                }
+                
+                // ตรวจสอบข้อมูลส่วนลดจาก sessionStorage
+                const savedDiscount = sessionStorage.getItem('appliedDiscount');
+                let appliedDiscount = null;
+                if (savedDiscount) {
+                    try {
+                        appliedDiscount = JSON.parse(savedDiscount);
+                    } catch (error) {
+                        console.error('Error parsing saved discount:', error);
                     }
                 }
                 
@@ -327,6 +338,17 @@ document.addEventListener('DOMContentLoaded', function() {
                         paymentData.walletPhone = document.getElementById('wallet-phone')?.value;
                     }
                     
+                    // ถ้ามีส่วนลด ให้ใช้ส่วนลดกับการจอง
+                    if (appliedDiscount) {
+                        try {
+                            console.log('Applying discount to booking:', appliedDiscount.discountId, 'to booking:', bookingId);
+                            await apiService.applyDiscountToBooking(bookingId, appliedDiscount.discountId);
+                        } catch (discountError) {
+                            console.error('Error applying discount:', discountError);
+                            // ไม่หยุดการทำงานเมื่อมีปัญหากับการใช้ส่วนลด
+                        }
+                    }
+                    
                     await apiService.createPayment(bookingId, paymentData);
                     
                     // เพิ่มคะแนนสะสมให้ผู้ใช้
@@ -349,7 +371,8 @@ document.addEventListener('DOMContentLoaded', function() {
                             flight: selectedFlightData,
                             passenger: passengerInfo,
                             seats: selectedSeats,
-                            additionalSeatPrice
+                            additionalSeatPrice,
+                            discount: appliedDiscount
                         }));
                         alert('กรุณาเข้าสู่ระบบก่อนทำการชำระเงิน');
                         window.location.href = 'login.html?redirect=payment.html';
@@ -370,8 +393,8 @@ document.addEventListener('DOMContentLoaded', function() {
                         seatNumber: selectedSeats[index]?.seatNumber || null,
                         seatId: selectedSeats[index]?.seatId || null,
                         specialService: p.specialService || ''
-                    }));                    
-
+                    }));
+                    
                     const bookingData = {
                         bookingDate: formattedDate,
                         bookingStatus: 'Confirmed',
@@ -383,9 +406,11 @@ document.addEventListener('DOMContentLoaded', function() {
                         contactPhone: passengerInfo.contact?.phone || '',
                         passengers: passengersData,
                         // เพิ่มข้อมูล loyalty points
-                        loyaltyPointsEarned: loyaltyPointsEarned
+                        loyaltyPointsEarned: loyaltyPointsEarned,
+                        // เพิ่มข้อมูลส่วนลด (ถ้ามี)
+                        discountId: appliedDiscount?.discountId || null,
+                        discountValue: appliedDiscount?.discountValue || 0
                     };
-
                     
                     console.log('Booking data to send:', JSON.stringify(bookingData));
                     
@@ -395,6 +420,17 @@ document.addEventListener('DOMContentLoaded', function() {
                     
                     if (!booking || !booking.bookingId) {
                         throw new Error('ไม่ได้รับข้อมูลการจองจาก API');
+                    }
+                    
+                    // ถ้ามีส่วนลด ให้ใช้ส่วนลดกับการจอง
+                    if (appliedDiscount) {
+                        try {
+                            console.log('Applying discount:', appliedDiscount.discountId, 'to booking:', booking.bookingId);
+                            await apiService.applyDiscountToBooking(booking.bookingId, appliedDiscount.discountId);
+                        } catch (discountError) {
+                            console.error('Error applying discount:', discountError);
+                            // ไม่หยุดการทำงานเมื่อมีปัญหากับการใช้ส่วนลด
+                        }
                     }
                     
                     // Prepare payment data
@@ -439,6 +475,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     sessionStorage.removeItem('passengerInfo');
                     sessionStorage.removeItem('selectedSeats');
                     sessionStorage.removeItem('additionalSeatPrice');
+                    sessionStorage.removeItem('appliedDiscount');
                     
                     // Redirect to confirmation page
                     window.location.href = `confirmation.html?bookingId=${booking.bookingId}`;
@@ -453,14 +490,14 @@ document.addEventListener('DOMContentLoaded', function() {
                     console.error('Error response:', error.response);
                 }
                 alert('เกิดข้อผิดพลาดในการชำระเงิน: ' + (error.message || 'กรุณาลองใหม่อีกครั้ง'));
-                resetButton();
+                resetButton(this, originalText);
                 hideLoadingState();
             }
         });
         
-        function resetButton() {
-            payNowBtn.innerHTML = originalText;
-            payNowBtn.disabled = false;
+        function resetButton(button, text) {
+            button.innerHTML = text;
+            button.disabled = false;
         }
     }
     
@@ -525,60 +562,261 @@ document.addEventListener('DOMContentLoaded', function() {
     
     function setupDiscountCode() {
         if (!discountBtn || !discountInput) return;
-        discountBtn.addEventListener('click', function() {
+        
+        // ตัวแปรเก็บข้อมูลส่วนลด
+        let appliedDiscount = null;
+        
+        // โหลดส่วนลดจาก sessionStorage (ถ้ามี)
+        const savedDiscount = sessionStorage.getItem('appliedDiscount');
+        if (savedDiscount) {
+            try {
+                appliedDiscount = JSON.parse(savedDiscount);
+                displayAppliedDiscount(appliedDiscount);
+                updatePriceSummaryWithDiscount(appliedDiscount);
+            } catch (error) {
+                console.error('Error parsing saved discount:', error);
+            }
+        }
+        
+        discountBtn.addEventListener('click', async function() {
+            // ป้องกันการกดปุ่มซ้ำ
+            if (this.disabled) return;
+            
             const discountCode = discountInput.value.trim();
             if (!discountCode) {
                 alert('กรุณากรอกรหัสส่วนลด');
                 return;
             }
-            if (discountCode.toUpperCase() === 'SKYPROMO') {
-                if (bookingInfo) {
-                    const discount = Math.round(bookingInfo.totalPrice * 0.1);
-                    const newTotal = bookingInfo.totalPrice - discount;
+            
+            // แสดงสถานะกำลังโหลด
+            this.disabled = true;
+            const originalText = this.innerHTML;
+            this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> กำลังตรวจสอบ...';
+            
+            try {
+                showDiscountLoadingState();
+                
+                // เรียกใช้ API สำหรับตรวจสอบโค้ดส่วนลด
+                const response = await apiService.validateDiscountCode(discountCode);
+                
+                // ตรวจสอบการตอบกลับจาก API
+                if (response && response.valid === true) {
+                    // บันทึกข้อมูลส่วนลด
+                    appliedDiscount = {
+                        discountId: response.discount.discountId,
+                        discountValue: parseFloat(response.discountValue || response.discount.discountValue)
+                    };
                     
-                    const totalItem = document.getElementById('totalPrice');
-                    if (totalItem) {
-                        totalItem.innerHTML = `฿${newTotal.toLocaleString()} <span style="text-decoration: line-through; color: #999; font-size: 0.85em;">฿${bookingInfo.totalPrice.toLocaleString()}</span>`;
-                        totalItem.style.color = '#4caf50';
-                    }
+                    // แสดงส่วนลดที่ใช้
+                    displayAppliedDiscount(appliedDiscount);
                     
-                    const priceBreakdown = document.querySelector('.price-breakdown');
-                    if (priceBreakdown) {
-                        let discountItem = document.querySelector('.price-item.discount');
-                        if (!discountItem) {
-                            discountItem = document.createElement('div');
-                            discountItem.className = 'price-item discount';
-                            discountItem.innerHTML = `
-                                <span class="price-label">ส่วนลด (10%)</span>
-                                <span class="price-value" style="color: #4caf50;">-฿${discount.toLocaleString()}</span>
-                            `;
-                            const totalItem = document.querySelector('.price-item.total');
-                            priceBreakdown.insertBefore(discountItem, totalItem);
-                        } else {
-                            discountItem.querySelector('.price-value').textContent = `-฿${discount.toLocaleString()}`;
-                        }
-                    }
+                    // อัปเดตราคารวม
+                    updatePriceSummaryWithDiscount(appliedDiscount);
                     
-                    bookingInfo.discount = discount;
-                    bookingInfo.totalPrice = newTotal;
+                    // บันทึกลงใน sessionStorage
+                    sessionStorage.setItem('appliedDiscount', JSON.stringify(appliedDiscount));
                     
-                    // อัพเดทคะแนนสะสมตามราคาใหม่
-                    loyaltyPointsEarned = Math.floor(newTotal / 10);
+                    // แสดงข้อความสำเร็จ
+                    alert(`ใช้รหัสส่วนลดสำเร็จ! คุณได้รับส่วนลด ฿${appliedDiscount.discountValue.toLocaleString()}`);
                     
-                    // อัพเดทข้อความแสดงคะแนนสะสม
-                    const loyaltyPointsInfo = document.getElementById('loyaltyPointsInfo');
-                    if (loyaltyPointsInfo) {
-                        loyaltyPointsInfo.textContent = `คุณจะได้รับ ${loyaltyPointsEarned} คะแนนเมื่อการจองเสร็จสมบูรณ์`;
-                    }
+                    // ปิดการใช้งานช่องกรอกและปุ่ม
+                    discountInput.disabled = true;
+                    this.disabled = true;
+                    this.innerHTML = '<i class="fas fa-check"></i> ใช้แล้ว';
+                } else {
+                    // แสดงข้อความผิดพลาด
+                    alert(response.message || 'รหัสส่วนลดไม่ถูกต้องหรือหมดอายุแล้ว');
+                    this.disabled = false;
+                    this.innerHTML = originalText;
                 }
-                alert('ใช้รหัสส่วนลดสำเร็จ! คุณได้รับส่วนลด 10%');
-                discountInput.disabled = true;
-                discountBtn.disabled = true;
-                discountBtn.innerHTML = 'ใช้แล้ว';
-            } else {
-                alert('รหัสส่วนลดไม่ถูกต้องหรือหมดอายุ');
+            } catch (error) {
+                console.error('Error validating discount code:', error);
+                alert('เกิดข้อผิดพลาดในการตรวจสอบรหัสส่วนลด กรุณาลองใหม่อีกครั้ง');
+                this.disabled = false;
+                this.innerHTML = originalText;
+            } finally {
+                hideDiscountLoadingState();
             }
         });
+        
+        /**
+         * แสดงส่วนลดที่ใช้งาน
+         */
+        function displayAppliedDiscount(discount) {
+            // สร้างองค์ประกอบสำหรับแสดงส่วนลดที่ใช้
+            const discountContainer = document.querySelector('.discount-code');
+            if (!discountContainer) return;
+            
+            // ลบส่วนแสดงส่วนลดที่มีอยู่ (ถ้ามี)
+            const existingApplied = document.querySelector('.discount-applied');
+            if (existingApplied) {
+                existingApplied.remove();
+            }
+            
+            // สร้างและแสดงส่วนส่วนลดใหม่
+            const discountElement = document.createElement('div');
+            discountElement.className = 'discount-applied';
+            discountElement.innerHTML = `
+                <div class="discount-info">
+                    <strong>รหัสส่วนลด:</strong> ${discount.discountId}
+                    <span class="discount-value">(-฿${discount.discountValue.toLocaleString()})</span>
+                </div>
+                <button class="remove-discount" type="button">
+                    <i class="fas fa-times"></i> ลบ
+                </button>
+            `;
+            
+            discountContainer.appendChild(discountElement);
+            
+            // เพิ่ม event listener สำหรับปุ่มลบส่วนลด
+            const removeButton = discountElement.querySelector('.remove-discount');
+            if (removeButton) {
+                removeButton.addEventListener('click', function() {
+                    // ลบส่วนลด
+                    appliedDiscount = null;
+                    sessionStorage.removeItem('appliedDiscount');
+                    discountElement.remove();
+                    
+                    // รีเซ็ตช่องกรอกและปุ่ม
+                    if (discountInput && discountBtn) {
+                        discountInput.disabled = false;
+                        discountInput.value = '';
+                        discountBtn.disabled = false;
+                        discountBtn.innerHTML = 'ใช้รหัส';
+                    }
+                    
+                    // อัปเดตราคารวมกลับเป็นราคาเดิม
+                    resetPriceSummary();
+                });
+            }
+        }
+        
+        /**
+         * อัปเดตราคารวมโดยคำนึงถึงส่วนลด
+         */
+        function updatePriceSummaryWithDiscount(discount) {
+            if (!bookingInfo || !discount) return;
+            
+            // คำนวณราคาใหม่
+            const originalPrice = bookingInfo.totalPrice;
+            const discountValue = discount.discountValue;
+            const newTotal = Math.max(originalPrice - discountValue, 0);
+            
+            // บันทึกข้อมูลใหม่
+            bookingInfo.originalPrice = originalPrice;
+            bookingInfo.discount = discountValue;
+            bookingInfo.totalPrice = newTotal;
+            
+            // อัปเดตการแสดงผลส่วนลดในสรุปราคา
+            const priceBreakdown = document.querySelector('.price-breakdown');
+            if (priceBreakdown) {
+                // ตรวจสอบว่ามีแถวส่วนลดอยู่แล้วหรือไม่
+                let discountItem = document.querySelector('.price-item.discount');
+                
+                if (!discountItem) {
+                    // สร้างแถวส่วนลดใหม่
+                    discountItem = document.createElement('div');
+                    discountItem.className = 'price-item discount';
+                    discountItem.innerHTML = `
+                        <span class="price-label">ส่วนลด</span>
+                        <span class="price-value" style="color: #4caf50;">-฿${discountValue.toLocaleString()}</span>
+                    `;
+                    
+                    // แทรกก่อนแถวยอดรวม
+                    const totalItem = document.querySelector('.price-item.total');
+                    if (totalItem) {
+                        priceBreakdown.insertBefore(discountItem, totalItem);
+                    } else {
+                        priceBreakdown.appendChild(discountItem);
+                    }
+                } else {
+                    // อัปเดตมูลค่าส่วนลด
+                    const valueElement = discountItem.querySelector('.price-value');
+                    if (valueElement) {
+                        valueElement.textContent = `-฿${discountValue.toLocaleString()}`;
+                    }
+                }
+            }
+            
+            // อัปเดตยอดรวม
+            const totalPriceElement = document.getElementById('totalPrice');
+            if (totalPriceElement) {
+                totalPriceElement.innerHTML = `฿${newTotal.toLocaleString()} <span style="text-decoration: line-through; color: #999; font-size: 0.85em;">฿${originalPrice.toLocaleString()}</span>`;
+                totalPriceElement.style.color = '#4caf50';
+            }
+            
+            // อัปเดตคะแนนสะสมตามราคาใหม่
+            loyaltyPointsEarned = Math.floor(newTotal / 10);
+            
+            // อัปเดตข้อความแสดงคะแนนสะสม
+            const loyaltyPointsInfo = document.getElementById('loyaltyPointsInfo');
+            if (loyaltyPointsInfo) {
+                loyaltyPointsInfo.textContent = `คุณจะได้รับ ${loyaltyPointsEarned} คะแนนเมื่อการจองเสร็จสมบูรณ์`;
+            }
+        }
+        
+        /**
+         * รีเซ็ตสรุปราคากลับเป็นราคาเดิม
+         */
+        function resetPriceSummary() {
+            if (!bookingInfo) return;
+            
+            // คืนค่าราคาเดิม
+            if (bookingInfo.originalPrice) {
+                bookingInfo.totalPrice = bookingInfo.originalPrice;
+                delete bookingInfo.originalPrice;
+                delete bookingInfo.discount;
+            }
+            
+            // ลบแถวส่วนลดในสรุปราคา
+            const discountItem = document.querySelector('.price-item.discount');
+            if (discountItem) {
+                discountItem.remove();
+            }
+            
+            // อัปเดตยอดรวม
+            const totalPriceElement = document.getElementById('totalPrice');
+            if (totalPriceElement) {
+                totalPriceElement.textContent = `฿${bookingInfo.totalPrice.toLocaleString()}`;
+                totalPriceElement.style.color = '';
+            }
+            
+            // อัปเดตคะแนนสะสมตามราคาเดิม
+            loyaltyPointsEarned = Math.floor(bookingInfo.totalPrice / 10);
+            
+            // อัปเดตข้อความแสดงคะแนนสะสม
+            const loyaltyPointsInfo = document.getElementById('loyaltyPointsInfo');
+            if (loyaltyPointsInfo) {
+                loyaltyPointsInfo.textContent = `คุณจะได้รับ ${loyaltyPointsEarned} คะแนนเมื่อการจองเสร็จสมบูรณ์`;
+            }
+        }
+        
+        /**
+         * แสดงสถานะกำลังโหลดส่วนลด
+         */
+        function showDiscountLoadingState() {
+            // ในกรณีที่ต้องการแสดงสถานะการโหลดเฉพาะส่วนของส่วนลด
+            const discountContainer = document.querySelector('.discount-code');
+            if (discountContainer) {
+                let loadingElement = discountContainer.querySelector('.discount-loading');
+                if (!loadingElement) {
+                    loadingElement = document.createElement('div');
+                    loadingElement.className = 'discount-loading';
+                    loadingElement.innerHTML = '<i class="fas fa-spinner fa-spin"></i> กำลังตรวจสอบรหัสส่วนลด...';
+                    discountContainer.appendChild(loadingElement);
+                }
+            }
+        }
+        
+        /**
+         * ซ่อนสถานะกำลังโหลดส่วนลด
+         */
+        function hideDiscountLoadingState() {
+            const loadingElement = document.querySelector('.discount-loading');
+            if (loadingElement) {
+                loadingElement.remove();
+            }
+        }
     }
     
     function setupBackButton() {

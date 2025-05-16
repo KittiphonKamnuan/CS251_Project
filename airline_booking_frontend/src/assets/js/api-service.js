@@ -460,6 +460,66 @@ async request(endpoint, method = 'GET', data = null) {
   async applyDiscount(bookingId, discountId) {
     return this.request(`/bookings/${bookingId}/discounts/${discountId}`, 'POST');
   }
+
+  // ======== DISCOUNT ENDPOINTS ========
+  // ตรวจสอบโค้ดส่วนลด
+  async validateDiscountCode(code) {
+    try {
+      const response = await this.request(`/discounts/validate/${code}`);
+      return response;
+    } catch (error) {
+      console.error('Error validating discount code:', error);
+      throw error;
+    }
+  }
+
+  // ใช้โค้ดส่วนลดกับการจอง
+  async applyDiscountToBooking(bookingId, discountCode) {
+    try {
+      const response = await this.request(`/discounts/apply?bookingId=${bookingId}&discountCode=${discountCode}`, 'POST');
+      return response;
+    } catch (error) {
+      console.error('Error applying discount:', error);
+      throw error;
+    }
+  }
+
+  // ดึงส่วนลดที่ใช้กับการจอง
+  async getDiscountsByBookingId(bookingId) {
+    try {
+      const response = await this.request(`/discounts/booking/${bookingId}`);
+      return response;
+    } catch (error) {
+      console.error('Error getting discounts for booking:', error);
+      // ถ้าไม่พบส่วนลด ให้คืนค่าเป็น array ว่าง
+      return [];
+    }
+  }
+
+  // ดึงส่วนลดทั้งหมด
+  async getAllDiscounts() {
+    return this.request('/discounts');
+  }
+
+  // ดึงส่วนลดตาม ID
+  async getDiscountById(discountId) {
+    return this.request(`/discounts/${discountId}`);
+  }
+
+  // สร้างส่วนลดใหม่
+  async createDiscount(discountData) {
+    return this.request('/discounts', 'POST', discountData);
+  }
+
+  // อัปเดตส่วนลด
+  async updateDiscount(discountId, discountData) {
+    return this.request(`/discounts/${discountId}`, 'PUT', discountData);
+  }
+
+  // ลบส่วนลด
+  async deleteDiscount(discountId) {
+    return this.request(`/discounts/${discountId}`, 'DELETE');
+  }
   
   // ======== ADDITIONAL ENDPOINTS ========
   
