@@ -1,3 +1,4 @@
+// ../assets/js/booking-status.js - SkyBooking Booking Status Page
 import { apiService } from './api-service.js';
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -32,6 +33,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 // Load user bookings
                 await loadUserBookings(userObj.userId);
+                
+                // Load user loyalty points
+                await loadUserLoyaltyPoints(userObj.userId);
             } catch (error) {
                 console.error('Error parsing user data:', error);
                 // Clear invalid user data
@@ -45,6 +49,207 @@ document.addEventListener('DOMContentLoaded', function() {
             // Show login required message
             showLoginRequiredMessage();
         }
+    }
+    
+    /**
+     * Load user's loyalty points
+     */
+    async function loadUserLoyaltyPoints(userId) {
+        try {
+            console.log('Loading loyalty points for user ID:', userId);
+            
+            // Call API to get loyalty points data
+            const pointsData = await apiService.getUserLoyaltyPoints(userId);
+            console.log('Loyalty points data received');
+            
+            // Update UI to display loyalty points
+            updateLoyaltyPointsUI(pointsData);
+            
+            return pointsData;
+        } catch (error) {
+            console.error('Error loading loyalty points:', error);
+            
+            // If error occurs, show default data
+            const defaultData = { 
+                userId: userId, 
+                totalPoints: 0, 
+                pointsExpiryDate: new Date().toISOString().split('T')[0]
+            };
+            
+            updateLoyaltyPointsUI(defaultData);
+            return defaultData;
+        }
+    }
+    
+    /**
+     * Update Loyalty Points UI
+     */
+    function updateLoyaltyPointsUI(pointsData) {
+        // Find or create container for displaying loyalty points
+        let loyaltyContainer = document.querySelector('.loyalty-points-container');
+        
+        // If container doesn't exist, create a new one
+        if (!loyaltyContainer) {
+            // Create container
+            loyaltyContainer = document.createElement('div');
+            loyaltyContainer.className = 'loyalty-points-container';
+            
+            // Points should be displayed above upcoming bookings
+            const upcomingBookings = document.getElementById('upcoming-bookings');
+            if (upcomingBookings) {
+                // Insert before upcoming bookings
+                upcomingBookings.parentNode.insertBefore(loyaltyContainer, upcomingBookings);
+            } else {
+                // If no upcoming-bookings, find another parent container
+                const searchCard = document.querySelector('.search-card');
+                if (searchCard) {
+                    searchCard.parentNode.insertBefore(loyaltyContainer, searchCard.nextSibling);
+                } else {
+                    // Last resort - add to main container
+                    const mainContainer = document.querySelector('.container');
+                    if (mainContainer) {
+                        mainContainer.insertBefore(loyaltyContainer, mainContainer.firstChild);
+                    }
+                }
+            }
+        }
+        
+        // Format expiry date for better readability
+        const expiryDate = new Date(pointsData.pointsExpiryDate);
+        const formattedExpiryDate = expiryDate.toLocaleDateString('th-TH', {
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric'
+        });
+        
+        // Display loyalty points data
+        loyaltyContainer.innerHTML = `
+            <div class="container">
+                <div class="loyalty-card">
+                    <div class="loyalty-header">
+                        <i class="fas fa-award"></i>
+                        <h3>คะแนนสะสม SkyBooking</h3>
+                    </div>
+                    <div class="loyalty-content">
+                        <div class="loyalty-points">
+                            <div class="points-amount">${pointsData.totalPoints || 0}</div>
+                            <div class="points-label">คะแนนสะสม</div>
+                        </div>
+                        <div class="loyalty-info">
+                            <p>คะแนนของคุณหมดอายุ: ${formattedExpiryDate}</p>
+                            <a href="profile.html#loyalty" class="btn btn-sm btn-outline">ดูรายละเอียดคะแนนสะสม</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        // Add styles for loyalty card
+        addLoyaltyStyles();
+    }
+    
+    /**
+     * Add styles for loyalty card
+     */
+    function addLoyaltyStyles() {
+        // Check if styles already exist
+        if (document.getElementById('loyalty-styles')) return;
+        
+        const style = document.createElement('style');
+        style.id = 'loyalty-styles';
+        style.textContent = `
+            .loyalty-points-container {
+                margin-bottom: 2rem;
+            }
+            
+            .loyalty-card {
+                background-color: #f0f8ff;
+                border-radius: 10px;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+                overflow: hidden;
+                border: 1px solid #c5e1ff;
+            }
+            
+            .loyalty-header {
+                background-color: var(--primary-color);
+                color: white;
+                padding: 15px;
+                display: flex;
+                align-items: center;
+            }
+            
+            .loyalty-header i {
+                font-size: 1.5rem;
+                margin-right: 10px;
+            }
+            
+            .loyalty-header h3 {
+                margin: 0;
+                font-size: 1.2rem;
+            }
+            
+            .loyalty-content {
+                padding: 20px;
+                display: flex;
+                align-items: center;
+            }
+            
+            .loyalty-points {
+                text-align: center;
+                margin-right: 30px;
+            }
+            
+            .points-amount {
+                font-size: 2.5rem;
+                font-weight: bold;
+                color: var(--primary-color);
+            }
+            
+            .points-label {
+                color: #666;
+                font-size: 0.9rem;
+            }
+            
+            .loyalty-info {
+                flex: 1;
+            }
+            
+            .loyalty-info p {
+                margin-top: 0;
+                margin-bottom: 10px;
+                color: #666;
+            }
+            
+            .loyalty-info-card {
+                display: flex;
+                align-items: center;
+                background-color: #f0f8ff;
+                border-radius: 4px;
+                padding: 10px;
+                margin: 10px 0;
+                color: var(--primary-color);
+            }
+            
+            .loyalty-info-card i {
+                margin-right: 10px;
+                font-size: 1.1rem;
+                color: #ffb700;
+            }
+            
+            @media (max-width: 768px) {
+                .loyalty-content {
+                    flex-direction: column;
+                    text-align: center;
+                }
+                
+                .loyalty-points {
+                    margin-right: 0;
+                    margin-bottom: 15px;
+                }
+            }
+        `;
+        
+        document.head.appendChild(style);
     }
     
     /**
@@ -67,6 +272,9 @@ document.addEventListener('DOMContentLoaded', function() {
                         <a href="profile.html">
                             <i class="fas fa-user"></i> โปรไฟล์
                         </a>
+                        <a href="profile.html#loyalty">
+                            <i class="fas fa-award"></i> คะแนนสะสม
+                        </a>
                         <a href="booking-status.html">
                             <i class="fas fa-ticket-alt"></i> การจองของฉัน
                         </a>
@@ -86,6 +294,7 @@ document.addEventListener('DOMContentLoaded', function() {
             mobileUserActions.innerHTML = `
                 <div class="user-welcome-mobile">ยินดีต้อนรับ, ${user.firstName || user.username || 'คุณ'}</div>
                 <a href="profile.html" class="btn btn-outline">โปรไฟล์</a>
+                <a href="profile.html#loyalty" class="btn btn-outline">คะแนนสะสม</a>
                 <a href="booking-status.html" class="btn btn-outline">การจองของฉัน</a>
                 <a href="#" id="mobileLogoutBtn" class="btn btn-primary">ออกจากระบบ</a>
             `;
@@ -178,23 +387,53 @@ document.addEventListener('DOMContentLoaded', function() {
         // Show info message in search section
         const searchCard = document.querySelector('.search-card');
         if (searchCard) {
-            const loginMessage = document.createElement('div');
-            loginMessage.className = 'login-message';
-            loginMessage.innerHTML = `
-                <i class="fas fa-info-circle"></i>
-                <div>
-                    <h3>เข้าสู่ระบบเพื่อดูการจองของคุณโดยอัตโนมัติ</h3>
-                    <p>หากคุณมีบัญชีผู้ใช้ <a href="login.html">เข้าสู่ระบบ</a> เพื่อดูประวัติการจองทั้งหมดของคุณโดยอัตโนมัติ หรือค้นหาการจองด้วยรหัสและนามสกุลของคุณด้านล่าง</p>
-                </div>
-            `;
-            
-            // Insert message before the search form
-            const searchForm = searchCard.querySelector('.search-form');
-            if (searchForm) {
-                searchCard.insertBefore(loginMessage, searchForm);
+            // Check if message already exists
+            if (!searchCard.querySelector('.login-message')) {
+                const loginMessage = document.createElement('div');
+                loginMessage.className = 'login-message';
+                loginMessage.innerHTML = `
+                    <i class="fas fa-info-circle"></i>
+                    <div>
+                        <h3>เข้าสู่ระบบเพื่อดูการจองของคุณโดยอัตโนมัติ</h3>
+                        <p>หากคุณมีบัญชีผู้ใช้ <a href="login.html">เข้าสู่ระบบ</a> เพื่อดูประวัติการจองทั้งหมดของคุณโดยอัตโนมัติ หรือค้นหาการจองด้วยรหัสและนามสกุลของคุณด้านล่าง</p>
+                    </div>
+                `;
+                
+                // Insert message before the search form
+                const searchForm = searchCard.querySelector('.search-form');
+                if (searchForm) {
+                    searchCard.insertBefore(loginMessage, searchForm);
+                }
             }
         }
     }
+
+    /**
+ * Setup sort dropdown for bookings
+ */
+function setupSortDropdown() {
+    const sortSelect = document.getElementById('sort-by');
+    
+    if (sortSelect) {
+        sortSelect.addEventListener('change', function() {
+            const sortValue = this.value;
+            
+            // Sort upcoming bookings
+            const upcomingBookingsData = window['upcoming-bookingsData'];
+            if (upcomingBookingsData) {
+                const sortedUpcoming = sortBookings(upcomingBookingsData, sortValue);
+                displayBookingsList(sortedUpcoming, 'upcoming-bookings');
+            }
+            
+            // Sort past bookings
+            const pastBookingsData = window['past-bookingsData'];
+            if (pastBookingsData) {
+                const sortedPast = sortBookings(pastBookingsData, sortValue);
+                displayBookingsList(sortedPast, 'past-bookings');
+            }
+        });
+    }
+}
     
     /**
      * Setup booking search form
@@ -221,6 +460,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> กำลังค้นหา...';
                 
                 try {
+                    console.log(`Searching for booking: ${bookingReference}, lastName: ${lastName}`);
+                    
                     // Call API to search booking
                     const booking = await apiService.getBookingById(bookingReference);
                     
@@ -230,9 +471,11 @@ document.addEventListener('DOMContentLoaded', function() {
                     );
                     
                     if (passengerFound) {
+                        console.log(`Passenger with lastName ${lastName} found in booking`);
                         // Display booking results
                         displayBookingResult(booking);
                     } else {
+                        console.log(`No passenger with lastName ${lastName} found in booking`);
                         // No matching passenger found
                         showNoResults();
                     }
@@ -247,13 +490,12 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
     }
-    JSON.parse(localStorage.getItem('userData'));
 
     /**
      * Load user bookings from API
      */
     async function loadUserBookings(userId) {
-        console.log('loadUserBookings called with userId:', userId);
+        console.log(`Loading bookings for user ID: ${userId}`);
         try {
             // Show loading indicators
             const upcomingBookings = document.getElementById('upcoming-bookings');
@@ -266,6 +508,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         <p>กำลังโหลดข้อมูลการจอง...</p>
                     </div>
                 `;
+                upcomingBookings.style.display = 'block';
             }
             
             if (pastBookings) {
@@ -275,29 +518,120 @@ document.addEventListener('DOMContentLoaded', function() {
                         <p>กำลังโหลดข้อมูลการจอง...</p>
                     </div>
                 `;
+                pastBookings.style.display = 'block';
             }
             
             // Fetch bookings from API
             const bookings = await apiService.getUserBookings(userId);
+            console.log(`Received ${bookings ? bookings.length : 0} bookings from API`, bookings);
             
             // Process bookings
             if (bookings && bookings.length > 0) {
+                // สร้าง array เพื่อเก็บ Promise ของการดึงข้อมูลเที่ยวบินทั้งหมด
+                const flightPromises = [];
+                
+                // แปลงข้อมูลและเตรียม Promise สำหรับดึงข้อมูลเที่ยวบิน
+                const processedBookings = bookings.map((booking, index) => {
+                    console.log(`Processing booking ${booking.bookingId}`);
+                    
+                    // ดึงข้อมูลเที่ยวบิน - สร้าง Promise
+                    if (booking.flightId) {
+                        const flightPromise = apiService.getFlightById(booking.flightId)
+                            .then(flightData => {
+                                console.log(`Flight data received for booking ${booking.bookingId}:`, flightData);
+                                return { index, flightData };
+                            })
+                            .catch(error => {
+                                console.error(`Error fetching flight data for booking ${booking.bookingId}:`, error);
+                                return { index, flightData: null };
+                            });
+                        
+                        flightPromises.push(flightPromise);
+                    }
+                    
+                    // ถ้าไม่มีข้อมูล passengers ให้สร้างค่าเริ่มต้น
+                    if (!booking.passengers || !Array.isArray(booking.passengers) || booking.passengers.length === 0) {
+                        booking.passengers = [{ 
+                            firstName: "ผู้โดยสาร", 
+                            lastName: (booking.contactEmail || "booking") + "@skyways.com",
+                            seatNumber: "",
+                            seatClass: "Economy"
+                        }];
+                        console.log(`Created default passenger data for booking ${booking.bookingId}`);
+                    }
+                    
+                    return booking;
+                });
+                
+                // รอให้การดึงข้อมูลเที่ยวบินทั้งหมดเสร็จสิ้น
+                console.log(`Waiting for ${flightPromises.length} flight data requests`);
+                const flightResults = await Promise.all(flightPromises);
+                
+                // นำข้อมูลเที่ยวบินมาใส่ในข้อมูลการจอง
+                flightResults.forEach(result => {
+                    if (result && result.flightData) {
+                        const { index, flightData } = result;
+                        processedBookings[index].flight = flightData;
+                        console.log(`Added flight data to booking ${processedBookings[index].bookingId}`);
+                    }
+                });
+                
+                // เพิ่มการตรวจสอบและจัดการข้อมูลเที่ยวบินที่อาจไม่สมบูรณ์
+                const finalBookings = processedBookings.map(booking => {
+                    // ถ้าไม่มีข้อมูล flight ให้เพิ่มข้อมูลเบื้องต้น
+                    if (!booking.flight) {
+                        console.log(`Creating default flight data for booking ${booking.bookingId}`);
+                        booking.flight = {
+                            flightId: booking.flightId || "Unknown",
+                            flightNumber: booking.flightId || "รอข้อมูล",
+                            aircraft: "SkyAirways",
+                            departureCity: "Bangkok",
+                            arrivalCity: "Destination",
+                            departureTime: booking.bookingDate, // ใช้วันที่จองเป็นเวลาออกเดินทางชั่วคราว
+                            arrivalTime: new Date(new Date(booking.bookingDate).getTime() + 2 * 60 * 60 * 1000) // +2 ชั่วโมง
+                        };
+                    }
+                    
+                    // ถ้าไม่มี departureTime ให้ใช้ bookingDate
+                    if (!booking.flight.departureTime) {
+                        booking.flight.departureTime = booking.bookingDate;
+                        console.log(`Using bookingDate as departureTime for booking ${booking.bookingId}`);
+                    }
+                    
+                    // ถ้าไม่มี arrivalTime ให้กำหนดเป็น departureTime + 2 ชั่วโมง
+                    if (!booking.flight.arrivalTime) {
+                        const depTime = new Date(booking.flight.departureTime);
+                        booking.flight.arrivalTime = new Date(depTime.getTime() + 2 * 60 * 60 * 1000);
+                        console.log(`Setting default arrivalTime for booking ${booking.bookingId}`);
+                    }
+                    
+                    return booking;
+                });
+                
                 // Separate bookings into upcoming and past
                 const now = new Date();
                 const upcoming = [];
                 const past = [];
                 
-                bookings.forEach(booking => {
-                    if (booking.flight && booking.flight.departureTime) {
+                finalBookings.forEach(booking => {
+                    try {
                         const departureTime = new Date(booking.flight.departureTime);
+                        console.log(`Booking ${booking.bookingId} departure: ${departureTime}, current time: ${now}`);
+                        console.log(`Is future flight? ${departureTime > now}`);
                         
                         if (departureTime > now) {
                             upcoming.push(booking);
                         } else {
                             past.push(booking);
                         }
+                    } catch (error) {
+                        console.error(`Error processing booking ${booking.bookingId}:`, error);
+                        // ถ้ามีข้อผิดพลาด ให้เพิ่มเข้า past เพื่อให้แสดงอย่างน้อย
+                        past.push(booking);
                     }
                 });
+                
+                console.log(`Separated bookings: ${upcoming.length} upcoming, ${past.length} past`);
                 
                 // Display bookings
                 if (upcoming.length > 0) {
@@ -323,6 +657,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     `;
                 }
             } else {
+                console.log('No bookings found');
                 // No bookings found
                 if (upcomingBookings) {
                     upcomingBookings.querySelector('.booking-cards').innerHTML = `
@@ -375,23 +710,125 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
     }
-    
+
+    /**
+     * Display individual booking result from search
+     */
+    async function displayBookingResult(booking) {
+        console.log('Displaying booking result:', booking);
+        
+        // First, fetch flight data if needed
+        if (booking.flightId && !booking.flight) {
+            try {
+                console.log(`Fetching flight data for booking ${booking.bookingId}`);
+                const flightData = await apiService.getFlightById(booking.flightId);
+                console.log('Flight data received:', flightData);
+                booking.flight = flightData;
+            } catch (error) {
+                console.error('Error fetching flight data:', error);
+                // Create default flight data if API fails
+                booking.flight = {
+                    flightId: booking.flightId,
+                    flightNumber: booking.flightId,
+                    aircraft: "SkyAirways",
+                    departureCity: "Bangkok",
+                    arrivalCity: "Destination",
+                    departureTime: booking.bookingDate,
+                    arrivalTime: new Date(new Date(booking.bookingDate).getTime() + 2 * 60 * 60 * 1000)
+                };
+            }
+        }
+        
+        // Now process the booking (similar to previous code)
+        if (!booking.flight) {
+            booking.flight = {
+                flightNumber: booking.flightId || "รอข้อมูล",
+                aircraft: "SkyAirways",
+                departureCity: "Bangkok",
+                arrivalCity: "Destination",
+                departureTime: booking.bookingDate,
+                arrivalTime: new Date(new Date(booking.bookingDate).getTime() + 2 * 60 * 60 * 1000)
+            };
+        }
+        
+        // Fill in missing data
+        if (!booking.flight.departureTime) {
+            booking.flight.departureTime = booking.bookingDate;
+        }
+        
+        if (!booking.flight.arrivalTime) {
+            const depTime = new Date(booking.flight.departureTime);
+            booking.flight.arrivalTime = new Date(depTime.getTime() + 2 * 60 * 60 * 1000);
+        }
+        
+        // Determine if this is a past or upcoming flight
+        const now = new Date();
+        const departureTime = new Date(booking.flight.departureTime);
+        const isPastFlight = departureTime <= now;
+        
+        // Create a container for the search result
+        const searchResultSection = document.createElement('section');
+        searchResultSection.className = 'booking-list search-result';
+        searchResultSection.innerHTML = `
+            <div class="container">
+                <div class="section-header">
+                    <h2><i class="fas fa-search"></i> ผลการค้นหา</h2>
+                </div>
+                <div class="booking-cards">
+                    <!-- Card will be added here -->
+                </div>
+            </div>
+        `;
+        
+        // Create and append the booking card
+        const card = createBookingCard(booking);
+        const cardsContainer = searchResultSection.querySelector('.booking-cards');
+        cardsContainer.appendChild(card);
+        
+        // Hide other sections and show the result
+        const upcomingBookings = document.getElementById('upcoming-bookings');
+        const pastBookings = document.getElementById('past-bookings');
+        const noResults = document.getElementById('no-results');
+        
+        if (upcomingBookings) upcomingBookings.style.display = 'none';
+        if (pastBookings) pastBookings.style.display = 'none';
+        if (noResults) noResults.style.display = 'none';
+        
+        // Insert search result section after search form
+        const searchBookingSection = document.querySelector('.search-booking');
+        searchBookingSection.parentNode.insertBefore(searchResultSection, searchBookingSection.nextSibling);
+        
+        // Highlight the card and scroll to it
+        highlightBookingCard(card);
+    }
+        
     /**
      * Display list of bookings
      */
     function displayBookingsList(bookings, containerId) {
         const container = document.getElementById(containerId);
-        if (!container) return;
+        if (!container) {
+            console.error(`Container not found: ${containerId}`);
+            return;
+        }
         
         const bookingCardsContainer = container.querySelector('.booking-cards');
-        if (!bookingCardsContainer) return;
+        if (!bookingCardsContainer) {
+            console.error(`Booking cards container not found in ${containerId}`);
+            return;
+        }
         
         // Clear previous content
         bookingCardsContainer.innerHTML = '';
         
         // Add booking cards
         bookings.forEach(booking => {
-            bookingCardsContainer.appendChild(createBookingCard(booking));
+            try {
+                const card = createBookingCard(booking);
+                bookingCardsContainer.appendChild(card);
+            } catch (error) {
+                console.error(`Error creating card for booking ${booking.bookingId}:`, error);
+            }
         });
         
         // Show container
@@ -399,53 +836,9 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Store bookings for sorting
         window[`${containerId}Data`] = [...bookings];
+        
+        console.log(`Displayed ${bookings.length} bookings in ${containerId}`);
     }
-    
-    /**
-     * Display single booking result from search
-     */
-    function displayBookingResult(booking) {
-        const now = new Date();
-        const departureTime = new Date(booking.flight.departureTime);
-        const isPastBooking = departureTime < now;
-        
-        // Clear previous results
-        const upcomingBookings = document.getElementById('upcoming-bookings');
-        const pastBookings = document.getElementById('past-bookings');
-        const noResults = document.getElementById('no-results');
-        
-        if (upcomingBookings) {
-            upcomingBookings.querySelector('.booking-cards').innerHTML = '';
-            upcomingBookings.style.display = isPastBooking ? 'none' : 'block';
-        }
-        
-        if (pastBookings) {
-            pastBookings.querySelector('.booking-cards').innerHTML = '';
-            pastBookings.style.display = isPastBooking ? 'block' : 'none';
-        }
-        
-        if (noResults) {
-            noResults.style.display = 'none';
-        }
-        
-        // Create booking card
-        const bookingCard = createBookingCard(booking);
-        
-        // Add card to appropriate section
-        if (isPastBooking) {
-            if (pastBookings) {
-                pastBookings.querySelector('.booking-cards').appendChild(bookingCard);
-            }
-        } else {
-            if (upcomingBookings) {
-                upcomingBookings.querySelector('.booking-cards').appendChild(bookingCard);
-            }
-        }
-        
-        // Highlight card
-        highlightBookingCard(bookingCard);
-    }
-    
     /**
      * Show no results message
      */
@@ -468,126 +861,178 @@ document.addEventListener('DOMContentLoaded', function() {
      * Create booking card element
      */
     function createBookingCard(booking) {
-        const card = document.createElement('div');
-        card.className = 'booking-card';
-        if (booking.bookingStatus === 'Completed' || 
-            new Date(booking.flight.departureTime) < new Date()) {
-            card.classList.add('past');
-        }
-        
-        // Format dates and times
-        const bookingDate = new Date(booking.bookingDate);
-        const departureTime = new Date(booking.flight.departureTime);
-        const arrivalTime = new Date(booking.flight.arrivalTime);
-        
-        const formattedBookingDate = bookingDate.toLocaleDateString('th-TH', {
-            day: 'numeric', 
-            month: 'short', 
-            year: 'numeric'
-        });
-        
-        const formattedDepartureTime = departureTime.toLocaleTimeString('th-TH', {
-            hour: '2-digit', 
-            minute: '2-digit'
-        });
-        
-        const formattedArrivalTime = arrivalTime.toLocaleTimeString('th-TH', {
-            hour: '2-digit', 
-            minute: '2-digit'
-        });
-        
-        const formattedDepartureDate = departureTime.toLocaleDateString('th-TH', {
-            day: 'numeric', 
-            month: 'short', 
-            year: 'numeric'
-        });
-        
-        // Calculate duration
-        const durationMs = arrivalTime - departureTime;
-        const durationHours = Math.floor(durationMs / (1000 * 60 * 60));
-        const durationMinutes = Math.floor((durationMs % (1000 * 60 * 60)) / (1000 * 60));
-        const duration = `${durationHours}h ${durationMinutes}m`;
-        
-        // Get status info
-        const statusInfo = getBookingStatusInfo(booking.bookingStatus);
-        
-        // Build card HTML
-        card.innerHTML = `
-            <div class="booking-status ${statusInfo.className}">
-                <span class="status-indicator"></span>
-                <span class="status-text">${statusInfo.text}</span>
-            </div>
-            <div class="booking-header">
-                <div class="reference">
-                    <span class="label">รหัสการจอง:</span>
-                    <span class="value">${booking.bookingId}</span>
-                </div>
-                <div class="booking-date">
-                    <span class="label">วันที่จอง:</span>
-                    <span class="value">${formattedBookingDate}</span>
-                </div>
-            </div>
-            <div class="flight-info">
-                <div class="airline">
-                    <img src="../assets/images/icons/airplane.png" alt="${booking.flight.aircraft}" class="airline-logo">
-                    <div>
-                        <div class="airline-name">${booking.flight.aircraft}</div>
-                        <div class="flight-number">${booking.flight.flightNumber}</div>
-                    </div>
-                </div>
-                <div class="flight-route">
-                    <div class="origin">
-                        <div class="city-code">${booking.flight.departureCity.substring(0, 3).toUpperCase()}</div>
-                        <div class="time">${formattedDepartureTime}</div>
-                    </div>
-                    <div class="flight-path">
-                        <div class="route-line"></div>
-                        <div class="duration">${duration}</div>
-                    </div>
-                    <div class="destination">
-                        <div class="city-code">${booking.flight.arrivalCity.substring(0, 3).toUpperCase()}</div>
-                        <div class="time">${formattedArrivalTime}</div>
-                    </div>
-                </div>
-                <div class="travel-dates">
-                    <div class="departure-date">${formattedDepartureDate}</div>
-                </div>
-            </div>
-            <div class="passenger-info">
-                <div class="passenger-count">
-                    <i class="fas fa-user"></i> ${booking.passengers.length} ผู้โดยสาร
-                </div>
-                <div class="seat-info">
-                    <i class="fas fa-chair"></i> ที่นั่ง: ${getPassengerSeats(booking.passengers)}
-                </div>
-            </div>
-            <div class="booking-actions">
-                ${booking.bookingStatus === 'Pending' ? `
-                    <div class="payment-countdown">
-                        <i class="fas fa-clock"></i> เหลือเวลาชำระเงิน: <span class="countdown-timer">23:59:59</span>
-                    </div>
-                ` : ''}
-                <button class="btn btn-outline btn-sm view-details-btn" data-booking-id="${booking.bookingId}">
-                    <i class="fas fa-eye"></i> ดูรายละเอียด
-                </button>
-                ${getActionButtons(booking)}
-            </div>
-        `;
-        
-        // Start countdown for pending bookings
-        if (booking.bookingStatus === 'Pending') {
-            const countdownElement = card.querySelector('.countdown-timer');
-            if (countdownElement) {
-                startPaymentCountdown(countdownElement);
+        try {
+            const card = document.createElement('div');
+            card.className = 'booking-card';
+            
+            // กำหนด class ตามสถานะ
+            if (booking.bookingStatus === 'Completed' || 
+                new Date(booking.flight.departureTime) < new Date()) {
+                card.classList.add('past');
             }
+            
+            // จัดการกรณีข้อมูลขาดหายหรือไม่สมบูรณ์
+            const bookingDate = booking.bookingDate ? new Date(booking.bookingDate) : new Date();
+            const departureTime = booking.flight && booking.flight.departureTime ? 
+                new Date(booking.flight.departureTime) : new Date(bookingDate);
+            const arrivalTime = booking.flight && booking.flight.arrivalTime ? 
+                new Date(booking.flight.arrivalTime) : new Date(departureTime.getTime() + 2 * 60 * 60 * 1000);
+            
+            // Format วันที่และเวลา
+            const formattedBookingDate = bookingDate.toLocaleDateString('th-TH', {
+                day: 'numeric', 
+                month: 'short', 
+                year: 'numeric'
+            });
+            
+            const formattedDepartureTime = departureTime.toLocaleTimeString('th-TH', {
+                hour: '2-digit', 
+                minute: '2-digit'
+            });
+            
+            const formattedArrivalTime = arrivalTime.toLocaleTimeString('th-TH', {
+                hour: '2-digit', 
+                minute: '2-digit'
+            });
+            
+            const formattedDepartureDate = departureTime.toLocaleDateString('th-TH', {
+                day: 'numeric', 
+                month: 'short', 
+                year: 'numeric'
+            });
+            
+            // Calculate duration
+            const durationMs = arrivalTime - departureTime;
+            const durationHours = Math.floor(durationMs / (1000 * 60 * 60));
+            const durationMinutes = Math.floor((durationMs % (1000 * 60 * 60)) / (1000 * 60));
+            const duration = `${durationHours}h ${durationMinutes}m`;
+            
+            // Get status info
+            const statusInfo = getBookingStatusInfo(booking.bookingStatus);
+            
+            // Display loyalty points earned
+            const loyaltyPointsEarned = booking.loyaltyPointsEarned || Math.floor((booking.totalPrice || 0) / 10);
+            const loyaltyPointsHtml = loyaltyPointsEarned > 0 ? `
+                <div class="loyalty-info-card">
+                    <i class="fas fa-award"></i>
+                    <span>คุณได้รับ ${loyaltyPointsEarned} คะแนนจากการจองนี้</span>
+                </div>
+            ` : '';
+            
+            // ข้อมูลเที่ยวบิน
+            const flightNumber = booking.flight ? booking.flight.flightNumber : (booking.flightId || 'N/A');
+            const aircraft = booking.flight ? booking.flight.aircraft : 'SkyAirways';
+            const departureCity = booking.flight && booking.flight.departureCity ? booking.flight.departureCity : 'Bangkok';
+            const arrivalCity = booking.flight && booking.flight.arrivalCity ? booking.flight.arrivalCity : 'Destination';
+            
+            // แสดงข้อมูลผู้โดยสาร
+            const passengerCount = booking.passengers && booking.passengers.length ? booking.passengers.length : 1;
+            
+            // Build card HTML
+            card.innerHTML = `
+                <div class="booking-status ${statusInfo.className}">
+                    <span class="status-indicator"></span>
+                    <span class="status-text">${statusInfo.text}</span>
+                </div>
+                <div class="booking-header">
+                    <div class="reference">
+                        <span class="label">รหัสการจอง:</span>
+                        <span class="value">${booking.bookingId}</span>
+                    </div>
+                    <div class="booking-date">
+                        <span class="label">วันที่จอง:</span>
+                        <span class="value">${formattedBookingDate}</span>
+                    </div>
+                </div>
+                <div class="flight-info">
+                    <div class="airline">
+                        <img src="../assets/images/icons/airplane.png" alt="${aircraft}" class="airline-logo">
+                        <div>
+                            <div class="airline-name">${aircraft}</div>
+                            <div class="flight-number">${flightNumber}</div>
+                        </div>
+                    </div>
+                    <div class="flight-route">
+                        <div class="origin">
+                            <div class="city-code">${departureCity.substring(0, 3).toUpperCase()}</div>
+                            <div class="time">${formattedDepartureTime}</div>
+                        </div>
+                        <div class="flight-path">
+                            <div class="route-line"></div>
+                            <div class="duration">${duration}</div>
+                        </div>
+                        <div class="destination">
+                            <div class="city-code">${arrivalCity.substring(0, 3).toUpperCase()}</div>
+                            <div class="time">${formattedArrivalTime}</div>
+                        </div>
+                    </div>
+                    <div class="travel-dates">
+                        <div class="departure-date">${formattedDepartureDate}</div>
+                    </div>
+                </div>
+                <div class="passenger-info">
+                    <div class="passenger-count">
+                        <i class="fas fa-user"></i> ${passengerCount} ผู้โดยสาร
+                    </div>
+                    <div class="seat-info">
+                        <i class="fas fa-chair"></i> ที่นั่ง: ${getPassengerSeats(booking.passengers)}
+                    </div>
+                </div>
+                ${loyaltyPointsHtml}
+                <div class="booking-actions">
+                    ${booking.bookingStatus === 'Pending' ? `
+                        <div class="payment-countdown">
+                            <i class="fas fa-clock"></i> เหลือเวลาชำระเงิน: <span class="countdown-timer">23:59:59</span>
+                        </div>
+                    ` : ''}
+                    <button class="btn btn-outline btn-sm view-details-btn" data-booking-id="${booking.bookingId}">
+                        <i class="fas fa-eye"></i> ดูรายละเอียด
+                    </button>
+                    ${getActionButtons(booking)}
+                </div>
+            `;
+            
+            // Start countdown for pending bookings
+            if (booking.bookingStatus === 'Pending') {
+                const countdownElement = card.querySelector('.countdown-timer');
+                if (countdownElement) {
+                    startPaymentCountdown(countdownElement);
+                }
+            }
+            
+            return card;
+        } catch (error) {
+            console.error(`Error creating booking card for booking:`, booking, error);
+            // ถ้ามีข้อผิดพลาด สร้างการ์ดเปล่าที่แสดงข้อความข้อผิดพลาด
+            const errorCard = document.createElement('div');
+            errorCard.className = 'booking-card error';
+            errorCard.innerHTML = `
+                <div class="booking-status">
+                    <span class="status-indicator"></span>
+                    <span class="status-text">มีข้อผิดพลาด</span>
+                </div>
+                <div class="booking-header">
+                    <div class="reference">
+                        <span class="label">รหัสการจอง:</span>
+                        <span class="value">${booking.bookingId || 'N/A'}</span>
+                    </div>
+                </div>
+                <div class="error-message">
+                    <p>ไม่สามารถแสดงข้อมูลการจองนี้ได้ กรุณาติดต่อเจ้าหน้าที่</p>
+                </div>
+                <div class="booking-actions">
+                    <button class="btn btn-outline btn-sm" onclick="window.location.reload()">
+                        <i class="fas fa-sync"></i> รีเฟรช
+                    </button>
+                </div>
+            `;
+            return errorCard;
         }
-        
-        return card;
     }
     
     /**
-     * Get seats information for passengers
-     */
+    * Get seats information for passengers
+    */
     function getPassengerSeats(passengers) {
         if (!passengers || passengers.length === 0) {
             return 'ยังไม่ได้เลือก';
@@ -598,277 +1043,26 @@ document.addEventListener('DOMContentLoaded', function() {
         
         return validSeats.length > 0 ? validSeats.join(', ') : 'ยังไม่ได้เลือก';
     }
-    
-    /**
-     * Get booking status information
-     */
-    function getBookingStatusInfo(status) {
-        switch (status) {
-            case 'Confirmed':
-                return { className: 'active', text: 'การจองยืนยันแล้ว' };
-            case 'Pending':
-                return { className: 'waiting', text: 'รอการชำระเงิน' };
-            case 'Cancelled':
-                return { className: 'cancelled', text: 'การจองถูกยกเลิก' };
-            case 'Completed':
-                return { className: 'completed', text: 'เดินทางเสร็จสิ้น' };
-            case 'Refunded':
-                return { className: 'refunded', text: 'คืนเงินแล้ว' };
-            default:
-                return { className: '', text: status };
-        }
+
+/**
+ * Get booking status information
+ */
+function getBookingStatusInfo(status) {
+    switch (status) {
+        case 'Confirmed':
+            return { className: 'active', text: 'การจองยืนยันแล้ว' };
+        case 'Pending':
+            return { className: 'waiting', text: 'รอการชำระเงิน' };
+        case 'Cancelled':
+            return { className: 'cancelled', text: 'การจองถูกยกเลิก' };
+        case 'Completed':
+            return { className: 'completed', text: 'เดินทางเสร็จสิ้น' };
+        case 'Refunded':
+            return { className: 'refunded', text: 'คืนเงินแล้ว' };
+        default:
+            return { className: '', text: status };
     }
-    
-    /**
-     * Get action buttons based on booking status
-     */
-    function getActionButtons(booking) {
-        const now = new Date();
-        const departureTime = new Date(booking.flight.departureTime);
-        const isPastFlight = departureTime <= now;
-        
-        // Cannot perform actions on past flights except viewing details and printing
-        if (isPastFlight) {
-            return `
-                <button class="btn btn-outline btn-sm print-btn" data-booking-id="${booking.bookingId}">
-                    <i class="fas fa-print"></i> พิมพ์บัตรโดยสาร
-                </button>
-                <button class="btn btn-primary btn-sm share-btn" data-booking-id="${booking.bookingId}">
-                    <i class="fas fa-share-alt"></i> แชร์การเดินทาง
-                </button>
-            `;
-        }
-        
-        // Action buttons based on booking status
-        switch (booking.bookingStatus) {
-            case 'Pending':
-                return `
-                    <button class="btn btn-success btn-sm pay-btn" data-booking-id="${booking.bookingId}">
-                        <i class="fas fa-credit-card"></i> ชำระเงิน
-                    </button>
-                    <button class="btn btn-danger btn-sm cancel-btn" data-booking-id="${booking.bookingId}">
-                        <i class="fas fa-times"></i> ยกเลิกการจอง
-                    </button>
-                `;
-            case 'Confirmed':
-                return `
-                    <button class="btn btn-outline btn-sm print-btn" data-booking-id="${booking.bookingId}">
-                        <i class="fas fa-print"></i> พิมพ์บัตรโดยสาร
-                    </button>
-                    <button class="btn btn-primary btn-sm edit-btn" data-booking-id="${booking.bookingId}">
-                        <i class="fas fa-pen"></i> แก้ไขการจอง
-                    </button>
-                    <button class="btn btn-danger btn-sm cancel-btn" data-booking-id="${booking.bookingId}">
-                        <i class="fas fa-times"></i> ยกเลิกการจอง
-                    </button>
-                `;
-            case 'Cancelled':
-            case 'Refunded':
-                return `
-                    <button class="btn btn-primary btn-sm rebook-btn" data-booking-id="${booking.bookingId}">
-                        <i class="fas fa-search"></i> ค้นหาเที่ยวบินใหม่
-                    </button>
-                `;
-            default:
-                return '';
-        }
-    }
-    
-    /**
-     * Start payment countdown timer
-     */
-    function startPaymentCountdown(countdownElement) {
-        // Simulate 24-hour countdown
-        let hours = 23;
-        let minutes = 59;
-        let seconds = 59;
-        
-        const countdownInterval = setInterval(() => {
-            seconds--;
-            
-            if (seconds < 0) {
-                seconds = 59;
-                minutes--;
-                
-                if (minutes < 0) {
-                    minutes = 59;
-                    hours--;
-                    
-                    if (hours < 0) {
-                        // Time's up
-                        clearInterval(countdownInterval);
-                        countdownElement.parentElement.innerHTML = '<span style="color: var(--danger);">หมดเวลาชำระเงิน</span>';
-                        return;
-                    }
-                }
-            }
-            
-            // Update display
-            countdownElement.textContent = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-            
-            // Change color when time is running low
-            if (hours === 0 && minutes < 30) {
-                countdownElement.style.color = 'var(--danger)';
-            }
-        }, 1000);
-    }
-    
-    /**
-     * Highlight booking card (for search results)
-     */
-    function highlightBookingCard(card) {
-        card.classList.add('highlight');
-        
-        // Scroll to card
-        card.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        
-        // Remove highlight after 3 seconds
-        setTimeout(() => {
-            card.classList.remove('highlight');
-        }, 3000);
-    }
-    
-    /**
-     * Setup sort dropdown for bookings
-     */
-    function setupSortDropdown() {
-        const sortSelect = document.getElementById('sort-by');
-        
-        if (sortSelect) {
-            sortSelect.addEventListener('change', function() {
-                const sortValue = this.value;
-                
-                // Sort upcoming bookings
-                const upcomingBookingsData = window['upcoming-bookingsData'];
-                if (upcomingBookingsData) {
-                    const sortedUpcoming = sortBookings(upcomingBookingsData, sortValue);
-                    displayBookingsList(sortedUpcoming, 'upcoming-bookings');
-                }
-                
-                // Sort past bookings
-                const pastBookingsData = window['past-bookingsData'];
-                if (pastBookingsData) {
-                    const sortedPast = sortBookings(pastBookingsData, sortValue);
-                    displayBookingsList(sortedPast, 'past-bookings');
-                }
-            });
-        }
-    }
-    
-    /**
-     * Sort bookings based on selected criteria
-     */
-    function sortBookings(bookings, sortValue) {
-        if (!bookings || !bookings.length) return [];
-        
-        const sortedBookings = [...bookings];
-        
-        switch (sortValue) {
-            case 'date-asc':
-                // Sort by date (oldest to newest)
-                return sortedBookings.sort((a, b) => 
-                    new Date(a.flight.departureTime) - new Date(b.flight.departureTime)
-                );
-            case 'date-desc':
-                // Sort by date (newest to oldest)
-                return sortedBookings.sort((a, b) => 
-                    new Date(b.flight.departureTime) - new Date(a.flight.departureTime)
-                );
-            case 'price-asc':
-                // Sort by price (low to high)
-                return sortedBookings.sort((a, b) => 
-                    (a.totalPrice || 0) - (b.totalPrice || 0)
-                );
-            case 'price-desc':
-                // Sort by price (high to low)
-                return sortedBookings.sort((a, b) => 
-                    (b.totalPrice || 0) - (a.totalPrice || 0)
-                );
-            default:
-                return sortedBookings;
-        }
-    }
-    
-    /**
-     * Setup action buttons in booking cards
-     */
-    function setupActionButtons() {
-        // Using event delegation for dynamically created buttons
-        document.addEventListener('click', function(e) {
-            // View details button
-            if (e.target.closest('.view-details-btn')) {
-                const btn = e.target.closest('.view-details-btn');
-                const bookingId = btn.getAttribute('data-booking-id');
-                handleViewDetails(bookingId);
-            }
-            
-            // Print boarding pass button
-            if (e.target.closest('.print-btn')) {
-                const btn = e.target.closest('.print-btn');
-                const bookingId = btn.getAttribute('data-booking-id');
-                handlePrintBoardingPass(bookingId);
-            }
-            
-            // Payment button
-            if (e.target.closest('.pay-btn')) {
-                const btn = e.target.closest('.pay-btn');
-                const bookingId = btn.getAttribute('data-booking-id');
-                handlePayment(bookingId);
-            }
-            
-            // Edit booking button
-            if (e.target.closest('.edit-btn')) {
-                const btn = e.target.closest('.edit-btn');
-                const bookingId = btn.getAttribute('data-booking-id');
-                handleEditBooking(bookingId);
-            }
-            
-            // Cancel booking button
-            if (e.target.closest('.cancel-btn')) {
-                const btn = e.target.closest('.cancel-btn');
-                const bookingId = btn.getAttribute('data-booking-id');
-                handleCancelBooking(bookingId);
-            }
-            
-            // Share travel button
-            if (e.target.closest('.share-btn')) {
-                const btn = e.target.closest('.share-btn');
-                const bookingId = btn.getAttribute('data-booking-id');
-                handleShareTravel(bookingId);
-            }
-            
-            // Rebook button
-            if (e.target.closest('.rebook-btn')) {
-                const btn = e.target.closest('.rebook-btn');
-                const bookingId = btn.getAttribute('data-booking-id');
-                handleRebook(bookingId);
-            }
-        });
-    }
-    
-    /**
-     * Handle view booking details
-     */
-    function handleViewDetails(bookingId) {
-        window.location.href = `confirmation.html?bookingId=${bookingId}`;
-    }
-    
-    /**
-     * Handle print boarding pass
-     */
-    function handlePrintBoardingPass(bookingId) {
-        // Get booking data
-        apiService.getBookingById(bookingId)
-            .then(booking => {
-                // Create and open print window
-                printBoardingPass(booking);
-            })
-            .catch(error => {
-                console.error('Error fetching booking details for printing:', error);
-                alert('ไม่สามารถพิมพ์บัตรโดยสารได้ในขณะนี้ กรุณาลองใหม่อีกครั้งภายหลัง');
-            });
-    }
-    
+}
     /**
      * Print boarding pass in new window
      */
@@ -940,6 +1134,12 @@ document.addEventListener('DOMContentLoaded', function() {
                     .barcode {
                         padding: 20px;
                         text-align: center;
+                    }
+                    .loyalty-info {
+                        padding: 15px;
+                        background-color: #f0f8ff;
+                        text-align: center;
+                        border-top: 1px solid #ddd;
                     }
                     h2 {
                         margin: 0;
@@ -1014,6 +1214,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 year: 'numeric'
             });
             
+            // Display loyalty points info
+            const loyaltyPointsEarned = booking.loyaltyPointsEarned || Math.floor((booking.totalPrice || 0) / 10);
+            const loyaltyInfo = loyaltyPointsEarned > 0 ? `
+                <div class="loyalty-info">
+                    <p><strong>คะแนนสะสมที่ได้รับ:</strong> ${loyaltyPointsEarned} คะแนน</p>
+                </div>
+            ` : '';
+            
             printWindow.document.write(`
                 <div class="boarding-pass">
                     <div class="boarding-pass-header">
@@ -1062,6 +1270,8 @@ document.addEventListener('DOMContentLoaded', function() {
                         <p>เวลาขึ้นเครื่อง: ${formattedBoardingTime}</p>
                     </div>
                     
+                    ${loyaltyInfo}
+                    
                     <div class="barcode">
                         <!-- Simulated barcode -->
                         <svg width="300" height="50" viewBox="0 0 300 50">
@@ -1093,21 +1303,21 @@ document.addEventListener('DOMContentLoaded', function() {
             }, 1000);
         };
     }
-    
+
     /**
      * Handle payment
      */
     function handlePayment(bookingId) {
         window.location.href = `payment.html?bookingId=${bookingId}`;
     }
-    
+
     /**
      * Handle edit booking
      */
     function handleEditBooking(bookingId) {
         window.location.href = `edit-booking.html?bookingId=${bookingId}`;
     }
-    
+
     /**
      * Handle cancel booking
      */
@@ -1169,7 +1379,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
         }
     }
-    
+
     /**
      * Handle share travel
      */
@@ -1177,7 +1387,28 @@ document.addEventListener('DOMContentLoaded', function() {
         // Check if Web Share API is available
         if (navigator.share) {
             apiService.getBookingById(bookingId)
-                .then(booking => {
+                .then(async booking => {
+                    // ดึงข้อมูลเที่ยวบินถ้ายังไม่มี
+                    if (booking.flightId && !booking.flight) {
+                        try {
+                            console.log(`Fetching flight data for sharing, booking ID: ${bookingId}`);
+                            const flightData = await apiService.getFlightById(booking.flightId);
+                            console.log('Flight data received for sharing:', flightData);
+                            booking.flight = flightData;
+                        } catch (error) {
+                            console.error('Error fetching flight data for sharing:', error);
+                            booking.flight = {
+                                flightId: booking.flightId,
+                                flightNumber: booking.flightId,
+                                aircraft: "SkyAirways",
+                                departureCity: "Bangkok",
+                                arrivalCity: "Destination",
+                                departureTime: booking.bookingDate,
+                                arrivalTime: new Date(new Date(booking.bookingDate).getTime() + 2 * 60 * 60 * 1000)
+                            };
+                        }
+                    }
+                    
                     // Create share data
                     const shareData = {
                         title: `เที่ยวบิน ${booking.flight.flightNumber}`,
@@ -1200,14 +1431,85 @@ document.addEventListener('DOMContentLoaded', function() {
             alert('ไม่สามารถใช้ฟีเจอร์แชร์บนเบราว์เซอร์นี้ กรุณาคัดลอก URL และแชร์ด้วยตนเอง');
         }
     }
+
+    /**
+ * Get action buttons based on booking status
+ */
+function getActionButtons(booking) {
+    const now = new Date();
+    const departureTime = new Date(booking.flight.departureTime);
+    const isPastFlight = departureTime <= now;
     
+    // Cannot perform actions on past flights except viewing details and printing
+    if (isPastFlight) {
+        return `
+            <button class="btn btn-outline btn-sm print-btn" data-booking-id="${booking.bookingId}">
+                <i class="fas fa-print"></i> พิมพ์บัตรโดยสาร
+            </button>
+            <button class="btn btn-primary btn-sm share-btn" data-booking-id="${booking.bookingId}">
+                <i class="fas fa-share-alt"></i> แชร์การเดินทาง
+            </button>
+        `;
+    }
+    
+    // Action buttons based on booking status
+    switch (booking.bookingStatus) {
+        case 'Pending':
+            return `
+                <button class="btn btn-success btn-sm pay-btn" data-booking-id="${booking.bookingId}">
+                    <i class="fas fa-credit-card"></i> ชำระเงิน
+                </button>
+                <button class="btn btn-danger btn-sm cancel-btn" data-booking-id="${booking.bookingId}">
+                    <i class="fas fa-times"></i> ยกเลิกการจอง
+                </button>
+            `;
+        case 'Confirmed':
+            return `
+                <button class="btn btn-outline btn-sm print-btn" data-booking-id="${booking.bookingId}">
+                    <i class="fas fa-print"></i> พิมพ์บัตรโดยสาร
+                </button>
+                <button class="btn btn-primary btn-sm edit-btn" data-booking-id="${booking.bookingId}">
+                    <i class="fas fa-pen"></i> แก้ไขการจอง
+                </button>
+                <button class="btn btn-danger btn-sm cancel-btn" data-booking-id="${booking.bookingId}">
+                    <i class="fas fa-times"></i> ยกเลิกการจอง
+                </button>
+            `;
+        case 'Cancelled':
+        case 'Refunded':
+            return `
+                <button class="btn btn-primary btn-sm rebook-btn" data-booking-id="${booking.bookingId}">
+                    <i class="fas fa-search"></i> ค้นหาเที่ยวบินใหม่
+                </button>
+            `;
+        default:
+            return '';
+    }
+}
+
     /**
      * Handle rebook
      */
     function handleRebook(bookingId) {
         // Redirect to search page with pre-filled data
         apiService.getBookingById(bookingId)
-            .then(booking => {
+            .then(async booking => {
+                // ดึงข้อมูลเที่ยวบินถ้ายังไม่มี
+                if (booking.flightId && !booking.flight) {
+                    try {
+                        console.log(`Fetching flight data for rebooking, booking ID: ${bookingId}`);
+                        const flightData = await apiService.getFlightById(booking.flightId);
+                        console.log('Flight data received for rebooking:', flightData);
+                        booking.flight = flightData;
+                    } catch (error) {
+                        console.error('Error fetching flight data for rebooking:', error);
+                        booking.flight = {
+                            departureCity: "Bangkok",
+                            arrivalCity: "Destination"
+                        };
+                    }
+                }
+                
                 // Redirect to home page with search parameters
                 const departureCity = encodeURIComponent(booking.flight.departureCity);
                 const arrivalCity = encodeURIComponent(booking.flight.arrivalCity);
@@ -1219,10 +1521,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 window.location.href = 'index.html'; // Redirect to home page without parameters
             });
     }
-    
+
     // Add CSS styles for booking status page
     addStyles();
-    
+
     /**
      * Add additional styles for the page
      */
@@ -1420,6 +1722,31 @@ document.addEventListener('DOMContentLoaded', function() {
             .user-welcome {
                 margin-right: 1rem;
                 color: var(--primary-color);
+            }
+            
+            /* Added styles for loyalty info card in booking card */
+            .loyalty-info-card {
+                display: flex;
+                align-items: center;
+                background-color: #f0f8ff;
+                border-radius: 4px;
+                padding: 10px;
+                margin: 10px 0;
+                color: var(--primary-color);
+                font-size: 0.9rem;
+            }
+            
+            .loyalty-info-card i {
+                margin-right: 10px;
+                font-size: 1.1rem;
+                color: #ffb700;
+            }
+            
+            /* Sort dropdown option for loyalty points */
+            #sort-by option[value="points-asc"],
+            #sort-by option[value="points-desc"] {
+                color: var(--primary-color);
+                font-weight: 500;
             }
         `;
         

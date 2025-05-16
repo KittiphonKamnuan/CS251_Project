@@ -324,31 +324,118 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
-    // Function to create a flight card
+    // Function to create a flight card - UPDATED with fixed time handling
     function createFlightCard(flight, searchParams) {
         const card = document.createElement('div');
         card.className = 'flight-card';
-        card.dataset.flightId = flight.flightId;
+        card.dataset.flightId = flight.flightId || '';
         
-        // Format times and calculate duration
-        const departureTime = new Date(flight.departureTime);
-        const arrivalTime = new Date(flight.arrivalTime);
+        // ตรวจสอบข้อมูลขาหายและตั้งค่าเริ่มต้น
+        flight.departureCity = flight.departureCity || 'Unknown';
+        flight.arrivalCity = flight.arrivalCity || 'Unknown';
+        flight.aircraft = flight.aircraft || 'Aircraft';
+        flight.flightNumber = flight.flightNumber || 'N/A';
         
-        const formattedDepartureTime = departureTime.toLocaleTimeString('th-TH', {
-            hour: '2-digit',
-            minute: '2-digit'
-        });
+        // ====== FIXED TIME HANDLING CODE ======
+        // For departureTime
+        let departureTimeStr;
+        if (flight.departureTime) {
+            // Directly extract the time portion without timezone conversion
+            if (typeof flight.departureTime === 'string') {
+                // Extract just the time portion (HH:MM) without creating a Date object
+                if (flight.departureTime.includes(' ')) {
+                    departureTimeStr = flight.departureTime.split(' ')[1].substring(0, 5);
+                } else if (flight.departureTime.includes('T')) {
+                    departureTimeStr = flight.departureTime.split('T')[1].substring(0, 5);
+                } else {
+                    departureTimeStr = flight.departureTime.substring(0, 5);
+                }
+            } else {
+                // If it's a Date object, format it carefully
+                const dt = new Date(flight.departureTime);
+                // Use toTimeString() which gives the time in the local timezone
+                departureTimeStr = dt.toTimeString().substring(0, 5);
+            }
+        } else {
+            departureTimeStr = "00:00";
+        }
         
-        const formattedArrivalTime = arrivalTime.toLocaleTimeString('th-TH', {
-            hour: '2-digit',
-            minute: '2-digit'
-        });
+        // For arrivalTime - same approach
+        let arrivalTimeStr;
+        if (flight.arrivalTime) {
+            if (typeof flight.arrivalTime === 'string') {
+                if (flight.arrivalTime.includes(' ')) {
+                    arrivalTimeStr = flight.arrivalTime.split(' ')[1].substring(0, 5);
+                } else if (flight.arrivalTime.includes('T')) {
+                    arrivalTimeStr = flight.arrivalTime.split('T')[1].substring(0, 5);
+                } else {
+                    arrivalTimeStr = flight.arrivalTime.substring(0, 5);
+                }
+            } else {
+                const at = new Date(flight.arrivalTime);
+                arrivalTimeStr = at.toTimeString().substring(0, 5);
+            }
+        } else {
+            arrivalTimeStr = "00:00";
+        }
         
-        // Calculate duration
-        const durationMs = arrivalTime - departureTime;
-        const durationHours = Math.floor(durationMs / (1000 * 60 * 60));
-        const durationMinutes = Math.floor((durationMs % (1000 * 60 * 60)) / (1000 * 60));
+        // For duration calculation, use a more precise approach
+        // that avoids timezone issues
+        let durationHours, durationMinutes;
+        
+        if (typeof flight.departureTime === 'string' && typeof flight.arrivalTime === 'string') {
+            // Extract hours and minutes directly from the strings
+            let depHours, depMinutes, arrHours, arrMinutes;
+            
+            // Extract time components from departure
+            if (flight.departureTime.includes(' ')) {
+                const timePart = flight.departureTime.split(' ')[1];
+                depHours = parseInt(timePart.split(':')[0]);
+                depMinutes = parseInt(timePart.split(':')[1]);
+            } else if (flight.departureTime.includes('T')) {
+                const timePart = flight.departureTime.split('T')[1];
+                depHours = parseInt(timePart.split(':')[0]);
+                depMinutes = parseInt(timePart.split(':')[1]);
+            }
+            
+            // Extract time components from arrival
+            if (flight.arrivalTime.includes(' ')) {
+                const timePart = flight.arrivalTime.split(' ')[1];
+                arrHours = parseInt(timePart.split(':')[0]);
+                arrMinutes = parseInt(timePart.split(':')[1]);
+            } else if (flight.arrivalTime.includes('T')) {
+                const timePart = flight.arrivalTime.split('T')[1];
+                arrHours = parseInt(timePart.split(':')[0]);
+                arrMinutes = parseInt(timePart.split(':')[1]);
+            }
+            
+            // Calculate duration in minutes, handling day crossings
+            let totalDepMinutes = depHours * 60 + depMinutes;
+            let totalArrMinutes = arrHours * 60 + arrMinutes;
+            
+            // If arrival is earlier in the day than departure, assume next day arrival
+            if (totalArrMinutes < totalDepMinutes) {
+                totalArrMinutes += 24 * 60; // Add a day's worth of minutes
+            }
+            
+            const durationTotalMinutes = totalArrMinutes - totalDepMinutes;
+            durationHours = Math.floor(durationTotalMinutes / 60);
+            durationMinutes = durationTotalMinutes % 60;
+        } else {
+            // Fallback to default duration if times aren't available
+            durationHours = 1;
+            durationMinutes = 15;
+        }
+        
         const duration = `${durationHours}h ${durationMinutes}m`;
+        // ====== END OF FIXED TIME HANDLING CODE ======
+        
+        // แสดง debug log เพื่อตรวจสอบค่า
+        console.log('Flight data:', flight);
+        console.log('Original departureTime:', flight.departureTime);
+        console.log('Formatted departureTime:', departureTimeStr);
+        console.log('Original arrivalTime:', flight.arrivalTime);
+        console.log('Formatted arrivalTime:', arrivalTimeStr);
         
         // Calculate price based on seat class and passengers
         const basePrice = flight.price || 1290;
@@ -366,6 +453,35 @@ document.addEventListener('DOMContentLoaded', function() {
         // Round to nearest 10
         adjustedPrice = Math.round(adjustedPrice / 10) * 10;
         
+        // ดึงรหัสเมือง (3 ตัว) โดยคำนึงถึงกรณีที่ข้อมูลอาจไม่ครบถ้วน
+        const getDepartureCity = () => {
+            // ถ้ารูปแบบเป็น "Bangkok (BKK)" ดึงเฉพาะส่วนในวงเล็บ
+            if (flight.departureCity.includes('(') && flight.departureCity.includes(')')) {
+                const match = flight.departureCity.match(/\(([A-Z]{3})\)/);
+                if (match) return match[1];
+            }
+            // ถ้าเป็นรหัสเมืองอยู่แล้ว (3 ตัวอักษร)
+            if (flight.departureCity.length === 3 && flight.departureCity === flight.departureCity.toUpperCase()) {
+                return flight.departureCity;
+            }
+            // ถ้าไม่ใช่รูปแบบข้างต้น ใช้ 3 ตัวแรกแปลงเป็นตัวพิมพ์ใหญ่
+            return flight.departureCity.substring(0, 3).toUpperCase();
+        };
+        
+        const getArrivalCity = () => {
+            // ถ้ารูปแบบเป็น "Chiang Mai (CNX)" ดึงเฉพาะส่วนในวงเล็บ
+            if (flight.arrivalCity.includes('(') && flight.arrivalCity.includes(')')) {
+                const match = flight.arrivalCity.match(/\(([A-Z]{3})\)/);
+                if (match) return match[1];
+            }
+            // ถ้าเป็นรหัสเมืองอยู่แล้ว (3 ตัวอักษร)
+            if (flight.arrivalCity.length === 3 && flight.arrivalCity === flight.arrivalCity.toUpperCase()) {
+                return flight.arrivalCity;
+            }
+            // ถ้าไม่ใช่รูปแบบข้างต้น ใช้ 3 ตัวแรกแปลงเป็นตัวพิมพ์ใหญ่
+            return flight.arrivalCity.substring(0, 3).toUpperCase();
+        };
+        
         // Create card HTML
         card.innerHTML = `
             <div class="airline-info">
@@ -377,16 +493,16 @@ document.addEventListener('DOMContentLoaded', function() {
             </div>
             <div class="flight-times">
                 <div class="departure">
-                    <div class="time">${formattedDepartureTime}</div>
-                    <div class="airport">${flight.departureCity.substring(0, 3).toUpperCase()}</div>
+                    <div class="time">${departureTimeStr}</div>
+                    <div class="airport">${getDepartureCity()}</div>
                 </div>
                 <div class="flight-duration">
                     <div class="duration">${duration}</div>
                     <div class="flight-line"></div>
                 </div>
                 <div class="arrival">
-                    <div class="time">${formattedArrivalTime}</div>
-                    <div class="airport">${flight.arrivalCity.substring(0, 3).toUpperCase()}</div>
+                    <div class="time">${arrivalTimeStr}</div>
+                    <div class="airport">${getArrivalCity()}</div>
                 </div>
             </div>
             <div class="price-select">

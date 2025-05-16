@@ -170,10 +170,13 @@ document.addEventListener('DOMContentLoaded', async function() {
             rowSeats.forEach((seat, index) => {
                 const seatLetter = seat.seatNumber.replace(/[0-9]/g, '');
                 let seatClassName = 'seat';
-                if (seat.seatStatus === 'Occupied') seatClassName += ' occupied';
+                // แก้ไขเป็น:
+                if (seat.seatStatus === 'Occupied' || seat.seatStatus === 'Booked') {
+                    seatClassName += ' occupied';
+                }
                 else if (isExitRow) seatClassName += ' exit-row';
                 else if (seat.price > 0) seatClassName += ' premium';
-
+        
                 html += `<div class="${seatClassName}" data-seat="${seat.seatNumber}" data-price="${seat.price || 0}">${seatLetter}</div>`;
 
                 if (seatClass.toLowerCase() === 'business' && index === 1) html += `<div class="aisle"></div>`;
