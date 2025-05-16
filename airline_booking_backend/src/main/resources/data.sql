@@ -120,7 +120,3 @@ INSERT INTO Discount (DiscountID, PointRequired, DiscountValue, ExpiryDate) VALU
 ('FAMILY4', 0, 400.00, '2025-05-15'),  -- ส่วนลดแพ็คเกจครอบครัว (15%)
 ('JAPAN25', 0, 990.00, '2025-06-30'),  -- ส่วนลดโปรเที่ยวญี่ปุ่น
 ('HOLIDAY25', 0, 300.00, '2025-07-31'); -- ส่วนลดโปรโมชั่นวันหยุด
-
--- เพิ่มข้อมูลการแลกส่วนลด (Redeems)
-INSERT INTO Redeems (DiscountID, BookingID, RedeemDate) VALUES
-('DIS10001', 'BK10002', '2025-05-02');
